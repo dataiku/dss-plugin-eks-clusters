@@ -1,0 +1,25 @@
+{
+    "meta" : {
+        "label" : "Attach EKS cluster",
+        "description" : "Attach to a running EKS cluster",
+        "icon" : "icon-puzzle-piece"
+    },
+    
+    "architecture" : "KUBERNETES",
+    
+    "params": [
+        {
+            "name": "connectionInfo",
+            "label": "Connection",
+            "type": "PRESET",
+            "parameterSetId" : "connection-info",
+            "mandatory" : true
+        },
+        {
+            "name": "clusterId",
+            "label": "EKS cluster",
+            "type": "STRING",
+            "mandatory" : true
+        }
+    ]
+}

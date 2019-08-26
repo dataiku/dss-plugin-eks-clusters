@@ -1,0 +1,72 @@
+{
+    "meta" : {
+        "label" : "Node pool",
+        "pluralLabel": "Node pools",
+        "description" : "Predefined configurations for GKE node pools",
+        "icon" : "icon-tasks"
+
+    },
+    
+    "defaultDefinableInline" : true,
+    "defaultDefinableAtProjectLevel" : true,
+
+    "params": [
+        {
+            "name": "machineType",
+            "label": "Machine type",
+            "description": "EC2 instance type for the nodes. SeeEC2 documentation for available instance types",
+            "type": "STRING",
+            "defaultValue": "m5.2xlarge",
+            "mandatory" : false
+        },
+        {
+            "name": "numNodes",
+            "label": "Default number of nodes",
+            "type": "INT",
+            "mandatory" : true,
+            "defaultValue" : 3
+        },
+        {
+            "name": "numNodesAutoscaling",
+            "label": "Enable node autoscaling",
+            "type": "BOOLEAN",
+            "mandatory" : true,
+            "defaultValue" : false
+        },
+        {
+            "name": "minNumNodes",
+            "label": "Min number of nodes",
+            "type": "INT",
+            "mandatory" : true,
+            "defaultValue" : 2,
+            "visibilityCondition" : "model.numNodesAutoscaling"
+        },
+        {
+            "name": "maxNumNodes",
+            "label": "Max number of nodes",
+            "type": "INT",
+            "mandatory" : true,
+            "defaultValue" : 5,
+            "visibilityCondition" : "model.numNodesAutoscaling"
+        },
+
+        {
+            "type":"SEPARATOR",
+            "label" :"Advanced. options"
+        },
+        {
+            "name": "diskType",
+            "label": "Disk type",
+            "description": "EBS disk type for the nodes. Leave empty for default (gp2)",
+            "type": "STRING",
+            "mandatory" : false
+        },
+        {
+            "name": "diskSizeGb",
+            "label": "Disk size",
+            "description": "Disk size for the nodes. Leave 0 for default (20 GB)",
+            "type": "INT",
+            "mandatory" : false
+        }
+    ]
+}

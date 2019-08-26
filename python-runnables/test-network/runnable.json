@@ -1,0 +1,31 @@
+{
+    "meta": {
+        "label": "Test network connectivity",
+        "description": "Test whether containers can reach the DSS machine",
+        "icon": "icon-resize-horizontal"
+    },
+
+    "impersonate": false,
+
+    "permissions": [],
+
+    "resultType": "HTML",
+
+    "resultLabel": "connectivity",
+    "extension": "html",
+    "mimeType": "text/html",
+
+    "macroRoles": [
+        { "type":"CLUSTER", "targetParamsKey":"clusterId", "limitToSamePlugin":true }
+    ],
+
+    "params": [
+        {
+            "name": "clusterId",
+            "label": "Cluster",
+            "type": "CLUSTER",
+            "description": "Cluster (in DSS)",
+            "mandatory": true
+        }
+    ]
+}

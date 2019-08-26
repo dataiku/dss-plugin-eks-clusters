@@ -1,0 +1,45 @@
+{
+    "meta": {
+        "label": "Resize cluster",
+        "description": "Resize node pool in cluster",
+        "icon": "icon-resize-full"
+    },
+
+    "impersonate": false,
+
+    "permissions": [],
+
+    "resultType": "HTML",
+
+    "resultLabel": "pools",
+    "extension": "html",
+    "mimeType": "text/html",
+
+    "macroRoles": [
+        { "type":"CLUSTER", "targetParamsKey":"clusterId", "limitToSamePlugin":true }
+    ],
+    
+    "params": [
+        {
+            "name": "clusterId",
+            "label": "Cluster",
+            "type": "CLUSTER",
+            "description": "Cluster (in DSS)",
+            "mandatory": true
+        },
+        {
+            "name": "numNodes",
+            "label": "Number of nodes",
+            "description": "Set to 0 to delete the node pool",
+            "type": "INT",
+            "mandatory": true
+        },
+        {
+            "name": "nodeGroupId",
+            "label": "Node group",
+            "description": "Id of node pool to resize, if not default",
+            "type": "STRING",
+            "mandatory": false
+        }
+    ]
+}

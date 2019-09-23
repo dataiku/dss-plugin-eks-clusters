@@ -17,7 +17,8 @@ class MyCluster(Cluster):
         self.global_settings = global_settings
         
     def start(self):
-        connection_info = {'config':self.config.get('connectionInfo', {}), 'pluginConfig':self.plugin_config.get('connectionInfo', {})}
+        connection_info = self.config["connectionInfo"]
+        networking_settings = self.config["networkingSettings"]
         
         args = ['create', 'cluster']
         args = args + ['-v', '4']

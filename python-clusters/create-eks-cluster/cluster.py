@@ -29,11 +29,11 @@ class MyCluster(Cluster):
         elif 'AWS_DEFAULT_REGION' is os.environ:
             args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
             
-        if self.config.get('useEcr', False):
+        if networking_settings.get('useEcr', False):
             args = args + ['--full-ecr-access']
             
-        subnets = self.config.get('subnets', [])
-        if self.config.get('privateNetworking', False):
+        subnets = networking_settings.get('subnets', [])
+        if networking_settings.get('privateNetworking', False):
             args = args + ['--node-private-networking']
             if len(subnets) > 0:
                 args = args + ['--vpc-private-subnets', ','.join(subnets)]
@@ -41,7 +41,7 @@ class MyCluster(Cluster):
             if len(subnets) > 0:
                 args = args + ['--vpc-public-subnets', ','.join(subnets)]
             
-        security_groups = self.config.get('securityGroups', [])
+        security_groups = networking_settings.get('securityGroups', [])
         if len(security_groups) > 0:
             args = args + ['--node-security-groups', ','.join(security_groups)]
             

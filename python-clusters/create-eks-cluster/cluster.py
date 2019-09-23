@@ -24,7 +24,7 @@ class MyCluster(Cluster):
         args = args + ['-v', '4']
         args = args + ['--name', self.cluster_id]
         
-        if 'region' in connection_info.get('config', {}):
+        if 'region' in connection_info:
             args = args + ['--region', connection_info['region']]
         elif 'AWS_DEFAULT_REGION' is os.environ:
             args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]

@@ -22,7 +22,7 @@
             "label": "Networking"
         },
         {
-            "name": "networking",
+            "name": "networkingSettings",
             "label": "Network settings",
             "type": "PRESET",
             "parameterSetId" : "networking-settings",

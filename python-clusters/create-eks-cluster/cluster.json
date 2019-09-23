@@ -17,30 +17,16 @@
             "mandatory" : true
         },
         {
-            "name": "s-nodes",
+            "name": "s-network",
             "type":"SEPARATOR",
             "label": "Networking"
         },
         {
-            "name": "subnets",
-            "label": "VPC subnets",
-            "type": "STRINGS",
-            "description": "Put at least 2 subnets. Check https://github.com/weaveworks/eksctl#use-existing-vpc-any-custom-configuration for constraints.",
-            "mandatory" : false
-        },
-        {
-            "name": "securityGroups",
-            "label": "Security groups",
-            "type": "STRINGS",
-            "description": "Additional security groups for the nodes. Needed to give access to the node running DSS",
-            "mandatory" : false
-        },
-        {
-            "name": "privateNetworking",
-            "label": "Private networking",
-            "type": "BOOLEAN",
-            "description": "Makes the cluster nodes non-accessible from internet",
-            "mandatory" : false
+            "name": "networking",
+            "label": "Network settings",
+            "type": "PRESET",
+            "parameterSetId" : "networking-settings",
+            "mandatory" : true
         },
         {
             "name": "s-nodes",
@@ -53,17 +39,6 @@
             "type": "PRESET",
             "parameterSetId" : "node-pool-request",
             "mandatory" : true
-        },
-        {
-            "type":"SEPARATOR",
-            "label": "Advanced options"
-        },
-        {
-            "name": "useEcr",
-            "label": "Grant access to ECR",
-            "type": "BOOLEAN",
-            "mandatory" : false,
-            "defaultValue" : true
         }
     ]
 }

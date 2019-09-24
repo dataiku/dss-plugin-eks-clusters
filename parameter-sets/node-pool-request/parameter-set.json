@@ -1,8 +1,8 @@
 {
     "meta" : {
-        "label" : "Node pool",
-        "pluralLabel": "Node pools",
-        "description" : "Predefined configurations for GKE node pools",
+        "label" : "Node group",
+        "pluralLabel": "Node groups",
+        "description" : "Predefined configurations for EKS node groups",
         "icon" : "icon-tasks"
 
     },
@@ -14,7 +14,7 @@
         {
             "name": "machineType",
             "label": "Machine type",
-            "description": "EC2 instance type for the nodes. SeeEC2 documentation for available instance types",
+            "description": "EC2 instance type for the nodes. See EC2 documentation for available instance types",
             "type": "STRING",
             "defaultValue": "m5.2xlarge",
             "mandatory" : false
@@ -28,7 +28,7 @@
         },
         {
             "name": "numNodesAutoscaling",
-            "label": "Enable node autoscaling",
+            "label": "Enable nodes autoscaling",
             "type": "BOOLEAN",
             "mandatory" : true,
             "defaultValue" : false

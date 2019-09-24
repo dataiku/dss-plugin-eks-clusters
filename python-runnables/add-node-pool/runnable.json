@@ -1,7 +1,7 @@
 {
     "meta": {
-        "label": "Add node pool",
-        "description": "Create a new node pool in the cluster",
+        "label": "Add node group",
+        "description": "Create a new node group in the cluster",
         "icon": "icon-plus-sign"
     },
 
@@ -30,7 +30,7 @@
         {
             "name": "nodeGroupId",
             "label": "Node group",
-            "description": "Id of node pool to create, if not default",
+            "description": "Id of node group to create, if not default",
             "type": "STRING",
             "mandatory": false
         },

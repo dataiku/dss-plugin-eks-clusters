@@ -1,7 +1,7 @@
 {
     "meta": {
         "label": "Inspect node pools",
-        "description": "Inspect the node pools of the cluster",
+        "description": "Inspect the node groups of the cluster",
         "icon": "icon-search"
     },
 

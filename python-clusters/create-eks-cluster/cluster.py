@@ -29,8 +29,7 @@ class MyCluster(Cluster):
         elif 'AWS_DEFAULT_REGION' is os.environ:
             args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
             
-        if networking_settings.get('useEcr', False):
-            args = args + ['--full-ecr-access']
+        args = args + ['--full-ecr-access']
             
         subnets = networking_settings.get('subnets', [])
         if networking_settings.get('privateNetworking', False):

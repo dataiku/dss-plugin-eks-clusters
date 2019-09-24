@@ -30,13 +30,6 @@
             "type": "BOOLEAN",
             "description": "Makes the cluster nodes non-accessible from internet",
             "mandatory" : false
-        },
-        {
-            "name": "useEcr",
-            "label": "Grant access to ECR",
-            "type": "BOOLEAN",
-            "mandatory" : false,
-            "defaultValue" : true
         }
     ]
 }

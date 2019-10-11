@@ -19,12 +19,12 @@ class MyCluster(Cluster):
         cluster_id = self.config['clusterId']
         # retrieve the cluster info from EKS
         # this will fail if the cluster doesn't exist, but the API message is enough
-        connection_info = {'config':self.config.get('connectionInfo', {}), 'pluginConfig':self.plugin_config.get('connectionInfo', {})}
+        connection_info = self.config.get('connectionInfo', {})
         args = ['get', 'cluster']
         args = args + ['--name', cluster_id]
         
-        if 'region' in connection_info.get('config', {}):
-            args = args + ['--region', connection_info['config']['region']]
+        if _has_not_blank_property(connection_info, 'region' ):
+            args = args + ['--region', connection_info['region']]
         elif 'AWS_DEFAULT_REGION' is os.environ:
             args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
         args = args + ['-o', 'json']
@@ -68,8 +68,8 @@ users:
         with open(kube_config_path, 'w') as f:
             f.write(kube_config_str)
 
-        if 'secretKey' in connection_info.get('pluginConfig', {}) and 'accessKey' in connection_info.get('config', {}):
-            creds_in_env = {'AWS_ACCESS_KEY_ID':connection_info['config']['accessKey'], 'AWS_SECRET_ACCESS_KEY':connection_info['pluginConfig']['secretKey']}
+        if _has_not_blank_property(connection_info, 'accessKey') and _has_not_blank_property(connection_info, 'secretKey'):
+            creds_in_env = {'AWS_ACCESS_KEY_ID':connection_info['accessKey'], 'AWS_SECRET_ACCESS_KEY':connection_info['secretKey']}
             add_authenticator_env(kube_config_path, creds_in_env)
             
         kube_config = yaml.safe_load(kube_config_str)

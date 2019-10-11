@@ -5,6 +5,7 @@ from dku_kube.autoscaler import add_autoscaler_if_needed, has_autoscaler
 from dku_aws.eksctl_command import EksctlCommand
 from dku_aws.aws_command import AwsCommand
 from dku_utils.cluster import get_cluster_from_dss_cluster
+from dku_utils.access import _has_not_blank_property
 
 class MyRunnable(Runnable):
     def __init__(self, project_key, config, plugin_config):
@@ -28,8 +29,6 @@ class MyRunnable(Runnable):
 
         # the cluster is accessible via the kubeconfig
         kube_config_path = dss_cluster_settings.get_raw()['containerSettings']['executionConfigsGenericOverrides']['kubeConfigPath']
-
-        connection_info = {'config':dss_cluster_config.get('config', {}).get('connectionInfo', {}), 'pluginConfig':dss_cluster_config.get('pluginConfig', {}).get('connectionInfo', {})}
         
         if has_autoscaler(kube_config_path):
             return '<h5>An autoscaler pod already runs<h5>'

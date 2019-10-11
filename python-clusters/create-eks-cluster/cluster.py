@@ -17,14 +17,14 @@ class MyCluster(Cluster):
         self.global_settings = global_settings
         
     def start(self):
-        connection_info = self.config["connectionInfo"]
+        connection_info = self.config.get('connectionInfo', {})
         networking_settings = self.config["networkingSettings"]
         
         args = ['create', 'cluster']
         args = args + ['-v', '4']
         args = args + ['--name', self.cluster_id]
         
-        if 'region' in connection_info:
+        if _has_not_blank_property(connection_info, 'region'):
             args = args + ['--region', connection_info['region']]
         elif 'AWS_DEFAULT_REGION' is os.environ:
             args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
@@ -71,14 +71,14 @@ class MyCluster(Cluster):
         args = ['get', 'cluster']
         args = args + ['--name', self.cluster_id]
         
-        if 'region' in connection_info.get('config', {}):
-            args = args + ['--region', connection_info['config']['region']]
+        if _has_not_blank_property(connection_info, 'region'):
+            args = args + ['--region', connection_info['region']]
         elif 'AWS_DEFAULT_REGION' is os.environ:
             args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
         args = args + ['-o', 'json']
         
-        if 'secretKey' in connection_info.get('pluginConfig', {}) and 'accessKey' in connection_info.get('config', {}):
-            creds_in_env = {'AWS_ACCESS_KEY_ID':connection_info['config']['accessKey'], 'AWS_SECRET_ACCESS_KEY':connection_info['pluginConfig']['secretKey']}
+        if _has_not_blank_property(connection_info, 'accessKey') and _has_not_blank_property(connection_info, 'secretKey'):
+            creds_in_env = {'AWS_ACCESS_KEY_ID':connection_info['accessKey'], 'AWS_SECRET_ACCESS_KEY':connection_info['secretKey']}
             add_authenticator_env(kube_config_path, creds_in_env)
         
         if node_pool.get('numNodesAutoscaling', False):
@@ -96,13 +96,13 @@ class MyCluster(Cluster):
         return [overrides, {'kube_config_path':kube_config_path, 'cluster':cluster_info}]
 
     def stop(self, data):
-        connection_info = {'config':self.config.get('connectionInfo', {}), 'pluginConfig':self.plugin_config.get('connectionInfo', {})}
+        connection_info = self.config.get('connectionInfo', {})
 
         args = ['delete', 'cluster']
         args = args + ['-v', '4']
         args = args + ['--name', self.cluster_id]
-        if 'region' in connection_info.get('config', {}):
-            args = args + ['--region', connection_info['config']['region']]
+        if _has_not_blank_property(connection_info, 'region'):
+            args = args + ['--region', connection_info['region']]
         elif 'AWS_DEFAULT_REGION' is os.environ:
             args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
         c = EksctlCommand(args, connection_info)

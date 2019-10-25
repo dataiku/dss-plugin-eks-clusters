@@ -8,6 +8,7 @@
         "icon": "icon-puzzle-piece",
         "tags": ["Cloud", "AWS"],
         "url": "https://www.dataiku.com/dss/plugins/info/eks-clusters.html",
-        "licenseInfo": "Apache Software License"
+        "licenseInfo": "Apache Software License",
+        "supportLevel": "TIER2_SUPPORT"
     }
 }

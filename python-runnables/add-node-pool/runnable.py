@@ -1,6 +1,6 @@
 from dataiku.runnables import Runnable
 import dataiku
-import json, logging
+import os, json, logging
 from dku_kube.autoscaler import add_autoscaler_if_needed
 from dku_aws.eksctl_command import EksctlCommand
 from dku_aws.aws_command import AwsCommand

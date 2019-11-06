@@ -1,13 +1,13 @@
 {
-    "meta" : {
-        "label" : "AWS connection",
-        "pluralLabel" : "AWS connections",
-        "description" : "Preset",
-        "icon" : "icon-key"
+    "meta": {
+        "label": "AWS connection",
+        "pluralLabel": "AWS connections",
+        "description": "Preset",
+        "icon": "icon-key"
     },
-    
-    "defaultDefinableInline" : true,
-    "defaultDefinableAtProjectLevel" : true,
+
+    "defaultDefinableInline": true,
+    "defaultDefinableAtProjectLevel": true,
 
     "params": [
         {
@@ -15,21 +15,21 @@
             "label": "AWS Access key",
             "description": "If empty, uses AWS credentials from the environment (IAM role, ~/.aws/credentials or AWS_ACCESS_KEY_ID environment variable)",
             "type": "STRING",
-            "mandatory" : false
+            "mandatory": false
         },
         {
             "name": "secretKey",
             "label": "AWS Secret key",
             "description": "If empty, uses AWS credentials from the environment (IAM role, ~/.aws/credentials or AWS_SECRET_ACCESS_KEY environment variable)",
-            "type": "STRING",
-            "mandatory" : false
+            "type": "PASSWORD",
+            "mandatory": false
         },
         {
             "name": "region",
             "label": "AWS Region",
             "description": "If empty, uses AWS region from the environment (~/.aws/config or AWS_DEFAULT_REGION environment variable)",
             "type": "STRING",
-            "mandatory" : false
+            "mandatory": false
         }
     ]
 }

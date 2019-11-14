@@ -34,11 +34,11 @@ class MyCluster(Cluster):
         subnets = networking_settings.get('subnets', [])
         if networking_settings.get('privateNetworking', False):
             args = args + ['--node-private-networking']
-            if len(subnets) > 0:
-                args = args + ['--vpc-private-subnets', ','.join(subnets)]
-        else:
-            if len(subnets) > 0:
-                args = args + ['--vpc-public-subnets', ','.join(subnets)]
+            private_subnets = networking_settings.get('privateSubnets', [])
+            if len(private_subnets) > 0:
+                args = args + ['--vpc-private-subnets', ','.join(private_subnets)]
+        if len(subnets) > 0:
+            args = args + ['--vpc-public-subnets', ','.join(subnets)]
             
         security_groups = networking_settings.get('securityGroups', [])
         if len(security_groups) > 0:

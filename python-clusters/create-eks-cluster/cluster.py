@@ -6,7 +6,7 @@ from dku_aws.eksctl_command import EksctlCommand
 from dku_kube.kubeconfig import merge_or_write_config, add_authenticator_env
 from dku_kube.autoscaler import add_autoscaler_if_needed
 from dku_utils.cluster import make_overrides
-from dku_utils.access import _has_not_blank_property
+from dku_utils.access import _has_not_blank_property, _is_none_or_blank
 
 class MyCluster(Cluster):
     def __init__(self, cluster_id, cluster_name, config, plugin_config, global_settings):
@@ -63,6 +63,10 @@ class MyCluster(Cluster):
         # and because 2 different clusters could be concurrently editing the config file
         kube_config_path = os.path.join(os.getcwd(), 'kube_config')
         args = args + ['--kubeconfig', kube_config_path]
+        
+        k8s_version = self.config.get("k8sVersion", None)
+        if not _is_none_or_blank(k8s_version):
+            args = args + ['--version', k8s_version.strip()]
 
         c = EksctlCommand(args, connection_info)
         if c.run_and_log() != 0:

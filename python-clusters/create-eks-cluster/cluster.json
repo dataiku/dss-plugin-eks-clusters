@@ -39,6 +39,18 @@
             "type": "PRESET",
             "parameterSetId" : "node-pool-request",
             "mandatory" : true
+        },
+        {
+            "name": "s-advanced",
+            "type":"SEPARATOR",
+            "label": "Advanced"
+        },
+        {
+            "name": "k8sVersion",
+            "label": "Kubernetes version",
+            "type": "STRING",
+            "mandatory" : false,
+            "description" : "Leave empty for current default of eksctl"
         }
     ]
 }

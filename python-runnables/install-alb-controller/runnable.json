@@ -2,10 +2,12 @@
      "meta": {
          "label": "Add ALB controller",
 
-         "description": "Add a controller on the cluster to create ingresses using ALB",
+         "description": "Add a controller on the cluster to create ingresses using ALB.",
 
          "icon": "icon-fullscreen"
      },
+    
+     "longDescription": "Note: the VPC subnets that the ALB instances will use need to be tagged with *kubernetes.io/role/internal-elb* and *kubernetes.io/role/elb* to *1*",
 
      "impersonate": false,
 

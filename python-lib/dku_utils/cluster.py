@@ -50,11 +50,14 @@ def get_cluster_generic_property(dss_cluster_settings, key, default_value=None):
 
 def set_cluster_generic_property(dss_cluster_settings, key, value, replace_if_exists=False):
     props = dss_cluster_settings.settings['containerSettings']['executionConfigsGenericOverrides']['properties']
-    has_prop = False
+    found_prop = None
     for prop in props:
         if prop['key'] == key:
-            has_prop = True
-    if not has_prop or replace_if_exists:
+            found_prop = prop
+    if found_prop is None:
         props.append({'key':key, 'value':value})
         dss_cluster_settings.save()
-    
+    elif replace_if_exists:
+        found_prop['value'] = value
+        dss_cluster_settings.save()
+        

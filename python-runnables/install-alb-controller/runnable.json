@@ -1,0 +1,35 @@
+{
+     "meta": {
+         "label": "Add ALB controller",
+
+         "description": "Add a controller on the cluster to create ingresses using ALB",
+
+         "icon": "icon-fullscreen"
+     },
+
+     "impersonate": false,
+
+     "macroRoles": [
+         { "type":"CLUSTER", "targetParamsKey":"clusterId", "limitToSamePlugin":true }
+     ],
+
+     "params": [
+         {
+             "name": "policyName",
+             "label": "IAM policy",
+             "type": "STRING",
+             "description": "Name of a policy to use or create (default: ALBIngressControllerIAMPolicy)",
+             "mandatory": false
+         }
+     ],
+
+     "permissions": [],
+
+     "resultType": "HTML",
+
+     "resultLabel": "Installation output",
+
+     "extension": "txt",
+
+     "mimeType": "text/plain"
+ }

@@ -1,0 +1,55 @@
+{
+    "meta": {
+        "label": "Add ingress-nginx controller",
+
+        "description": "Add a controller on the cluster to create nginx ingresses",
+
+        "icon": "icon-play"
+    },
+
+    "impersonate": false,
+
+    "macroRoles": [
+        { "type":"CLUSTER", "targetParamsKey":"clusterId", "limitToSamePlugin":true }
+    ],
+
+    "params": [
+        {
+            "name": "layer",
+            "label": "Layer",
+            "type": "SELECT",
+            "mandatory": false,
+            "selectChoices": [
+                {"value":"L4","label":"Layer 4"},
+                {"value":"L7","label":"Layer 7"}
+            ],
+            "defaultValue":"L4"
+        },
+        {
+            "name": "certificate",
+            "label": "Certificate",
+            "type": "STRING",
+            "description": "ARN of a certificate in ACM",
+            "mandatory": false,
+            "visibilityCondition": "model.layer == 'L7'"
+        },
+        {
+            "name": "idleTimeout",
+            "label": "Idle timeout",
+            "type": "INT",
+            "description": "Idle timeout for the connection. Must be 3600 if websockets will be used",
+            "mandatory": false,
+            "defaultValue":60
+        }
+    ],
+
+    "permissions": [],
+
+    "resultType": "HTML",
+
+    "resultLabel": "Installation output",
+
+    "extension": "txt",
+
+    "mimeType": "text/plain"
+}

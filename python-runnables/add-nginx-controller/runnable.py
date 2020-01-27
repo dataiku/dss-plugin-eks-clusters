@@ -4,7 +4,7 @@ import json, logging, os, re, tempfile
 import requests
 from dku_aws.eksctl_command import EksctlCommand
 from dku_aws.aws_command import AwsCommand
-from dku_utils.cluster import get_cluster_from_dss_cluster
+from dku_utils.cluster import get_cluster_from_dss_cluster, get_cluster_generic_property, set_cluster_generic_property
 from dku_utils.access import _has_not_blank_property
 from dku_kube.kubectl_command import run_with_timeout, KubeCommandException
 from dku_utils.access import _has_not_blank_property, _is_none_or_blank
@@ -37,6 +37,9 @@ class InstallNginx(Runnable):
 
     def run(self, progress_callback):
         cluster_data, dss_cluster_settings, dss_cluster_config = get_cluster_from_dss_cluster(self.config['clusterId'])
+        
+        if get_cluster_generic_property(dss_cluster_settings, 'nginx-ingress.controller', 'false') == 'true':
+            raise Exception("Nginx controller already installed, remove first")
 
         kube_config_path = dss_cluster_settings.get_raw()['containerSettings']['executionConfigsGenericOverrides']['kubeConfigPath']
 
@@ -49,7 +52,7 @@ class InstallNginx(Runnable):
         cmd = ['kubectl', 'apply', '-f', 'https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.27.1/deploy/static/mandatory.yaml']
         logging.info("Run : %s" % json.dumps(cmd))
         try:
-            out, err = run_with_timeout(cmd, env=env, timeout=20)
+            out, err = run_with_timeout(cmd, env=env, timeout=100)
             command_outputs.append((cmd, 0, out, err))
         except KubeCommandException as e:
             command_outputs.append((cmd, e.rv, e.out, e.err))
@@ -60,12 +63,13 @@ class InstallNginx(Runnable):
             
         idle_timeout_pattern = 'service.beta.kubernetes.io/aws\\-load\\-balancer\\-connection\\-idle\\-timeout:\\s*"[0-9]+"'
         idle_timeout_replacement = 'service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "%s"' % self.config.get('idleTimeout', 60)
-        if self.config.get('layer', 'L4') == 'L7':
+        layer = self.config.get('layer', 'L4')
+        if layer == 'L7':
             r = requests.get('https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.27.1/deploy/static/provider/aws/service-l7.yaml')
             service_data = r.content
             service_data = re.sub(idle_timeout_pattern, idle_timeout_replacement, service_data)
             cert_pattern = 'service.beta.kubernetes.io/aws\\-load\\-balancer\\-ssl\\-cert:\\s*".*"'
-            cert_replacement = 'service.beta.kubernetes.io/aws\\-load\\-balancer\\-ssl\\-cert: "%s"' % self.config.get('certificate', '')
+            cert_replacement = 'service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "%s"' % self.config.get('certificate', '')
             service_data = re.sub(cert_pattern, cert_replacement, service_data)
             with open('./service-l7.yaml', 'w') as f:
                 f.write(service_data)
@@ -73,7 +77,7 @@ class InstallNginx(Runnable):
             cmd = ['kubectl', 'apply', '-f', './service-l7.yaml']
             logging.info("Run : %s" % json.dumps(cmd))
             try:
-                out, err = run_with_timeout(cmd, env=env, timeout=20)
+                out, err = run_with_timeout(cmd, env=env, timeout=100)
                 command_outputs.append((cmd, 0, out, err))
             except KubeCommandException as e:
                 command_outputs.append((cmd, e.rv, e.out, e.err))
@@ -85,7 +89,7 @@ class InstallNginx(Runnable):
             cmd = ['kubectl', 'apply', '-f', 'https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.27.1/deploy/static/provider/aws/patch-configmap-l7.yaml']
             logging.info("Run : %s" % json.dumps(cmd))
             try:
-                out, err = run_with_timeout(cmd, env=env, timeout=20)
+                out, err = run_with_timeout(cmd, env=env, timeout=100)
                 command_outputs.append((cmd, 0, out, err))
             except KubeCommandException as e:
                 command_outputs.append((cmd, e.rv, e.out, e.err))
@@ -100,7 +104,7 @@ class InstallNginx(Runnable):
             cmd = ['kubectl', 'apply', '-f', './service-l4.yaml']
             logging.info("Run : %s" % json.dumps(cmd))
             try:
-                out, err = run_with_timeout(cmd, env=env, timeout=20)
+                out, err = run_with_timeout(cmd, env=env, timeout=100)
                 command_outputs.append((cmd, 0, out, err))
             except KubeCommandException as e:
                 command_outputs.append((cmd, e.rv, e.out, e.err))
@@ -112,32 +116,13 @@ class InstallNginx(Runnable):
             cmd = ['kubectl', 'apply', '-f', 'https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.27.1/deploy/static/provider/aws/patch-configmap-l4.yaml']
             logging.info("Run : %s" % json.dumps(cmd))
             try:
-                out, err = run_with_timeout(cmd, env=env, timeout=20)
+                out, err = run_with_timeout(cmd, env=env, timeout=100)
                 command_outputs.append((cmd, 0, out, err))
             except KubeCommandException as e:
                 command_outputs.append((cmd, e.rv, e.out, e.err))
 
-        # all ready, flag the cluster as nginx-able
-        dss_cluster_id = self.config['clusterId']
-        # get the public API client
-        client = dataiku.api_client()
-        # get the cluster object in DSS
-        found = False
-        for c in client.list_clusters():
-            if c['name'] == dss_cluster_id:
-                found = True
-        if not found:
-            raise Exception("DSS cluster %s doesn't exist" % dss_cluster_id)
-        dss_cluster = client.get_cluster(dss_cluster_id)
-        dss_cluster_settings = dss_cluster.get_settings()
-        props = dss_cluster_settings.settings['containerSettings']['executionConfigsGenericOverrides']['properties']
-        has_prop = False
-        for prop in props:
-            if prop['key'] == 'nginx-ingress.controller':
-                has_prop = True
-        if not has_prop:
-            props.append({'key':'nginx-ingress.controller', 'value':'true'})
-            dss_cluster_settings.save()
+        set_cluster_generic_property(dss_cluster_settings, 'nginx-ingress.controller', 'true', True)
+        set_cluster_generic_property(dss_cluster_settings, 'nginx-ingress.layer', layer, True)
             
         return make_html(command_outputs)
                 

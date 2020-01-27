@@ -40,3 +40,21 @@ def get_cluster_from_dss_cluster(dss_cluster_id):
 
     return cluster_data, dss_cluster_settings, dss_cluster_config
     
+def get_cluster_generic_property(dss_cluster_settings, key, default_value=None):
+    props = dss_cluster_settings.settings['containerSettings']['executionConfigsGenericOverrides']['properties']
+    found_value = default_value
+    for prop in props:
+        if prop['key'] == key:
+            found_value = prop['value']
+    return found_value
+
+def set_cluster_generic_property(dss_cluster_settings, key, value, replace_if_exists=False):
+    props = dss_cluster_settings.settings['containerSettings']['executionConfigsGenericOverrides']['properties']
+    has_prop = False
+    for prop in props:
+        if prop['key'] == key:
+            has_prop = True
+    if not has_prop or replace_if_exists:
+        props.append({'key':key, 'value':value})
+        dss_cluster_settings.save()
+    

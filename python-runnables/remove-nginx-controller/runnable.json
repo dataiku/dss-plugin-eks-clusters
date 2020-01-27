@@ -1,0 +1,28 @@
+{
+    "meta": {
+        "label": "Remove ingress-nginx controller",
+
+        "description": "Remove the controller created by the Add Nginx controller macro",
+
+        "icon": "icon-trash"
+    },
+
+    "impersonate": false,
+
+    "macroRoles": [
+        { "type":"CLUSTER", "targetParamsKey":"clusterId", "limitToSamePlugin":true }
+    ],
+
+    "params": [
+    ],
+
+    "permissions": [],
+
+    "resultType": "HTML",
+
+    "resultLabel": "Installation output",
+
+    "extension": "txt",
+
+    "mimeType": "text/plain"
+}

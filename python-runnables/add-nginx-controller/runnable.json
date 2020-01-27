@@ -4,7 +4,7 @@
 
         "description": "Add a controller on the cluster to create nginx ingresses",
 
-        "icon": "icon-play"
+        "icon": "icon-fullscreen"
     },
 
     "impersonate": false,

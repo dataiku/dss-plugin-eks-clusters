@@ -56,7 +56,7 @@ class RemoveNginx(Runnable):
             cmd = ['kubectl', 'delete', '-f', 'https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.27.1/deploy/static/provider/aws/service-l7.yaml']
             logging.info("Run : %s" % json.dumps(cmd))
             try:
-                out, err = run_with_timeout(cmd, env=env, timeout=100)
+                out, err = run_with_timeout(cmd, env=env, timeout=300)
                 command_outputs.append((cmd, 0, out, err))
             except KubeCommandException as e:
                 command_outputs.append((cmd, e.rv, e.out, e.err))
@@ -66,7 +66,7 @@ class RemoveNginx(Runnable):
             cmd = ['kubectl', 'delete', '-f', 'https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.27.1/deploy/static/provider/aws/service-l4.yaml']
             logging.info("Run : %s" % json.dumps(cmd))
             try:
-                out, err = run_with_timeout(cmd, env=env, timeout=100)
+                out, err = run_with_timeout(cmd, env=env, timeout=300)
                 command_outputs.append((cmd, 0, out, err))
             except KubeCommandException as e:
                 command_outputs.append((cmd, e.rv, e.out, e.err))
@@ -78,7 +78,7 @@ class RemoveNginx(Runnable):
         cmd = ['kubectl', 'delete', '-f', 'https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.27.1/deploy/static/mandatory.yaml']
         logging.info("Run : %s" % json.dumps(cmd))
         try:
-            out, err = run_with_timeout(cmd, env=env, timeout=100)
+            out, err = run_with_timeout(cmd, env=env, timeout=300)
             command_outputs.append((cmd, 0, out, err))
         except KubeCommandException as e:
             command_outputs.append((cmd, e.rv, e.out, e.err))

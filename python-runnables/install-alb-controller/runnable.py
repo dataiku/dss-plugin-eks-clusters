@@ -23,7 +23,7 @@ def make_html(command_outputs):
             divs.append(err_html)
     return '\n'.join(divs).decode('utf8')
 
-class InstallNginx(Runnable):
+class InstallAlb(Runnable):
     """
     Installs a ALB ingress controller as described in https://docs.aws.amazon.com/eks/latest/userguide/alb-ingress.html
     """
@@ -159,7 +159,40 @@ class InstallNginx(Runnable):
             command_outputs.append((cmd, 0, out, err))
         except KubeCommandException as e:
             command_outputs.append((cmd, e.rv, e.out, e.err))
+            keep_going = False
 
+        if not keep_going:
+            return make_html(command_outputs)
+
+        if self.config.get("tagSubnets", False):
+            networking_settings = dss_cluster_config.get('config', {}).get('networkingSettings', {})
+            subnets = networking_settings.get('subnets', [])
+            if networking_settings.get('privateNetworking', False):
+                private_subnets = dss_cluster_config.get('config', {}).get('networkingSettings', {}).get('privateSubnets', [])
+            else:
+                private_subnets = []
+                
+            def add_tags(resources, tag, connection_info, command_outputs):
+                args = ['ec2', 'create-tags']
+
+                if _has_not_blank_property(connection_info, 'region'):
+                    args = args + ['--region', connection_info['region']]
+                elif 'AWS_DEFAULT_REGION' is os.environ:
+                    args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
+
+                args = args + ["--resources"] + resources
+                args = args + ["--tags", tag]
+
+                c = AwsCommand(args, connection_info)
+                command_outputs.append(c.run())
+                if command_outputs[-1][1] != 0:
+                    return make_html(command_outputs)
+            
+            if len(subnets) > 0:
+                add_tags(subnets, 'Key=kubernetes.io/role/elb,Value=1', connection_info, command_outputs)
+            if len(private_subnets) > 0:
+                add_tags(private_subnets, 'Key=kubernetes.io/role/internal-elb,Value=1', connection_info, command_outputs)
+            
         set_cluster_generic_property(dss_cluster_settings, 'alb-ingress.controller', 'true', True)
 
         return make_html(command_outputs)

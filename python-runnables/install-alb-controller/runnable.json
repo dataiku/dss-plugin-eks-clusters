@@ -7,7 +7,7 @@
          "icon": "icon-fullscreen"
      },
     
-     "longDescription": "Note: the VPC subnets that the ALB instances will use need to be tagged with *kubernetes.io/role/internal-elb* and *kubernetes.io/role/elb* to *1*",
+     "longDescription": "Note: the VPC subnets that the ALB instances will use need to be tagged with \n\n * kubernetes.io/role/internal-elb &rightarrow; 1 \n\n * kubernetes.io/role/elb &rightarrow; 1 ",
 
      "impersonate": false,
 
@@ -22,6 +22,13 @@
              "type": "STRING",
              "description": "Name of a policy to use or create (default: ALBIngressControllerIAMPolicy)",
              "mandatory": false
+         },
+         {
+             "name": "tagSubnets",
+             "label": "Tag subnets",
+             "description": "Tag the subnets of this cluster's settings with kubernetes.io/role/{elb,internal-elb} (for clusters created by this plugin)",
+             "type": "BOOLEAN",
+             "defaultValue": false
          }
      ],
 

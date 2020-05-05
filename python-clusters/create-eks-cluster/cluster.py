@@ -3,6 +3,7 @@ import os, sys, json, subprocess, time, logging, yaml
 from dataiku.cluster import Cluster
 
 from dku_aws.eksctl_command import EksctlCommand
+from dku_aws.aws_command import AwsCommand
 from dku_kube.kubeconfig import merge_or_write_config, add_authenticator_env
 from dku_kube.autoscaler import add_autoscaler_if_needed
 from dku_utils.cluster import make_overrides
@@ -32,9 +33,9 @@ class MyCluster(Cluster):
         args = args + ['--full-ecr-access']
             
         subnets = networking_settings.get('subnets', [])
+        private_subnets = networking_settings.get('privateSubnets', [])
         if networking_settings.get('privateNetworking', False):
             args = args + ['--node-private-networking']
-            private_subnets = networking_settings.get('privateSubnets', [])
             if len(private_subnets) > 0:
                 args = args + ['--vpc-private-subnets', ','.join(private_subnets)]
         if len(subnets) > 0:
@@ -44,7 +45,8 @@ class MyCluster(Cluster):
         if len(security_groups) > 0:
             args = args + ['--node-security-groups', ','.join(security_groups)]
             
-            
+        dns_ok = self.check_vpc_dns(connection_info, subnets + private_subnets)
+                
         node_pool = self.config.get('nodePool', {})
         if 'machineType' in node_pool:
             args = args + ['--node-type', node_pool['machineType']]
@@ -70,7 +72,10 @@ class MyCluster(Cluster):
 
         c = EksctlCommand(args, connection_info)
         if c.run_and_log() != 0:
-            raise Exception("Failed to start cluster")
+            if not dns_ok:
+                raise Exception("Failed to start cluster (check cluster's VPC and DNS in VPC)")
+            else:
+                raise Exception("Failed to start cluster")
         
         args = ['get', 'cluster']
         args = args + ['--name', self.cluster_id]
@@ -113,3 +118,44 @@ class MyCluster(Cluster):
 
         if c.run_and_log() != 0:
             raise Exception("Failed to stop cluster")
+
+    def check_vpc_dns(self, connection_info, subnet_ids):
+        vpc_ids = set()
+        for subnet_id in subnet_ids:
+            args = ['ec2', 'describe-subnets', '--subnet-ids', subnet_id]
+            c = AwsCommand(args, connection_info)
+            data = c.run_and_get_output()
+            if data is None or len(data.strip()) == 0:
+                logger.warning("Subnet %s doesn't seem to exist" % subnet_id)
+                continue
+            subnet_items = json.loads(data).get('Subnets', [])
+            if len(subnet_items) > 0:
+                subnet_item = subnet_items[0]
+                vpc_id = subnet_item.get('VpcId', None)
+                if vpc_id is None:
+                    continue
+                vpc_ids.add(vpc_id)
+        
+        ok = True
+        for vpc_id in vpc_ids:
+            logging.info("Checking DNS on VPC %s" % vpc_id)
+            args = ['ec2', 'describe-vpc-attribute', '--vpc-id', vpc_id, '--attribute', 'enableDnsSupport']
+            c = AwsCommand(args, connection_info)
+            o = c.run_and_get_output()
+            print(o)
+            enable_dns_support = json.loads(o).get('EnableDnsSupport', {}).get('Value', False)
+            args = ['ec2', 'describe-vpc-attribute', '--vpc-id', vpc_id, '--attribute', 'enableDnsHostnames']
+            c = AwsCommand(args, connection_info)
+            o = c.run_and_get_output()
+            print(o)
+            enable_dns_hostnames = json.loads(o).get('EnableDnsHostnames', {}).get('Value', False)
+            
+            if not enable_dns_support:
+                logging.warning("Subnets have been selected in VPC %s which has no DNS support. Nodes might not be able to join the cluster" % vpc_id)
+                ok = False
+            if not enable_dns_hostnames:
+                logging.warning("Subnets have been selected in VPC %s which has no DNS hostnames resolution. Nodes might not be able to join the cluster" % vpc_id)
+                ok = False
+                
+        return ok
+    

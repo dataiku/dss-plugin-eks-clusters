@@ -91,6 +91,9 @@ class MyCluster(Cluster):
 
         c = EksctlCommand(args, connection_info)
         cluster_info = json.loads(c.run_and_get_output())[0]
+
+        if networking_settings.get('privateNetworking', False):
+            self.make_private()
         
         with open(kube_config_path, "r") as f:
             kube_config = yaml.safe_load(f)
@@ -113,3 +116,11 @@ class MyCluster(Cluster):
 
         if c.run_and_log() != 0:
             raise Exception("Failed to stop cluster")
+
+    def make_private(self):
+        connection_info = self.config.get('connectionInfo', {})
+        args = ['utils', 'update-cluster-endpoints', '--cluster', self.cluster_id, '--private-access=true', '--public-access=false', '--approve']
+        
+        c = EksctlCommand(args, connection_info)
+        if c.run_and_log() != 0:
+            raise Exception("Failed to update to private cluster")

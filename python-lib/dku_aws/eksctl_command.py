@@ -21,11 +21,13 @@ class EksctlCommand(object):
         (o, e) = p.communicate()
         return o
     
-    def run_and_log(self):
+    def run_and_log(self, sniff_log=None):
         cmd = [self.eksctl_bin] + self.args
         print('Running %s' % (' '.join(cmd)))
         p = subprocess.Popen(cmd, shell=False, env=self.env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         with p.stdout as s:
             for line in iter(s.readline, b''):
                 logging.info(line)
+                if sniff_log is not None:
+                    sniff_log(line)
         return p.wait()

@@ -1,4 +1,4 @@
-import os, sys, json, subprocess, time, logging, yaml
+import os, sys, json, subprocess, time, logging, yaml, re
 
 from dataiku.cluster import Cluster
 
@@ -71,8 +71,9 @@ class MyCluster(Cluster):
             args = args + ['--version', k8s_version.strip()]
 
         c = EksctlCommand(args, connection_info)
-        if c.run_and_log() != 0:
-            if not dns_ok:
+        sniffer = CreationLogsSniffer()
+        if c.run_and_log(sniff_log=lambda l:sniffer.handle(l)) != 0:
+            if sniffer.found_node_connect_timeout and not dns_ok:
                 raise Exception("Failed to start cluster (check cluster's VPC and DNS in VPC)")
             else:
                 raise Exception("Failed to start cluster")
@@ -158,4 +159,11 @@ class MyCluster(Cluster):
                 ok = False
                 
         return ok
-    
+
+class CreationLogsSniffer(object):
+    def __init__(self):
+        self.found_node_connect_timeout = False
+    def handle(self, line):
+        m = re.search("^.*timed out .* waiting for .* to join the cluster and become ready.*$", line)
+        if m is not None:
+            self.found_node_connect_timeout = True

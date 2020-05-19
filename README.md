@@ -4,4 +4,4 @@ This plugin allows you to dynamically create, manage and scale EKS clusters in D
 
 Requires DSS 6.0 or above.
 
-For more details, please see https://doc.dataiku.com/dss/latest/containers/eks/
+For more details, please see https://doc.dataiku.com/dss/latest/containers/eks

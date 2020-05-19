@@ -113,7 +113,7 @@ class MyCluster(Cluster):
         args = args + ['--name', self.cluster_id]
 
         if _has_not_blank_property(connection_info, 'region'):
-            region = connection_info['region'] 
+            region = connection_info['region']
         elif 'AWS_DEFAULT_REGION' is os.environ:
             region = os.environ['AWS_DEFAULT_REGION']
             

@@ -93,8 +93,6 @@ class MyCluster(Cluster):
 
         c = EksctlCommand(args, connection_info)
         cluster_info = json.loads(c.run_and_get_output())[0]
-        
-        logging.info(cluster_info)
 
         if networking_settings.get('privateNetworking', False):
             self.make_private(cluster_info['ResourcesVpcConfig']['SecurityGroupIds'][0])
@@ -181,7 +179,6 @@ class MyCluster(Cluster):
                             }
                         ]
                     )
-
         
         c = EksctlCommand(args, connection_info)
 

@@ -1,5 +1,7 @@
 import os, sys, json, subprocess, time, logging, yaml
 
+import boto3
+
 from dataiku.cluster import Cluster
 
 from dku_aws.eksctl_command import EksctlCommand
@@ -91,9 +93,11 @@ class MyCluster(Cluster):
 
         c = EksctlCommand(args, connection_info)
         cluster_info = json.loads(c.run_and_get_output())[0]
+        
+        logging.info(cluster_info)
 
         if networking_settings.get('privateNetworking', False):
-            self.make_private()
+            self.make_private(cluster_info['ResourcesVpcConfig']['SecurityGroupIds'][0])
         
         with open(kube_config_path, "r") as f:
             kube_config = yaml.safe_load(f)
@@ -104,23 +108,141 @@ class MyCluster(Cluster):
 
     def stop(self, data):
         connection_info = self.config.get('connectionInfo', {})
-
+        networking_settings = self.config["networkingSettings"]
+        
         args = ['delete', 'cluster']
         args = args + ['-v', '4']
         args = args + ['--name', self.cluster_id]
+
         if _has_not_blank_property(connection_info, 'region'):
-            args = args + ['--region', connection_info['region']]
+            region = connection_info['region'] 
         elif 'AWS_DEFAULT_REGION' is os.environ:
-            args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
+            region = os.environ['AWS_DEFAULT_REGION']
+            
+        args = args + ['--region', region]
+        
+        if networking_settings.get('privateNetworking', False):
+            dss_sg = networking_settings.get('dssSecurityGroup', '')
+
+            if dss_sg:
+                pid = os.fork()
+                
+                if pid == 0:
+                    time.sleep(180)
+                    eks = boto3.client(
+                        'eks',
+                        aws_access_key_id=connection_info['accessKey'],
+                        aws_secret_access_key=connection_info['secretKey'],
+                        region_name=region
+                    )
+                    response = eks.describe_cluster(
+                        name=self.cluster_id
+                    )
+
+                    cluster_sg = response['cluster']['resourcesVpcConfig']['securityGroupIds'][0]
+
+                    ec2 = boto3.client(
+                        'ec2',
+                        aws_access_key_id=connection_info['accessKey'],
+                        aws_secret_access_key=connection_info['secretKey'],
+                        region_name=region
+                    )
+
+                    response = ec2.revoke_security_group_egress(
+                        GroupId=dss_sg,
+                        IpPermissions=[
+                            {
+                                'FromPort': 443,
+                                'IpProtocol': 'tcp',
+                                'ToPort': 443,
+                                'UserIdGroupPairs': [
+                                    {
+                                        'Description': 'Allow outbound from DSS SG to private cluster endpoint SG',
+                                        'GroupId': cluster_sg
+                                    }
+                                ]
+                            }
+                        ]
+                    )
+
+                    response = ec2.revoke_security_group_ingress(
+                        GroupId=cluster_sg,
+                        IpPermissions=[
+                            {
+                                'FromPort': 443,
+                                'IpProtocol': 'tcp',
+                                'ToPort': 443,
+                                'UserIdGroupPairs': [
+                                    {
+                                        'Description': 'Allow inbound to private cluster endpoint SG from DSS SG',
+                                        'GroupId': dss_sg
+                                    }
+                                ]
+                            }
+                        ]
+                    )
+
+        
         c = EksctlCommand(args, connection_info)
 
         if c.run_and_log() != 0:
-            raise Exception("Failed to stop cluster")
+            raise Exception("Failed to stop cluster") 
 
-    def make_private(self):
+    def make_private(self, cluster_sg):
+        networking_settings = self.config["networkingSettings"]
         connection_info = self.config.get('connectionInfo', {})
+        
+        if _has_not_blank_property(connection_info, 'region'):
+            region = connection_info['region']
+        elif 'AWS_DEFAULT_REGION' is os.environ:
+            region = os.environ['AWS_DEFAULT_REGION']
+            
+        client = boto3.client(
+            'ec2',
+            aws_access_key_id=connection_info['accessKey'],
+            aws_secret_access_key=connection_info['secretKey'],
+            region_name=region
+        )
         args = ['utils', 'update-cluster-endpoints', '--cluster', self.cluster_id, '--private-access=true', '--public-access=false', '--approve']
         
         c = EksctlCommand(args, connection_info)
         if c.run_and_log() != 0:
             raise Exception("Failed to update to private cluster")
+            
+        dss_sg = networking_settings.get('dssSecurityGroup', '')
+        
+        if dss_sg:
+            response = client.authorize_security_group_egress(
+                GroupId=dss_sg,
+                IpPermissions=[
+                    {
+                        'FromPort': 443,
+                        'IpProtocol': 'tcp',
+                        'ToPort': 443,
+                        'UserIdGroupPairs': [
+                            {
+                                'Description': 'Allow outbound from DSS SG to private cluster endpoint SG',
+                                'GroupId': cluster_sg
+                            }
+                        ]
+                    }
+                ]
+            )
+            
+            response = client.authorize_security_group_ingress(
+                GroupId=cluster_sg,
+                IpPermissions=[
+                    {
+                        'FromPort': 443,
+                        'IpProtocol': 'tcp',
+                        'ToPort': 443,
+                        'UserIdGroupPairs': [
+                            {
+                                'Description': 'Allow inbound to private cluster endpoint SG from DSS SG',
+                                'GroupId': dss_sg
+                            }
+                        ]
+                    }
+                ]
+            )
+        

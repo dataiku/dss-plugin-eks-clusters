@@ -33,6 +33,14 @@
             "mandatory" : false
         },
         {
+            "name": "dssSecurityGroup",
+            "label": "DSS Security Group",
+            "description": "Provide Security Group ID of the DSS instance to update for private networking",
+            "visibilityCondition": "model.privateNetworking == true",
+            "type": "STRING",
+            "mandatory": false
+        },
+        {
             "name": "securityGroups",
             "label": "Security groups",
             "type": "STRINGS",

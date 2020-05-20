@@ -179,6 +179,7 @@ class MyCluster(Cluster):
                             }
                         ]
                     )
+                    return
         
         c = EksctlCommand(args, connection_info)
 

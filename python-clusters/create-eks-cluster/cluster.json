@@ -26,7 +26,7 @@
             "label": "Network settings",
             "type": "PRESET",
             "parameterSetId" : "networking-settings",
-            "mandatory" : true
+            "mandatory" : false
         },
         {
             "name": "s-nodes",
@@ -38,7 +38,7 @@
             "label": "Initial node pool",
             "type": "PRESET",
             "parameterSetId" : "node-pool-request",
-            "mandatory" : true
+            "mandatory" : false
         },
         {
             "name": "s-advanced",
@@ -51,6 +51,18 @@
             "type": "STRING",
             "mandatory" : false,
             "description" : "Leave empty for current default of eksctl"
+        },
+        {
+            "name": "advanced",
+            "label": "Use Advanced Configuration",
+            "type": "BOOLEAN"
+        },
+        {
+            "name": "advancedYaml",
+            "label": "Advanced Configuration, use YAML",
+            "type": "TEXTAREA",
+            "mandatory" : false,
+            "visibilityCondition": "model.advanced == true"
         }
     ]
 }

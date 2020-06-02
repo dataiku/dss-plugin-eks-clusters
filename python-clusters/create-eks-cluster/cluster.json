@@ -60,7 +60,7 @@
         {
             "name": "advancedYaml",
             "label": "Advanced Configuration",
-            "description": "Use YAML. For examples, see https://github.com/weaveworks/eksctl/tree/master/examples",
+            "description": "Use YAML. If you use advanced configuration, presets will not be used. For examples, see https://github.com/weaveworks/eksctl/tree/master/examples",
             "type": "TEXTAREA",
             "mandatory" : false,
             "visibilityCondition": "model.advanced == true"

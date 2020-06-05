@@ -20,6 +20,14 @@
             "mandatory" : false
         },
         {
+            "name": "securityGroup",
+            "label": "security group",
+            "description": "additional security group for EKS workers",
+            "type": "STRING",
+            "defaultValue": "",
+            "mandatory" : false
+        },
+        {
             "name": "numNodes",
             "label": "Default number of nodes",
             "type": "INT",

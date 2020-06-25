@@ -21,7 +21,7 @@ class MyCluster(Cluster):
         networking_settings = self.config["networkingSettings"]
         
         args = ['create', 'cluster']
-        args = args + ['-v', '5']
+        args = args + ['-v', '4']
 
         if not self.config.get('advanced'):
             args = args + ['--name', self.cluster_id]

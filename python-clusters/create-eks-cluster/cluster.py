@@ -98,7 +98,7 @@ class MyCluster(Cluster):
             if node_pool.get('numNodesAutoscaling', False):
                 logging.info("Nodegroup is autoscaling, ensuring autoscaler")
                 add_autoscaler_if_needed(self.cluster_id, kube_config_path)
-        else:
+        elif self.config.get('clusterAutoScaling'):
             logging.info("Nodegroup is autoscaling, ensuring autoscaler")
             add_autoscaler_if_needed(self.cluster_id, kube_config_path)
 

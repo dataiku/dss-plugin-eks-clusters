@@ -22,51 +22,60 @@ class MyCluster(Cluster):
         
         args = ['create', 'cluster']
         args = args + ['-v', '4']
-        args = args + ['--name', self.cluster_id]
-        
-        if _has_not_blank_property(connection_info, 'region'):
-            args = args + ['--region', connection_info['region']]
-        elif 'AWS_DEFAULT_REGION' is os.environ:
-            args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
+
+        if not self.config.get('advanced'):
+            args = args + ['--name', self.cluster_id]
             
-        args = args + ['--full-ecr-access']
-            
-        subnets = networking_settings.get('subnets', [])
-        if networking_settings.get('privateNetworking', False):
-            args = args + ['--node-private-networking']
-            private_subnets = networking_settings.get('privateSubnets', [])
-            if len(private_subnets) > 0:
-                args = args + ['--vpc-private-subnets', ','.join(private_subnets)]
-        if len(subnets) > 0:
-            args = args + ['--vpc-public-subnets', ','.join(subnets)]
-            
-        security_groups = networking_settings.get('securityGroups', [])
-        if len(security_groups) > 0:
-            args = args + ['--node-security-groups', ','.join(security_groups)]
-            
-            
-        node_pool = self.config.get('nodePool', {})
-        if 'machineType' in node_pool:
-            args = args + ['--node-type', node_pool['machineType']]
-        if 'diskType' in node_pool:
-            args = args + ['--node-volume-type', node_pool['diskType']]
-        if 'diskSizeGb' in node_pool and node_pool['diskSizeGb'] > 0:
-            args = args + ['--node-volume-size', str(node_pool['diskSizeGb'])]
-            
-        args = args + ['--nodes', str(node_pool.get('numNodes', 3))]
-        if node_pool.get('numNodesAutoscaling', False):
-            args = args + ['--asg-access']
-            args = args + ['--nodes-min', str(node_pool.get('minNumNodes', 2))]
-            args = args + ['--nodes-max', str(node_pool.get('maxNumNodes', 5))]
+            if _has_not_blank_property(connection_info, 'region'):
+                args = args + ['--region', connection_info['region']]
+            elif 'AWS_DEFAULT_REGION' is os.environ:
+                args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
+                
+            args = args + ['--full-ecr-access']
+                
+            subnets = networking_settings.get('subnets', [])
+            if networking_settings.get('privateNetworking', False):
+                args = args + ['--node-private-networking']
+                private_subnets = networking_settings.get('privateSubnets', [])
+                if len(private_subnets) > 0:
+                    args = args + ['--vpc-private-subnets', ','.join(private_subnets)]
+            if len(subnets) > 0:
+                args = args + ['--vpc-public-subnets', ','.join(subnets)]
+                
+            security_groups = networking_settings.get('securityGroups', [])
+            if len(security_groups) > 0:
+                args = args + ['--node-security-groups', ','.join(security_groups)]
+                
+                
+            node_pool = self.config.get('nodePool', {})
+            if 'machineType' in node_pool:
+                args = args + ['--node-type', node_pool['machineType']]
+            if 'diskType' in node_pool:
+                args = args + ['--node-volume-type', node_pool['diskType']]
+            if 'diskSizeGb' in node_pool and node_pool['diskSizeGb'] > 0:
+                args = args + ['--node-volume-size', str(node_pool['diskSizeGb'])]
+                
+            args = args + ['--nodes', str(node_pool.get('numNodes', 3))]
+            if node_pool.get('numNodesAutoscaling', False):
+                args = args + ['--asg-access']
+                args = args + ['--nodes-min', str(node_pool.get('minNumNodes', 2))]
+                args = args + ['--nodes-max', str(node_pool.get('maxNumNodes', 5))]
+
+            k8s_version = self.config.get("k8sVersion", None)
+            if not _is_none_or_blank(k8s_version):
+                args = args + ['--version', k8s_version.strip()]
+        else:
+            yaml_dict = yaml.safe_load(self.config.get("advancedYaml"))
+            yaml_loc = os.path.join(os.getcwd(), self.cluster_id +'_advanced.yaml')
+            with open(yaml_loc, 'w') as outfile:
+                yaml.dump(yaml_dict, outfile, default_flow_style=False)
+
+            args = args + ['-f', yaml_loc]
 
         # we don't add the context to the main config file, to not end up with an oversized config,
         # and because 2 different clusters could be concurrently editing the config file
         kube_config_path = os.path.join(os.getcwd(), 'kube_config')
         args = args + ['--kubeconfig', kube_config_path]
-        
-        k8s_version = self.config.get("k8sVersion", None)
-        if not _is_none_or_blank(k8s_version):
-            args = args + ['--version', k8s_version.strip()]
 
         c = EksctlCommand(args, connection_info)
         if c.run_and_log() != 0:
@@ -85,7 +94,11 @@ class MyCluster(Cluster):
             creds_in_env = {'AWS_ACCESS_KEY_ID':connection_info['accessKey'], 'AWS_SECRET_ACCESS_KEY':connection_info['secretKey']}
             add_authenticator_env(kube_config_path, creds_in_env)
         
-        if node_pool.get('numNodesAutoscaling', False):
+        if not self.config.get('advanced'):
+            if node_pool.get('numNodesAutoscaling', False):
+                logging.info("Nodegroup is autoscaling, ensuring autoscaler")
+                add_autoscaler_if_needed(self.cluster_id, kube_config_path)
+        elif self.config.get('clusterAutoScaling'):
             logging.info("Nodegroup is autoscaling, ensuring autoscaler")
             add_autoscaler_if_needed(self.cluster_id, kube_config_path)
 

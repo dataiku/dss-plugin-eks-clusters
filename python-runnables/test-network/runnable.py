@@ -50,7 +50,7 @@ class MyRunnable(Runnable):
                     ip = None
                     cmd = ['nslookup', host]
                     out, err = b.exec_cmd(cmd)
-                    result = add_to_result(result, 'Resolve host', cmd, out, err)
+                    result =  result + '<h5>Resolve host</h5><div style="margin-left: 20px;"><div>Command</div><pre class="debug">%s</pre><div>Output</div><pre class="debug">%s</pre><div>Error</div><pre class="debug">%s</pre></div>' % (json.dumps(cmd), out, err)
                     for line in out.split('\n'):
                         m = re.match('^Address.*\\s([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+[^\\s]*)\\s.*$', line)
                         if m is not None:
@@ -63,7 +63,7 @@ class MyRunnable(Runnable):
                 # try to connect on the backend port
                 cmd = ['nc', '-vz', ip, port, '-w', '5']
                 out, err = b.exec_cmd(cmd, timeout=10)
-                result = add_to_result(result, 'Test connection to port', cmd, out, err)
+                result =  result + '<h5>Test connection to port</h5><div style="margin-left: 20px;"><div>Command</div><pre class="debug">%s</pre><div>Debug (stderr)</div><pre class="debug">%s</pre></div>' % (json.dumps(cmd), err)
                 if 'no route to host' in err.lower():
                     raise Exception("DSS node resolved but unreachable on port %s : %s" % (str(port), err))
 

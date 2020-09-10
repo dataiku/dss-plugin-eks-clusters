@@ -5,3 +5,8 @@ This plugin allows you to dynamically create, manage and scale EKS clusters in D
 Requires DSS 6.0 or above.
 
 For more details, please see https://doc.dataiku.com/dss/latest/containers/eks
+
+## Release notes
+
+### v1.0.2
+- Fix `Test network connectivity` macro when the hostname is already an IP.

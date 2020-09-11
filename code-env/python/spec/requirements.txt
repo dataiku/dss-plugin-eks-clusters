@@ -1,2 +1,3 @@
 PyYAML
 awscli
+ipaddress==1.0.23

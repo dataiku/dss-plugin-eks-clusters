@@ -93,12 +93,17 @@ class InstallAlb(Runnable):
                 policy_arn = policy.get('Arn', None)
 
         if policy_arn is None:
-            if not self.config("createPolicy", False):
+            if not self.config.get("createPolicy", False):
                 raise Exception("Policy %s doesn't exist and the macro isn't allowed to create it" % policy_name)
             # create the policy
+            policy_document_url = 'https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.8/docs/examples/iam-policy.json'
+            policy_document = requests.get(policy_document_url).text
+            with open("policy.json", "w") as p:
+                p.write(policy_document)
+            
             args = ['iam', 'create-policy']
             args = args + ['--policy-name', policy_name]
-            args = args + ['--policy-document', 'https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.4/docs/examples/iam-policy.json']
+            args = args + ['--policy-document', 'file://policy.json']
             
             if _has_not_blank_property(connection_info, 'region'):
                 args = args + ['--region', connection_info['region']]

@@ -93,6 +93,8 @@ class InstallAlb(Runnable):
                 policy_arn = policy.get('Arn', None)
 
         if policy_arn is None:
+            if not self.config("createPolicy", False):
+                raise Exception("Policy %s doesn't exist and the macro isn't allowed to create it" % policy_name)
             # create the policy
             args = ['iam', 'create-policy']
             args = args + ['--policy-name', policy_name]

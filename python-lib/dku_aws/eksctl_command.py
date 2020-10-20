@@ -29,3 +29,11 @@ class EksctlCommand(object):
             for line in iter(s.readline, b''):
                 logging.info(line)
         return p.wait()
+    
+    def run_and_get(self):
+        cmd = [self.eksctl_bin] + self.args
+        print('Running %s' % (' '.join(cmd)))
+        p = subprocess.Popen(cmd, shell=False, env=self.env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = p.communicate()
+        rv = p.wait()
+        return rv, out, err

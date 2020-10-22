@@ -111,7 +111,7 @@ class MyRunnable(Runnable):
             rv, out, err = c.run_and_get()
             if rv == 0:
                 logging.info("Cluster node group resized")
-                return '<div>Deleted</div><pre class="debug">%s</pre>' % node_group_id
+                return '<div>Resized</div><pre class="debug">%s</pre>' % node_group_id
             else:
                 logging.info("Cluster node group failed to resize")
                 return '<div>Failed to resize the node group</div><pre class="debug">%s</pre>' % (err)

@@ -1,0 +1,15 @@
+{
+  "actions": [
+    {
+      "ts": 1605201722571,
+      "action": "INSTALL",
+      "user": "admin"
+    }
+  ],
+  "gitState": {
+    "enabled": true,
+    "repository": "git@github.com:xaaaaav/dss-plugin-eks-clusters.git",
+    "path": "",
+    "checkout": ""
+  }
+}

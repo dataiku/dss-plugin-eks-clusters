@@ -33,8 +33,10 @@ class MyRunnable(Runnable):
         
         os.environ["KUBECONFIG"] = cluster_data["kube_config_path"]
         
+        cmd = "delete" if self.config.get("delete") else "create"
+        
         proc = subprocess.Popen(
-            ["kubectl", "apply", "-f", "https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/master/nvidia-device-plugin.yml"],
+            ["kubectl", cmd, "-f", "https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/master/nvidia-device-plugin.yml"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )

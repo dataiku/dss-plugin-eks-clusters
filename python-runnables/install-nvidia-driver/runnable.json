@@ -7,6 +7,12 @@
 
     "impersonate": false,
     "params": [
+        {
+            "name": "delete",
+            "label": "Remove NVIDIA Driver",
+            "type": "BOOLEAN",
+            "description": "Uninstall GPU Driver from cluster"
+        }
     ],
 
     "permissions": [],

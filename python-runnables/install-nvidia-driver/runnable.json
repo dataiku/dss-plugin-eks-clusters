@@ -1,0 +1,24 @@
+{
+    "meta": {
+        "label": "Install NVIDIA Driver",
+        "description": "Install NVIDIA Driver Daemonset on GPU Cluster",
+        "icon": "icon-download-alt"
+    },
+
+    "impersonate": false,
+    "params": [
+    ],
+
+    "permissions": [],
+
+    "resultType": "HTML",
+    "resultLabel": "gpu",
+
+    "extension": "html",
+
+    "mimeType": "text/html",
+
+    "macroRoles": [
+        { "type":"CLUSTER", "targetParamsKey":"clusterId", "limitToSamePlugin":true }
+    ]
+}

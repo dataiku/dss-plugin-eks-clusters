@@ -41,6 +41,8 @@ class MyRunnable(Runnable):
         
         stdout, stderr = proc.communicate()
         
+        del os.environ["KUBECONFIG"]
+        
         if stderr:
             raise Exception("Exception installing driver: {}".format(stderr))
             

@@ -13,3 +13,8 @@ For more details, please see https://doc.dataiku.com/dss/latest/containers/eks
 
 ### v1.0.2
 - Fix `Test network connectivity` macro when the hostname is already an IP.
+
+## License
+Copyright (C) 2019-2021 Dataiku
+
+Licensed under the Apache License, version 2.0

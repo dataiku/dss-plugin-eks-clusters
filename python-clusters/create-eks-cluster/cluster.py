@@ -5,6 +5,8 @@ from dataiku.cluster import Cluster
 from dku_aws.eksctl_command import EksctlCommand
 from dku_kube.kubeconfig import merge_or_write_config, add_authenticator_env
 from dku_kube.autoscaler import add_autoscaler_if_needed
+from dku_kube.gpu_driver import add_gpu_driver_if_needed
+from dku_kube.kubectl_command import run_with_timeout
 from dku_utils.cluster import make_overrides
 from dku_utils.access import _has_not_blank_property, _is_none_or_blank
 
@@ -80,6 +82,9 @@ class MyCluster(Cluster):
         c = EksctlCommand(args, connection_info)
         if c.run_and_log() != 0:
             raise Exception("Failed to start cluster")
+            
+        env = os.environ.copy()
+        env['KUBECONFIG'] = kube_config_path
         
         args = ['get', 'cluster']
         args = args + ['--name', self.cluster_id]
@@ -98,9 +103,22 @@ class MyCluster(Cluster):
             if node_pool.get('numNodesAutoscaling', False):
                 logging.info("Nodegroup is autoscaling, ensuring autoscaler")
                 add_autoscaler_if_needed(self.cluster_id, kube_config_path)
-        elif self.config.get('clusterAutoScaling'):
-            logging.info("Nodegroup is autoscaling, ensuring autoscaler")
-            add_autoscaler_if_needed(self.cluster_id, kube_config_path)
+            if node_pool.get("enableGPU", False):
+                logging.info("Nodegroup is GPU-enabled, ensuring NVIDIA GPU Drivers")
+                nodes_cmd = ["kubectl", "get", "nodes", "--no-headers", "-o", "custom-columns=:metadata.name"]
+                o, e = run_with_timeout(nodes_cmd, env=env, timeout=5)
+                nodes_to_label = o.split("\n")
+                add_gpu_driver_if_needed(self.cluster_id, kube_config_path, connection_info, nodes_to_label)
+        else:
+            if self.config.get('clusterAutoScaling'):
+                logging.info("Nodegroup is autoscaling, ensuring autoscaler")
+                add_autoscaler_if_needed(self.cluster_id, kube_config_path)
+            if self.config.get("advancedGPU"):
+                logging.info("Nodegroup is GPU-enabled, ensuring NVIDIA GPU Drivers")
+                nodes_cmd = ["kubectl", "get", "nodes", "--no-headers", "-o", "custom-columns=:metadata.name"]
+                o, e = run_with_timeout(nodes_cmd, env=env, timeout=5)
+                nodes_to_label = o.split("\n")
+                add_gpu_driver_if_needed(self.cluster_id, kube_config_path, connection_info, nodes_to_label)
 
         c = EksctlCommand(args, connection_info)
         cluster_info = json.loads(c.run_and_get_output())[0]

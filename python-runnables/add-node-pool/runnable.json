@@ -40,6 +40,12 @@
             "type": "PRESET",
             "parameterSetId" : "node-pool-request",
             "mandatory" : true
+        },
+        {
+            "name": "privateNetworking",
+            "label": "Private Nodes",
+            "description": "Use this option when using the advanced YAML configuration for the EKS cluster",
+            "type": "BOOLEAN"
         }
     ]
 }

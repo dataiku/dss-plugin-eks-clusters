@@ -3,7 +3,6 @@ import dataiku
 import os, json, logging
 from dku_kube.autoscaler import add_autoscaler_if_needed
 from dku_kube.gpu_driver import add_gpu_driver_if_needed
-from dku_kube.kubectl_command import run_with_timeout
 from dku_aws.eksctl_command import EksctlCommand
 from dku_aws.aws_command import AwsCommand
 from dku_utils.cluster import get_cluster_from_dss_cluster
@@ -31,9 +30,6 @@ class MyRunnable(Runnable):
 
         # the cluster is accessible via the kubeconfig
         kube_config_path = dss_cluster_settings.get_raw()['containerSettings']['executionConfigsGenericOverrides']['kubeConfigPath']
-        
-        env = os.environ.copy()
-        env['KUBECONFIG'] = kube_config_path
 
         connection_info = dss_cluster_config.get('config', {}).get('connectionInfo', {})
         
@@ -85,13 +81,7 @@ class MyRunnable(Runnable):
             
         if node_pool.get('enableGPU', False):
             logging.info("Nodegroup is GPU-enabled, ensuring NVIDIA GPU Drivers")
-            if node_group_id is not None and len(node_group_id) > 0:
-                nodes_cmd = ["kubectl", "get", "nodes", "-l", "alpha.eksctl.io/nodegroup-name={}".format(node_group_id), "--no-headers", "-o", "custom-columns=:metadata.name"]
-                o, e = run_with_timeout(nodes_cmd, env=env, timeout=5)
-                nodes_to_label = o.split("\n")
-                add_gpu_driver_if_needed(self.config['clusterId'], kube_config_path, connection_info, nodes_to_label)
-            else:
-                raise ValueError("To enable GPU workloads on this nodegroup, you must name the nodegroup first!")
+            add_gpu_driver_if_needed(self.config['clusterId'], kube_config_path, connection_info)
 
         args = ['get', 'nodegroup']
         #args = args + ['-v', '4']

@@ -52,7 +52,7 @@
 
         {
             "type":"SEPARATOR",
-            "label" :"Advanced. options"
+            "label" :"Advanced options"
         },
         {
             "name": "diskType",
@@ -67,6 +67,13 @@
             "description": "Disk size for the nodes. Leave 0 for default (20 GB)",
             "type": "INT",
             "mandatory" : false
+        },
+        {
+            "name": "enableGPU",
+            "label": "GPU",
+            "description": "Enable GPU workloads on the cluster",
+            "type": "BOOLEAN",
+            "defaultValue": false
         }
     ]
 }

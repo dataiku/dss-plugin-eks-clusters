@@ -1,11 +1,11 @@
 {
     "id": "eks-clusters",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "meta": {
         "label": "EKS clusters",
         "description": "Interact with Amazon Elastic Kubernetes Service clusters",
         "author": "Dataiku",
-        "icon": "icon-puzzle-piece",
+        "icon": "icon-amazon-elastic-kubernetes icon-cloud",
         "tags": ["Cloud", "AWS"],
         "url": "https://www.dataiku.com/dss/plugins/info/eks-clusters.html",
         "licenseInfo": "Apache Software License",

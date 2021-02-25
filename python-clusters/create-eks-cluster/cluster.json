@@ -64,6 +64,12 @@
             "visibilityCondition": "model.advanced == true"
         },
         {
+            "name": "advancedGPU",
+            "label": "Use GPU",
+            "type": "BOOLEAN",
+            "visibilityCondition": "model.advanced == true"
+        },
+        {
             "name": "advancedYaml",
             "label": "Advanced Configuration",
             "description": "Use YAML. If you use advanced configuration, presets will not be used. For examples, see https://github.com/weaveworks/eksctl/tree/master/examples",

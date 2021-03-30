@@ -56,8 +56,6 @@ users:
       - token
       - -i
       - %s
-      - -r
-      - 1234123412:mystupidrole
       command: aws-iam-authenticator
       env: null
         """ % (cluster_info['CertificateAuthority']['Data'], cluster_info['Endpoint'], cluster_id)

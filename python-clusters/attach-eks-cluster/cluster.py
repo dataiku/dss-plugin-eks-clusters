@@ -3,7 +3,7 @@ import os, sys, json, subprocess, time, logging, yaml
 from dataiku.cluster import Cluster
 
 from dku_aws.eksctl_command import EksctlCommand
-from dku_kube.kubeconfig import merge_or_write_config, add_authenticator_env
+from dku_kube.kubeconfig import merge_or_write_config, add_authenticator_env, add_assumed_arn
 from dku_utils.cluster import make_overrides
 from dku_utils.access import _has_not_blank_property
 
@@ -14,7 +14,7 @@ class MyCluster(Cluster):
         self.config = config
         self.plugin_config = plugin_config
         self.global_settings = global_settings
-        
+
     def start(self):
         cluster_id = self.config['clusterId']
         # retrieve the cluster info from EKS
@@ -22,16 +22,16 @@ class MyCluster(Cluster):
         connection_info = self.config.get('connectionInfo', {})
         args = ['get', 'cluster']
         args = args + ['--name', cluster_id]
-        
+
         if _has_not_blank_property(connection_info, 'region' ):
             args = args + ['--region', connection_info['region']]
         elif 'AWS_DEFAULT_REGION' is os.environ:
             args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
         args = args + ['-o', 'json']
-        
+
         c = EksctlCommand(args, connection_info)
         cluster_info = json.loads(c.run_and_get_output())[0]
-                
+
         kube_config_str = """
 apiVersion: v1
 clusters:
@@ -56,6 +56,8 @@ users:
       - token
       - -i
       - %s
+      - -r
+      - 1234123412:mystupidrole
       command: aws-iam-authenticator
       env: null
         """ % (cluster_info['CertificateAuthority']['Data'], cluster_info['Endpoint'], cluster_id)
@@ -71,9 +73,13 @@ users:
         if _has_not_blank_property(connection_info, 'accessKey') and _has_not_blank_property(connection_info, 'secretKey'):
             creds_in_env = {'AWS_ACCESS_KEY_ID':connection_info['accessKey'], 'AWS_SECRET_ACCESS_KEY':connection_info['secretKey']}
             add_authenticator_env(kube_config_path, creds_in_env)
-            
+
+        if _has_not_blank_property(connection_info, 'arn'):
+            arn = ':connection_info['arn']
+            add_assumed_arn(kube_config_path, arn)
+
         kube_config = yaml.safe_load(kube_config_str)
-                
+
         # collect and prepare the overrides so that DSS can know where and how to use the cluster
         overrides = make_overrides(self.config, kube_config, kube_config_path)
         return [overrides, {'kube_config_path':kube_config_path, 'cluster':cluster_info}]

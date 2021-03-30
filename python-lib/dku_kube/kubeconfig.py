@@ -11,7 +11,7 @@ def get_first_kube_config(kube_config_path=None):
 
 def merge_or_write_config(config, kube_config_path=None):
     kube_config_path = get_first_kube_config(kube_config_path)
-    
+
     if os.path.exists(kube_config_path):
         logging.info("A kube config exists at %s => merging" % kube_config_path)
         with open(kube_config_path, "r") as f:
@@ -37,9 +37,9 @@ def merge_or_write_config(config, kube_config_path=None):
             logging.info("Setting current context to %s" % current_context)
             existing["current-context"] = current_context
         """
-        
+
         logging.info("Final state is %s" % json.dumps(existing, indent=2))
-            
+
         with open(kube_config_path, "w") as f:
             yaml.safe_dump(existing, f)
     else:
@@ -60,5 +60,12 @@ def add_authenticator_env(kube_config_path, env):
             authenticator_env.append({'name':k, 'value':env[k]})
         authenticator['env'] = authenticator_env
     with open(kube_config_path, "w") as f:
-        yaml.safe_dump(existing, f)    
-            
+        yaml.safe_dump(existing, f)
+
+def add_assumed_arn(kube_config_path, arn):
+    with open(kube_config_path, "r") as f:
+        existing = yaml.safe_load(f)
+    if 'exec' in existing['users'][0]['user']:
+        existing['users'][0]['user']['exec']['args'].extend('-r',arn)
+    with open(kube_config_path, "w") as f:
+        yaml.safe_dump(existing, f)

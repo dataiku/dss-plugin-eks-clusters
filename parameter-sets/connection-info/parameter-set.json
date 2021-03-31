@@ -30,14 +30,6 @@
             "description": "If empty, uses AWS region from the environment (~/.aws/config or AWS_DEFAULT_REGION environment variable)",
             "type": "STRING",
             "mandatory": false
-        },
-        {
-            "name": "arn",
-            "label": "IAM Role ARN to assume",
-            "description": "Assumes an IAM role to perform cluster operations instead of the default AWS credential provider chain. If empty, uses AWS credentials defined above",
-            "type": "STRING",
-            "mandatory": false
         }
-
     ]
 }

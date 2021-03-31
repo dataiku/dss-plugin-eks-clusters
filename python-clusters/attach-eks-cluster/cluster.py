@@ -20,6 +20,7 @@ class MyCluster(Cluster):
         # retrieve the cluster info from EKS
         # this will fail if the cluster doesn't exist, but the API message is enough
         connection_info = self.config.get('connectionInfo', {})
+        arn = self.config.get('arn', '')
         args = ['get', 'cluster']
         args = args + ['--name', cluster_id]
 
@@ -72,8 +73,7 @@ users:
             creds_in_env = {'AWS_ACCESS_KEY_ID':connection_info['accessKey'], 'AWS_SECRET_ACCESS_KEY':connection_info['secretKey']}
             add_authenticator_env(kube_config_path, creds_in_env)
 
-        if _has_not_blank_property(connection_info, 'arn'):
-            arn = ':connection_info['arn']
+        if arn:
             add_assumed_arn(kube_config_path, arn)
 
         kube_config = yaml.safe_load(kube_config_str)

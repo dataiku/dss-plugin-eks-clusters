@@ -82,7 +82,7 @@ users:
             creds_in_env = {'AWS_ACCESS_KEY_ID':connection_info['accessKey'], 'AWS_SECRET_ACCESS_KEY':connection_info['secretKey']}
             add_authenticator_env(kube_config_path, creds_in_env)
 
-        # If the arn exists, then add it to the kubeconfig so it is assumed role for future use
+        # If the arn exists, then add it to the kubeconfig so it is the assumed role for future use
         if arn:
             add_assumed_arn(kube_config_path, arn)
 

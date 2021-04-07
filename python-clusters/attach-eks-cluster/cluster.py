@@ -19,9 +19,12 @@ class MyCluster(Cluster):
         cluster_id = self.config['clusterId']
         # retrieve the cluster info from EKS
         # this will fail if the cluster doesn't exist, but the API message is enough
-        connection_info = self.config.get('connectionInfo', {})
+
         arn = self.config.get('arn', '')
         if arn:
+            connection_info = Boto3STSService(arn).credentials
+        else:
+            connection_info = self.config.get('connectionInfo', {})
             
         args = ['get', 'cluster']
         args = args + ['--name', cluster_id]

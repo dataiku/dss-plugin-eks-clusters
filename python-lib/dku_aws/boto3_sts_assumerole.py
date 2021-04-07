@@ -7,4 +7,9 @@ class Boto3STSService(object):
         assume_role_object = sts_connection.assume_role(
             RoleArn=arn, RoleSessionName="test",
             DurationSeconds=3600)
-        self.credentials = assume_role_object['Credentials']
+        creds = assume_role_object['Credentials']
+        creds['accessKey'] = creds.pop('AccessKeyId')
+        creds['secretKey'] = creds.pop('SecretAccessKey')
+        creds['sessionToken'] = creds.pop('SessionToken')
+        self.credentials = creds
+        

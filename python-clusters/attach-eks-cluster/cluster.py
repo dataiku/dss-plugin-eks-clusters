@@ -22,6 +22,7 @@ class MyCluster(Cluster):
         # this will fail if the cluster doesn't exist, but the API message is enough
 
         arn = self.config.get('arn', '')
+        
         if arn:
             connection_info = Boto3STSService(arn).credentials
         else:

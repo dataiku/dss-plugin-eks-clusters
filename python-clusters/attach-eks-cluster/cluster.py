@@ -21,8 +21,10 @@ class MyCluster(Cluster):
         # retrieve the cluster info from EKS
         # this will fail if the cluster doesn't exist, but the API message is enough
 
+        # grab the ARN if it exists
         arn = self.config.get('arn', '')
         
+        # If the arn exists use boto3 to assumeRole to it, otherwise use the regular connection info
         if arn:
             connection_info = Boto3STSService(arn).credentials
         else:

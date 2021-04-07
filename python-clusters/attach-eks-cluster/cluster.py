@@ -3,6 +3,7 @@ import os, sys, json, subprocess, time, logging, yaml
 from dataiku.cluster import Cluster
 
 from dku_aws.eksctl_command import EksctlCommand
+from dku_aws.boto3_sts_assumerole import Boto3STSService
 from dku_kube.kubeconfig import merge_or_write_config, add_authenticator_env, add_assumed_arn
 from dku_utils.cluster import make_overrides
 from dku_utils.access import _has_not_blank_property

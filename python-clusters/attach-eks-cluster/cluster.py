@@ -21,12 +21,14 @@ class MyCluster(Cluster):
         # this will fail if the cluster doesn't exist, but the API message is enough
         connection_info = self.config.get('connectionInfo', {})
         arn = self.config.get('arn', '')
+        if arn:
+            
         args = ['get', 'cluster']
         args = args + ['--name', cluster_id]
 
         if _has_not_blank_property(connection_info, 'region' ):
             args = args + ['--region', connection_info['region']]
-        elif 'AWS_DEFAULT_REGION' is os.environ:
+        elif 'AWS_DEFAULT_REGION' in os.environ:
             args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
         args = args + ['-o', 'json']
 

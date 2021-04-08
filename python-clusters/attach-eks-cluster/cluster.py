@@ -27,11 +27,10 @@ class MyCluster(Cluster):
         # If the arn exists use boto3 to assumeRole to it, otherwise use the regular connection info
         if arn:
             connection_info = Boto3STSService(arn).credentials
-
             if _has_not_blank_property(info, 'region' ):
                 connection_info['region'] = info['region']
         else:
-            connection_info = self.config.get('connectionInfo', {})
+            connection_info = info
             
         args = ['get', 'cluster']
         args = args + ['--name', cluster_id]

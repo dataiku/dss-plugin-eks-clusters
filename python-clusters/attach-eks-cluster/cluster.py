@@ -42,7 +42,7 @@ class MyCluster(Cluster):
         args = args + ['-o', 'json']
 
         c = EksctlCommand(args, connection_info)
-        cluster_info = json.loads(c.run_and_log())[0]
+        cluster_info = json.loads(c.run_and_get_output())[0]
 
         kube_config_str = """
 apiVersion: v1

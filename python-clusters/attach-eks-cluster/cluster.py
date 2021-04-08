@@ -40,7 +40,7 @@ class MyCluster(Cluster):
             args = args + ['--region', connection_info['region']]
         elif 'AWS_DEFAULT_REGION' in os.environ:
             args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
-        args = args #+ ['-o', 'json']
+        args = args + ['-o', 'json']
 
         c = EksctlCommand(args, connection_info)
         cluster_info = json.loads(c.run_and_log())[0]

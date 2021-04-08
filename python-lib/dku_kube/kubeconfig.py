@@ -66,6 +66,6 @@ def add_assumed_arn(kube_config_path, arn):
     with open(kube_config_path, "r") as f:
         existing = yaml.safe_load(f)
     if 'exec' in existing['users'][0]['user']:
-        existing['users'][0]['user']['exec']['args'] + ['-r',arn]
+        existing['users'][0]['user']['exec']['args'].extend(['-r',arn])
     with open(kube_config_path, "w") as f:
         yaml.safe_dump(existing, f)

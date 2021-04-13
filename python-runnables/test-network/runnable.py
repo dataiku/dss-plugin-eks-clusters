@@ -15,8 +15,9 @@ class MyRunnable(Runnable):
         return None
 
     def run(self, progress_callback):
-        cluster_data, _, dss_cluster_settings, _ = get_cluster_from_dss_cluster(self.config['clusterId'])
-
+        print(get_cluster_from_dss_cluster(self.config['clusterId']))
+        cluster_data, dss_cluster_settings, _ = get_cluster_from_dss_cluster(self.config['clusterId'])
+        print("Getting Cluster Data")
         # the cluster is accessible via the kubeconfig
         kube_config_path = dss_cluster_settings.get_raw()['containerSettings']['executionConfigsGenericOverrides']['kubeConfigPath']
 

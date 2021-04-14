@@ -3,8 +3,10 @@ import dataiku
 import json, logging, os
 from dku_aws.eksctl_command import EksctlCommand
 from dku_aws.aws_command import AwsCommand
+from dku_aws.boto3_sts_assumerole import Boto3STSService
 from dku_utils.cluster import get_cluster_from_dss_cluster
 from dku_utils.access import _has_not_blank_property
+
 
 class MyRunnable(Runnable):
     def __init__(self, project_key, config, plugin_config):
@@ -16,6 +18,9 @@ class MyRunnable(Runnable):
         return None
 
     def run(self, progress_callback):
+        
+
+            
         cluster_data, dss_cluster_settings, dss_cluster_config = get_cluster_from_dss_cluster(self.config['clusterId'])
 
         # retrieve the actual name in the cluster's data
@@ -25,10 +30,18 @@ class MyRunnable(Runnable):
         if cluster_def is None:
             raise Exception("No cluster definition (starting failed?)")
         cluster_id = cluster_def["Name"]
-
-        connection_info = dss_cluster_config.get('config', {}).get('connectionInfo', {})
+        
+        arn  = dss_cluster_config.get('config', {}).get('arn', None)
+        info = dss_cluster_config.get('config', {}).get('connectionInfo', {})
+        if arn:
+            connection_info = Boto3STSService(arn).credentials
+            if _has_not_blank_property(info, 'region' ):
+                connection_info['region'] = info['region']
+        else:
+            connection_info = info
         
         node_group_id = self.config.get('nodeGroupId', None)
+        
         if node_group_id is None or len(node_group_id) == 0:
             args = ['get', 'nodegroup']
             #args = args + ['-v', '4']

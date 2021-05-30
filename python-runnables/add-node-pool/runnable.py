@@ -37,6 +37,8 @@ class MyRunnable(Runnable):
         
         args = ['create', 'nodegroup']
         args = args + ['-v', '4']
+        args = args + ['--managed']
+        args = args + ['--spot']
         args = args + ['--cluster', cluster_id]
         if node_group_id is not None and len(node_group_id) > 0:
             args = args + ['--name', node_group_id]

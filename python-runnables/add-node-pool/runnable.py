@@ -52,8 +52,8 @@ class MyRunnable(Runnable):
         if node_group_id is not None and len(node_group_id) > 0:
             args = args + ['--name', node_group_id]
 
-        if node_labels is not None and len(node_labels) > 0:
-            args = args + [' --node-labels', node_labels]            
+        #if node_labels is not None and len(node_labels) > 0:
+        #    args = args + [' --node-labels', node_labels]            
         
         if _has_not_blank_property(connection_info, 'region'):
             args = args + ['--region', connection_info['region']]
@@ -67,8 +67,9 @@ class MyRunnable(Runnable):
             args = args + ['--node-private-networking']
             
         security_groups = dss_cluster_config['config'].get('securityGroups', [])
-
-        print (security_groups)
+        
+        logging.info("Security Group Information")
+        logging.info(security_groups)
         
         if len(security_groups) > 0:
             args = args + ['--node-security-groups', ','.join(security_groups)]

@@ -67,6 +67,9 @@ class MyRunnable(Runnable):
             args = args + ['--node-private-networking']
             
         security_groups = dss_cluster_config['config'].get('securityGroups', [])
+
+        print (security_groups)
+        
         if len(security_groups) > 0:
             args = args + ['--node-security-groups', ','.join(security_groups)]
             

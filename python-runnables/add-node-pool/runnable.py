@@ -31,13 +31,17 @@ class MyRunnable(Runnable):
         # the cluster is accessible via the kubeconfig
         kube_config_path = dss_cluster_settings.get_raw()['containerSettings']['executionConfigsGenericOverrides']['kubeConfigPath']
 
-        connection_info = dss_cluster_config.get('config', {}).get('connectionInfo', {})
+        connection_info = dss_cluster_config.get('config', {}).get('connectionInfo', {})     
         
         node_group_id = self.config.get('nodeGroupId', None)
 
         spot_pool_bln = self.config.get('spotPool', None)
 
         node_labels = self.config.get('nodeLabels', None)
+        
+        networking_settings = dss_cluster_config.get('config', {}).get('networkingSettings', {})
+        
+        security_groups = networking_settings.get('securityGroups', [])
         
         
         args = ['create', 'nodegroup']
@@ -59,17 +63,15 @@ class MyRunnable(Runnable):
             args = args + ['--region', connection_info['region']]
         elif 'AWS_DEFAULT_REGION' is os.environ:
             args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
-            
+
+        # This does not appear to be in the configuration at this point, doing nothing    
         if dss_cluster_config['config'].get('useEcr', False):
             args = args + ['--full-ecr-access']
-            
-        if dss_cluster_config.get('privateNetworking', False) or self.config.get('privateNetworking', None):
+
+
+        if networking_settings.get('privateNetworking', False) or self.config.get('privateNetworking', None):
             args = args + ['--node-private-networking']
             
-        security_groups = dss_cluster_config['config'].get('securityGroups', [])
-        
-        logging.info("Security Group Information")
-        logging.info(security_groups)
         
         if len(security_groups) > 0:
             args = args + ['--node-security-groups', ','.join(security_groups)]

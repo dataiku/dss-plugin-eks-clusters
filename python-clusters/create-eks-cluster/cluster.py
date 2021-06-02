@@ -25,6 +25,8 @@ class MyCluster(Cluster):
         args = args + ['-v', '4']
 
         if not self.config.get('advanced'):
+            args = args + ['--managed']
+            
             args = args + ['--name', self.cluster_id]
             
             if _has_not_blank_property(connection_info, 'region'):

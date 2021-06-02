@@ -40,7 +40,7 @@ class MyRunnable(Runnable):
         node_labels = self.config.get('nodeLabels', None)
         
         networking_settings = dss_cluster_config.get('config', {}).get('networkingSettings', {})
-        
+
         security_groups = networking_settings.get('securityGroups', [])
         
         
@@ -56,8 +56,8 @@ class MyRunnable(Runnable):
         if node_group_id is not None and len(node_group_id) > 0:
             args = args + ['--name', node_group_id]
 
-        #if node_labels is not None and len(node_labels) > 0:
-        #    args = args + [' --node-labels', node_labels]            
+        if node_labels is not None and len(node_labels) > 0:
+            args = args + ['--node-labels', node_labels]            
         
         if _has_not_blank_property(connection_info, 'region'):
             args = args + ['--region', connection_info['region']]

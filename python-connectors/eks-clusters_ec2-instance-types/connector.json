@@ -1,0 +1,62 @@
+/* This file is the descriptor for the Custom python dataset eks-clusters_ec2-instance-types */
+{
+    "meta" : {
+        // label: name of the dataset type as displayed, should be short
+        "label": "Custom dataset eks-clusters_ec2-instance-types",
+
+        // description: longer string to help end users understand what this dataset type is
+        "description": "",
+
+        // icon: must be one of the FontAwesome 3.2.1 icons, complete list here at https://fontawesome.com/v3.2.1/icons/
+        "icon": "icon-puzzle-piece"
+    },
+
+    /* Can this connector read data ? */
+    "readable": true,
+    /* Can this connector write data ? */
+    "writable": false,
+
+
+    /* params:
+    DSS will generate a formular from this list of requested parameters.
+    Your component code can then access the value provided by users using the "name" field of each parameter.
+
+    Available parameter types include:
+    STRING, INT, DOUBLE, BOOLEAN, DATE, SELECT, TEXTAREA, PRESET and others.
+
+    For the full list and for more details, see the documentation: https://doc.dataiku.com/dss/latest/plugins/reference/params.html
+    */
+    "params": [
+        {
+            "name": "parameter1",
+            "label": "User-readable name",
+            "type": "STRING",
+            "description": "Some documentation for parameter1",
+            "mandatory": true
+        },
+        {
+            "name": "parameter2",
+            "type": "INT",
+            "defaultValue" : 42
+            /* Note that standard json parsing will return it as a double in Python (instead of an int), so you need to write
+               int(self.config()['parameter2'])
+            */
+        },
+
+        /* A "SELECT" parameter is a multi-choice selector. Choices are specified using the selectChoice field*/
+        {
+            "name": "parameter8",
+            "type": "SELECT",
+            "selectChoices": [
+                {
+                    "value": "val_x",
+                    "label": "display name for val_x"
+                },
+                {
+                    "value": "val_y",
+                    "label": "display name for val_y"
+                }
+            ]
+        }
+    ]
+}

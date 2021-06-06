@@ -43,7 +43,9 @@ class MyRunnable(Runnable):
 
         security_groups = networking_settings.get('securityGroups', [])
         
-        
+        availability_zone = get_dss_instance_variables()['availability_zone'] 
+    
+    
         args = ['create', 'nodegroup']
         args = args + ['-v', '4']
         args = args + ['--cluster', cluster_id]
@@ -52,6 +54,7 @@ class MyRunnable(Runnable):
         if spot_pool_bln is not None and spot_pool_bln:
             args = args + ['--managed']
             args = args + ['--spot']
+            args = args + ['--node-zones', availability_zone]
 
         if node_group_id is not None and len(node_group_id) > 0:
             args = args + ['--name', node_group_id]

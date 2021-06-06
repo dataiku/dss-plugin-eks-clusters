@@ -1,6 +1,6 @@
 PyYAML
 awscli
-ipaddress==1.0.23
+ipaddress
 boto3
 tabulate
 request

@@ -75,7 +75,9 @@ class MyRunnable(Runnable):
             args = args + ['--stack-name', node_group_stack_name]
 
             c = AwsCommand(args, connection_info)
-            node_group_resources = json.loads(c.run_and_get_output()).get('StackResources', [])
+            json_load_file = c.run_and_get_output()
+            print(json_load_file)
+            node_group_resources = json.loads(json_load_file).get('StackResources', [])
             
             # find the auto-scaling-group
             auto_scaling_resource = None

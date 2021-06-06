@@ -42,7 +42,7 @@ class MyRunnable(Runnable):
                 raise Exception('Host appears to not be a public hostname. Set DKU_BACKEND_EXT_HOST')
             with BusyboxPod(kube_config_path) as b:
                 try:
-                    ip = str(ipaddress.ip_address(unicode(host)))
+                    ip = str(ipaddress.ip_address((host)))
                     result = result + '<h5>Host %s is an ip. No need to resolve it, testing connection directly</h5>' % (host)
 
                 except ValueError:

@@ -18,13 +18,19 @@ class MyCluster(Cluster):
         self.global_settings = global_settings
         
     def start(self):
+        print('Start Cluster - 1. Create Cluster') #Debugger
+
         connection_info = self.config.get('connectionInfo', {})
         networking_settings = self.config["networkingSettings"]
         
+        
+
         args = ['create', 'cluster']
         args = args + ['-v', '4']
 
         if not self.config.get('advanced'):
+            print('Start Cluster - 2. Create Cluster - Regular Args') #Debugger
+
             args = args + ['--managed']
             
             args = args + ['--name', self.cluster_id]
@@ -75,32 +81,46 @@ class MyCluster(Cluster):
 
             args = args + ['-f', yaml_loc]
 
+        print('Start Cluster - 3. Start Kubeconfig') #Debugger
+
         # we don't add the context to the main config file, to not end up with an oversized config,
         # and because 2 different clusters could be concurrently editing the config file
         kube_config_path = os.path.join(os.getcwd(), 'kube_config')
         args = args + ['--kubeconfig', kube_config_path]
 
+        print('Start Cluster - 4. Start Eksctl Command') #Debugger
+
         c = EksctlCommand(args, connection_info)
         if c.run_and_log() != 0:
             raise Exception("Failed to start cluster")
         
+        print('Start Cluster - 5. Start Get Cluster') #Debugger
+
         args = ['get', 'cluster']
         args = args + ['--name', self.cluster_id]
+
+        print('Start Cluster - 6. Get Cluster - Region') #Debugger
         
         if _has_not_blank_property(connection_info, 'region'):
+            print('Start Cluster - 7. Get Cluster - Region') #Debugger
             args = args + ['--region', connection_info['region']]
         elif 'AWS_DEFAULT_REGION' is os.environ:
+            print('Start Cluster - 8. Get Cluster - Region') #Debugger
             args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
         args = args + ['-o', 'json']
         
         if _has_not_blank_property(connection_info, 'accessKey') and _has_not_blank_property(connection_info, 'secretKey'):
+            print('Start Cluster - 9. Get Cluster - Access Key') #Debugger
             creds_in_env = {'AWS_ACCESS_KEY_ID':connection_info['accessKey'], 'AWS_SECRET_ACCESS_KEY':connection_info['secretKey']}
             add_authenticator_env(kube_config_path, creds_in_env)
         
         if not self.config.get('advanced'):
+            print('Start Cluster - 9. Get Cluster - Not Advanced') #Debugger
             if node_pool.get('numNodesAutoscaling', False):
                 logging.info("Nodegroup is autoscaling, ensuring autoscaler")
+                print('Start Cluster - 10. Get Cluster - Start Autoscaler') #Debugger
                 add_autoscaler_if_needed(self.cluster_id, kube_config_path)
+                print('1. EKSCtl Invocation - Create Cluster') #Debugger
             if node_pool.get("enableGPU", False):
                 logging.info("Nodegroup is GPU-enabled, ensuring NVIDIA GPU Drivers")
                 add_gpu_driver_if_needed(self.cluster_id, kube_config_path, connection_info)
@@ -113,13 +133,17 @@ class MyCluster(Cluster):
                 add_gpu_driver_if_needed(self.cluster_id, kube_config_path, connection_info)
 
         c = EksctlCommand(args, connection_info)
+        print('Start Cluster - 11. Get Cluster - EKSCTL Execution') #Debugger
         cluster_info = json.loads(c.run_and_get_output())[0]
         
+        print('Start Cluster - 12. Get Cluster - Open Kube Config') #Debugger
         with open(kube_config_path, "r") as f:
             kube_config = yaml.safe_load(f)
         
         # collect and prepare the overrides so that DSS can know where and how to use the cluster
         overrides = make_overrides(self.config, kube_config, kube_config_path)
+
+        print('Start Cluster - 13. End') #Debugger
         return [overrides, {'kube_config_path':kube_config_path, 'cluster':cluster_info}]
 
     def stop(self, data):

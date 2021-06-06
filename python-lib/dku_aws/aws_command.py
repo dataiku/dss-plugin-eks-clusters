@@ -19,8 +19,7 @@ class AwsCommand(object):
                              shell=False,
                              env=self.env,
                              stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE,
-                             universal_newlines=True)
+                             stderr=subprocess.PIPE)
         (o, e) = p.communicate()
         return o
     
@@ -31,8 +30,7 @@ class AwsCommand(object):
                              shell=False,
                              env=self.env,
                              stdout=subprocess.PIPE, 
-                             stderr=subprocess.STDOUT,
-                             universal_newlines=True)
+                             stderr=subprocess.STDOUT)
         with p.stdout as s:
             for line in iter(s.readline, b''):
                 logging.info(line)

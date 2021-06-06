@@ -4,3 +4,4 @@ ipaddress
 boto3
 tabulate
 request
+pandas==1.0.5

@@ -22,7 +22,7 @@ class EksctlCommand(object):
                              shell=False,
                              env=self.env,
                              stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE
+                             stderr=subprocess.PIPE)
         (o, e) = p.communicate()
         print('EKSCtl RAGO 2')
         return o

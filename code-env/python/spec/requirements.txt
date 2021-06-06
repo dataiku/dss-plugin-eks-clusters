@@ -1,4 +1,14 @@
 boto3
 PyYAML
 awscli
+tabulate
+certifi==2021.5.30
+chardet==3.0.4
+idna==2.8
+numpy==1.19.5
 pandas==1.0.5
+python-dateutil==2.8.1
+pytz==2020.5
+requests==2.22.0
+six==1.16.0
+urllib3==1.25.11

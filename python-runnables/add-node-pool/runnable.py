@@ -7,6 +7,7 @@ from dku_aws.eksctl_command import EksctlCommand
 from dku_aws.aws_command import AwsCommand
 from dku_utils.cluster import get_cluster_from_dss_cluster
 from dku_utils.access import _has_not_blank_property
+from dku_aws.aws_command import get_dss_instance_variables
 
 class MyRunnable(Runnable):
     def __init__(self, project_key, config, plugin_config):

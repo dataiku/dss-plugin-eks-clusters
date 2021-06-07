@@ -17,7 +17,8 @@ class MyRunnable(Runnable):
 
     def run(self, progress_callback):
         cluster_data, dss_cluster_settings, dss_cluster_config = get_cluster_from_dss_cluster(self.config['clusterId'])
-
+        
+        print('Inspect Cluster - 1. Start') #Debugger
         # retrieve the actual name in the cluster's data
         if cluster_data is None:
             raise Exception("No cluster data (not started?)")
@@ -40,6 +41,7 @@ class MyRunnable(Runnable):
                 args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
 
             args = args + ['-o', 'json']
+            print('Start Cluster - 2. Create Cluster') #Debugger
 
             c = EksctlCommand(args, connection_info)
             node_groups = json.loads(c.run_and_get_output())
@@ -73,6 +75,11 @@ class MyRunnable(Runnable):
             
             args = ['cloudformation', 'describe-stack-resources']
             args = args + ['--stack-name', node_group_stack_name]
+
+            print('Inspect Cluster - 3. aws describe-stack-resources') #Debugger
+            print(node_group)
+            print(node_group_stack_name)
+            print(args) #Debugger
 
             c = AwsCommand(args, connection_info)
             node_group_dict = json.loads(c.run_and_get_output())

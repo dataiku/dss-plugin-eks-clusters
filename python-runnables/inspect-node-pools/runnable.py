@@ -77,8 +77,8 @@ class MyRunnable(Runnable):
             args = args + ['--stack-name', node_group_stack_name]
 
             print('Inspect Cluster - 3. aws describe-stack-resources') #Debugger
-            print('Node Group:' + node_group)
-            print'Node Group Stack:' + (node_group_stack_name)
+            print('Node Group:' % node_group)
+            print'Node Group Stack:' % (node_group_stack_name)
             print(args) #Debugger
 
             c = AwsCommand(args, connection_info)

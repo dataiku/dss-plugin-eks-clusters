@@ -68,7 +68,11 @@ class MyRunnable(Runnable):
             if len(node_group_batch) == 0:
                 node_groups.append('<h5>%s</h5><div class="alert alert-error">Unable to get details</div>' % (node_group_id))
                 continue
-                
+            
+            print('Node Group Batch Start')
+            print(node_group_batch)
+            print('Node Group Batch End')
+
             node_group = node_group_batch[0]
 
             node_group_stack_name = node_group['StackName']
@@ -77,9 +81,18 @@ class MyRunnable(Runnable):
             args = args + ['--stack-name', node_group_stack_name]
 
             print('Inspect Cluster - 3. aws describe-stack-resources') #Debugger
-            print('Node Group:' % node_group)
-            print('Node Group Stack:' % node_group_stack_name)
+            
+            print('Node Group Start')
+            print(node_group)
+
+            print('Node Group End / Stack Start')
+            
+            print(node_group_stack_name)
+
+            print('Node Group Stack End / Args Start')
+
             print(args) #Debugger
+            print('Node Group Stack End / Args End')
 
             c = AwsCommand(args, connection_info)
             node_group_dict = json.loads(c.run_and_get_output())

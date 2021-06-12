@@ -15,11 +15,22 @@ def do(payload, config, plugin_config, inputs):
 
     Inst_Type = instances_df['Instance_Type'].tolist()
     Inst_Desc = instances_df['Inst_Description'].tolist()
+    
+    Inst_Type = 'r5b.large'
+    Inst_Desc = 'r5b.large/vCPUs:2/Mem:16.0/Ghz:3.1/Spot: $0.020900/GPU:0.0'
 
-    choices = dict(zip(instances_df['Instance_Type'], instances_df['Inst_Description']))
-
-    #choices = []
-
-    #choices += [{"label": Inst_Type, "value": Inst_Desc}]
+    choices=[]
+    
+    choices.append({"value: {}, label: {}".format(Inst_Type, Inst_Desc)})
+    
+    Inst_Type = 'r5a.large'
+    Inst_Desc = 'r5a.large/vCPUs:2/Mem:16.0/Ghz:3.1/Spot: $0.020900/GPU:0.0'   
+    
+    choices.append({"value: {}, label: {}".format(Inst_Type, Inst_Desc)})
+    
+    #choices = dict(zip(instances_df['Instance_Type'],instances_df['Inst_Description']))
+    #choices += dict(zip([{"label": Inst_Type, "value": Inst_Desc}])
+    
+    choices
 
     return {"choices": choices}

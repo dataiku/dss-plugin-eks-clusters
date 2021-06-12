@@ -13,9 +13,9 @@
    "params": [
        {
            "name": "machineType",
-           "label": "Machine type",
-           "description": "EC2 instance type for the nodes. See EC2 documentation for available instance types",
-           "type": "SELECT",
+           "label": "Machine types",
+           "description": "EC2 instance types for the nodes. See EC2 documentation for available instance types",
+           "type": "MULTISELECT",
            "getChoicesFromPython": true,
            "mandatory" : false
        },

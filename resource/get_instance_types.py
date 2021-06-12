@@ -15,9 +15,11 @@ def do(payload, config, plugin_config, inputs):
 
     Inst_Type = instances_df['Instance_Type'].tolist()
     Inst_Desc = instances_df['Inst_Description'].tolist()
-      
-    choices = []
 
-    choices += [{"label": Inst_Type, "value": Inst_Desc}]
+    choices = dict(zip(instances_df['Instance_Type'], instances_df['Inst_Description']))
+
+    #choices = []
+
+    #choices += [{"label": Inst_Type, "value": Inst_Desc}]
 
     return {"choices": choices}

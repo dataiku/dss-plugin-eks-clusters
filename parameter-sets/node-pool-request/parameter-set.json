@@ -31,7 +31,7 @@
             "label": "Enable nodes autoscaling",
             "type": "BOOLEAN",
             "mandatory" : true,
-            "defaultValue" : false
+            "defaultValue" : true
         },
         {
             "name": "minNumNodes",
@@ -57,9 +57,10 @@
         {
             "name": "diskType",
             "label": "Disk type",
-            "description": "EBS disk type for the nodes. Leave empty for default (gp2)",
+            "description": "EBS disk type for the nodes. Leave empty for default (gp3)",
             "type": "STRING",
-            "mandatory" : false
+            "mandatory" : false,
+            "defaultValue" : "gp3"
         },
         {
             "name": "diskSizeGb",

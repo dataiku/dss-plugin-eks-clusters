@@ -13,12 +13,11 @@ def do(payload, config, plugin_config, inputs):
         'Spot: $' + instances_df['Current_Spot_Price'].astype(str) + '/' + 
         'GPU:' + instances_df['GPU_Ind'].astype(str) )
 
+    Inst_Type = instances_df['Instance_Type'].tolist()
+    Inst_Desc = instances_df['Inst_Description'].tolist()
+      
     choices = []
 
-    choices += [{"label": instances_df['Instance_Type'], "value": instances_df['Inst_Description']}]
-
-    #results
-
-    #choices = [build_choice_list(x, y) for x,y in zip(instances_df['Instance_Type'], instances_df['Inst_Description'])]
+    choices += [{"label": Inst_Type, "value": Inst_Desc}]
 
     return {"choices": choices}

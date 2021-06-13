@@ -1,5 +1,5 @@
 def do(payload, config, plugin_config, inputs):
-    from dku_aws.boto3_command import get_instances_and_spot, build_choice_list
+    from dku_aws.boto3_command import get_instances_and_spot, build_choices_list_from_pandas
 
     instances_df = get_instances_and_spot()
     instances_df = instances_df[['Instance_Type','vCPUs','Memory','GPU_Ind','Processor_Speed','Current_Spot_Price','Instance_Recommended']]
@@ -13,24 +13,8 @@ def do(payload, config, plugin_config, inputs):
         'Spot: $' + instances_df['Current_Spot_Price'].astype(str) + '/' + 
         'GPU:' + instances_df['GPU_Ind'].astype(str) )
 
-    Inst_Type = instances_df['Instance_Type'].tolist()
-    Inst_Desc = instances_df['Inst_Description'].tolist()
-    
-    Inst_Type = 'r5b.large'
-    Inst_Desc = 'r5b.large/vCPUs:2/Mem:16.0/Ghz:3.1/Spot: $0.020900/GPU:0.0'
+    choice_df = instances_df[['Instance_Type','Inst_Description']]
 
-    choices=[]
-    
-    choices.append({"value: {}, label: {}".format(Inst_Type, Inst_Desc)})
-    
-    Inst_Type = 'r5a.large'
-    Inst_Desc = 'r5a.large/vCPUs:2/Mem:16.0/Ghz:3.1/Spot: $0.020900/GPU:0.0'   
-    
-    choices.append({"value: {}, label: {}".format(Inst_Type, Inst_Desc)})
-    
-    #choices = dict(zip(instances_df['Instance_Type'],instances_df['Inst_Description']))
-    #choices += dict(zip([{"label": Inst_Type, "value": Inst_Desc}])
-    
-    choices
+    choice_output = build_choices_list_from_pandas(choice_df)
 
-    return {"choices": choices}
+    return choice_output

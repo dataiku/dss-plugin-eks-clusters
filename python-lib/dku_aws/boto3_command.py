@@ -142,18 +142,4 @@ def get_instances_and_spot():
 
     return total_spot_df
 
-def build_choices_list_from_pandas(df):    
-    df.columns.values[0] = "value"
-    df.columns.values[1] = "label"
-    
-    lst = list()
-    
-    for i, row in df.iterrows():
-        val = f"{row['value']}"
-        label = f"{row['label']}"
-        lst.append(( { "value" : val, "label" : desc}))
-
-    choices=lst      
-    
-    return {"choices": choices}
 

@@ -1,6 +1,7 @@
 def do(payload, config, plugin_config, inputs):
-    from dku_aws.boto3_command import get_instances_and_spot, build_choices_list_from_pandas
+    from dku_aws.boto3_command import get_instances_and_spot
 
+    
     instances_df = get_instances_and_spot()
     instances_df = instances_df[['Instance_Type','vCPUs','Memory','GPU_Ind','Processor_Speed','Current_Spot_Price','Instance_Recommended']]
     instances_df = instances_df.sort_values(by=['Instance_Recommended', 'GPU_Ind', 'vCPUs', 'Memory', 'Processor_Speed', 'Current_Spot_Price'], ascending=[False, True, True, False, False, True])
@@ -23,6 +24,6 @@ def do(payload, config, plugin_config, inputs):
     for i, row in df.iterrows():
         val = f"{row['value']}"
         label = f"{row['label']}"
-        choices.append(( { "value" : val, "label" : desc}))
+        choices.append(( { "value" : val, "label" : label}))
 
     return {"choices": choices}

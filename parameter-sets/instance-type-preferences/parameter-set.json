@@ -13,7 +13,7 @@
         {
             "name": "instanceFamily",
             "label": "Instance Families",
-            "description": "If empty, uses AWS credentials from the environment (IAM role, ~/.aws/credentials or AWS_ACCESS_KEY_ID environment variable)",
+            "description": "Choose the AWS Instance Families to be returned when building node pools.",
             "type": "MULTISELECT",
             "selectChoices": [
                 {"value": "m", "label": "M Family - General Purpose*"},
@@ -34,8 +34,8 @@
         },
         {
             "name": "instanceVCPUsMin",
-            "label": "Min Cores",
-            "description": "Minimum Number of Cores an Instance Type can have (will be set to 2 if not selected).",
+            "label": "Min vCPUs",
+            "description": "Minimum Number of vCPUs an Instance Type can have (will be set to 2 if not selected).",
             "type": "INT",
             "minI": 2,
             "maxI": 96,
@@ -45,7 +45,7 @@
         {
             "name": "instanceVCPUsMax",
             "label": "Max vCPUs",
-            "description": "Maximum Number of Cores an Instance Type.",
+            "description": "Maximum Number of vCPUs an Instance Type.",
             "type": "INT",
             "minI": 2,
             "maxI": 96,

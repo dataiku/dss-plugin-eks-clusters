@@ -29,6 +29,7 @@
                 {"value": "h", "label": "H Family - Storage Optimized"},
                 {"value": "i", "label": "I Family - Storage Optimized"}
               ],
+            "defaultValue": ["m","r","c"],
             "mandatory": false
         },
         {

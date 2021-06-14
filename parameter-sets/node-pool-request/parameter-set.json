@@ -11,6 +11,10 @@
     "paramsPythonSetup": "get_instance_types.py",
     "params": [
         {
+            "type":"SEPARATOR",
+            "label" :"EC2 Instance Types"
+        },
+        {
             "name": "singleMultiMachinePool",
             "label": "Use a Single or Multi-Instance Types for the Node Pool?",
             "type": "SELECT",
@@ -39,6 +43,10 @@
             "getChoicesFromPython": true,
             "visibilityCondition" : "model.singleMultiMachinePool == 'single'",
             "mandatory" : false
+        },
+        {
+            "type":"SEPARATOR",
+            "label" :"Node Group Configuration"
         },
         {
             "name": "numNodes",
@@ -73,7 +81,7 @@
 
         {
             "type":"SEPARATOR",
-            "label" :"Advanced options"
+            "label" :"Storage Options"
         },
         {
             "name": "diskType",
@@ -89,6 +97,11 @@
             "description": "Disk size for the nodes. Leave 0 for default (20 GB)",
             "type": "INT",
             "mandatory" : false
+        },
+
+        {
+            "type":"SEPARATOR",
+            "label" :"GPU Options"
         },
         {
             "name": "enableGPU",

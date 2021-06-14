@@ -11,9 +11,13 @@
     "paramsPythonSetup": "get_instance_types.py",
     "params": [
         {
-            "name": "multiMachinePool",
-            "label": "Select a Single or Multi-Instance Types",
-            "type": "BOOLEAN",
+            "name": "singleMultiMachinePool",
+            "label": "Use a Single or Multi-Instance Types for the Node Pool?",
+            "type": "SELECT",
+            "selectChoices": [
+                {"value": "multi", "label": "Multiple Instance Types"},
+                {"value": "single", "label": "Single Instance Type"}
+              ],
             "mandatory" : true,
             "defaultValue" : true
         },
@@ -23,16 +27,17 @@
             "description": "Collection of Instance Types available to the Node Pool. See EC2 documentation for available instance types",
             "type": "MULTISELECT",
             "getChoicesFromPython": true,
-            "visibilityCondition" : "model.multiMachinePool",
+            "visibilityCondition" : "model.singleMultiMachinePool == 'multi'",
             "mandatory" : false
         },
         {
             "name": "machineType",
             "label": "Single Machine type",
+
             "description": "EC2 instance type for the nodes. See EC2 documentation for available instance types",
             "type": "SELECT",
             "getChoicesFromPython": true,
-            "visibilityCondition" : "not model.multiMachinePool",
+            "visibilityCondition" : "model.multiMachinePool == 'single'",
             "mandatory" : false
         },
         {

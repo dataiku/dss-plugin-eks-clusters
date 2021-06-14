@@ -19,7 +19,7 @@
                 {"value": "single", "label": "Single Instance Type"}
               ],
             "mandatory" : true,
-            "defaultValue" : true
+            "defaultValue" : "multi"
         },
         {
             "name": "multiMachineType",
@@ -37,7 +37,7 @@
             "description": "EC2 instance type for the nodes. See EC2 documentation for available instance types",
             "type": "SELECT",
             "getChoicesFromPython": true,
-            "visibilityCondition" : "model.multiMachinePool == 'single'",
+            "visibilityCondition" : "model.singleMultiMachinePool == 'single'",
             "mandatory" : false
         },
         {

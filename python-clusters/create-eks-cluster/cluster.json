@@ -7,6 +7,7 @@
     },
     
     "architecture" : "KUBERNETES",
+    "paramsPythonSetup": "get_instance_types.py",
     
     "params": [
         {

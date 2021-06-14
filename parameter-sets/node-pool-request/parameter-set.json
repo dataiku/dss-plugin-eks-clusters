@@ -12,11 +12,27 @@
 
     "params": [
         {
+            "name": "singleMultiMachineBoolean",
+            "label": "Select a Single or Multi-Instance Types",
+            "type": "BOOLEAN",
+            "mandatory" : true,
+            "defaultValue" : true
+        },
+        {
+            "name": "multiMachineType",
+            "label": "EC2 Instance Types",
+            "description": "Collection of Instance Types available to the Node Pool. See EC2 documentation for available instance types",
+            "type": "MULTISELECT",
+            "getChoicesFromPython": true,
+            "visibilityCondition" : "model.singleMultiMachineBoolean",
+            "mandatory" : false
+        },
+        {
             "name": "machineType",
-            "label": "Machine type",
+            "label": "Single Machine type",
             "description": "EC2 instance type for the nodes. See EC2 documentation for available instance types",
-            "type": "STRING",
-            "defaultValue": "m5.2xlarge",
+            "type": "SELECT",
+            "getChoicesFromPython": true,
             "mandatory" : false
         },
         {

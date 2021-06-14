@@ -100,15 +100,18 @@
         {
             "name": "diskSizeGb",
             "label": "Disk size",
-            "description": "Disk size for the nodes. Leave 0 for default (20 GB)",
+            "description": "Disk size for the nodes in GB. Leave 0 for default (20 GB)",
             "type": "INT",
+            "minI": 5,
+            "maxI": 10000,
+            "defaultValue": "20",
             "mandatory" : false
         },
 
         {
             "type":"SEPARATOR",
             "label" :"GPU Options",
-            "description": "Disk size for the nodes. Leave 0 for default (20 GB)"
+            "description": "If you select GPU Instance Type ensure you make a selection below."
         },
         {
             "name": "enableGPU",

@@ -21,6 +21,8 @@ def do(payload, config, plugin_config, inputs):
     
     choices = list()
     
+    choices.append(( { "value" : "t4g.nano", "label" : "t4g.nano - For Keeping a Cluster Alive Only"}))
+
     for i, row in df.iterrows():
         val = f"{row['value']}"
         label = f"{row['label']}"

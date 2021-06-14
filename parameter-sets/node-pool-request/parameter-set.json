@@ -104,7 +104,7 @@
             "type": "INT",
             "minI": 5,
             "maxI": 10000,
-            "defaultValue": "20",
+            "defaultValue": 20,
             "mandatory" : false
         },
 

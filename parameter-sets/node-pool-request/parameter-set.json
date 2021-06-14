@@ -28,7 +28,7 @@
         {
             "name": "multiMachineType",
             "label": "EC2 Instance Types",
-            "description": "Collection of Instance Types available to the Node Pool. See EC2 documentation for available instance types",
+            "description": "Collection of Instance Types available to the Node Pool. See EC2 documentation for available instance types https://aws.amazon.com/ec2/instance-types/",
             "type": "MULTISELECT",
             "getChoicesFromPython": true,
             "visibilityCondition" : "model.singleMultiMachinePool == 'multi'",
@@ -87,7 +87,13 @@
             "name": "diskType",
             "label": "Disk type",
             "description": "EBS disk type for the nodes. Leave empty for default (gp3)",
-            "type": "STRING",
+            "type": "SELECT",
+            "selectChoices": [
+                {"value": "gp3", "label": "gp3"},
+                {"value": "gp2", "label": "gp2"},
+                {"value": "io2", "label": "io2"},
+                {"value": "io1", "label": "io1"}
+              ],
             "mandatory" : false,
             "defaultValue" : "gp3"
         },
@@ -101,7 +107,8 @@
 
         {
             "type":"SEPARATOR",
-            "label" :"GPU Options"
+            "label" :"GPU Options",
+            "description": "Disk size for the nodes. Leave 0 for default (20 GB)"
         },
         {
             "name": "enableGPU",

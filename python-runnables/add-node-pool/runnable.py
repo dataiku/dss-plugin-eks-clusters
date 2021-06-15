@@ -87,6 +87,10 @@ class MyRunnable(Runnable):
         
         print(instance_lst)
         
+        print(args)
+        
+        
+        
         
         if 'machineType' in node_pool:
             args = args + ['--instance-types', instance_lst]
@@ -100,6 +104,12 @@ class MyRunnable(Runnable):
             args = args + ['--asg-access']
             args = args + ['--nodes-min', str(node_pool.get('minNumNodes', 2))]
             args = args + ['--nodes-max', str(node_pool.get('maxNumNodes', 5))]
+            
+        print(args)
+        
+        raise ValueError('A very specific bad thing happened')
+        
+
 
         c = EksctlCommand(args, connection_info)
         if c.run_and_log() != 0:
@@ -124,9 +134,6 @@ class MyRunnable(Runnable):
 
         args = args + ['-o', 'json']
         
-        print(args)
-        
-        raise ValueError('A very specific bad thing happened')
 
         c = EksctlCommand(args, connection_info)
         node_groups_str = c.run_and_get_output()

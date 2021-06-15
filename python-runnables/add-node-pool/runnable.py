@@ -123,6 +123,10 @@ class MyRunnable(Runnable):
             args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
 
         args = args + ['-o', 'json']
+        
+        print(args)
+        
+        raise ValueError('A very specific bad thing happened')
 
         c = EksctlCommand(args, connection_info)
         node_groups_str = c.run_and_get_output()

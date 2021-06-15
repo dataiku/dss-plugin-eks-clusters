@@ -83,10 +83,14 @@ class MyRunnable(Runnable):
             
         node_pool = self.config.get('nodePool', {})
         
-        print (node_pool['machineType'].values())
+        print (node_pool)
+        
+        print(node_pool['machineType'])
+               
+        test = ','.join(iter(node_pool['machineType'].values()))
         
         if 'machineType' in node_pool:
-            args = args + ['--instance-types', ','.join(iter(node_pool['machineType'].values())]
+            args = args + ['--instance-types', test]
         if 'diskType' in node_pool:
             args = args + ['--node-volume-type', node_pool['diskType']]
         if 'diskSizeGb' in node_pool and node_pool['diskSizeGb'] > 0:

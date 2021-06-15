@@ -82,12 +82,10 @@ class MyRunnable(Runnable):
             
             
         node_pool = self.config.get('nodePool', {})
-        
-        print (node_pool)
-        
-        print(node_pool['machineType'])
-               
+                      
         instance_lst = ','.join(node_pool['machineType'])
+        
+        print(instance_lst)
         
         
         if 'machineType' in node_pool:

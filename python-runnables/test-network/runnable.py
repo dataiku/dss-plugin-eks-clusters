@@ -16,7 +16,8 @@ class MyRunnable(Runnable):
         return None
 
     def run(self, progress_callback):
-        cluster_data, _, dss_cluster_settings, _ = get_cluster_from_dss_cluster(self.config['clusterId'])
+        
+        cluster_data, dss_cluster_settings, dss_cluster_config = get_cluster_from_dss_cluster(self.config['clusterId'])
 
         print("Test Netwokr 1")
 

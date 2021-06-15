@@ -83,14 +83,7 @@ class MyRunnable(Runnable):
             
         node_pool = self.config.get('nodePool', {})
                       
-        instance_lst = ','.join(node_pool['machineType'])
-        
-        print(instance_lst)
-        
-        print(args)
-        
-        
-        
+        instance_lst = ','.join(node_pool['machineType'])  
         
         if 'machineType' in node_pool:
             args = args + ['--instance-types', instance_lst]
@@ -103,9 +96,7 @@ class MyRunnable(Runnable):
         if node_pool.get('numNodesAutoscaling', False):
             args = args + ['--asg-access']
             args = args + ['--nodes-min', str(node_pool.get('minNumNodes', 2))]
-            args = args + ['--nodes-max', str(node_pool.get('maxNumNodes', 5))]
-            
-        print(args)        
+            args = args + ['--nodes-max', str(node_pool.get('maxNumNodes', 5))]       
 
 
         c = EksctlCommand(args, connection_info)

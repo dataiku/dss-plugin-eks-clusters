@@ -105,10 +105,7 @@ class MyRunnable(Runnable):
             args = args + ['--nodes-min', str(node_pool.get('minNumNodes', 2))]
             args = args + ['--nodes-max', str(node_pool.get('maxNumNodes', 5))]
             
-        print(args)
-        
-        raise ValueError('A very specific bad thing happened')
-        
+        print(args)        
 
 
         c = EksctlCommand(args, connection_info)

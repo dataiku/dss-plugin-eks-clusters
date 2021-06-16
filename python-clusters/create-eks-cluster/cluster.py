@@ -55,8 +55,11 @@ class MyCluster(Cluster):
             if len(security_groups) > 0:
                 args = args + ['--node-security-groups', ','.join(security_groups)]
                 
-                
             node_pool = self.config.get('nodePool', {})
+                        
+            instance_lst = ','.join(node_pool['machineType'])  
+                
+            node_pool = self.config.get(instance_lst, {})
             if 'machineType' in node_pool:
                 args = args + ['--node-type', node_pool['machineType']]
             if 'diskType' in node_pool:

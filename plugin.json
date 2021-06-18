@@ -12,18 +12,17 @@
         "supportLevel": "TIER2_SUPPORT"
     },
 
-    "params": [
-        {
-            "instanceFamily": [
-                {"m": "m"},
-                {"r": "r"},
-                {"c": "c"}
-                ],
-            "instanceVCPUsMin": 2,
-            "instanceVCPUsMax": 96,
-            "memoryMin": 4,
-            "memoryMax": 2000
+    "params": {
+        "instanceFamily": [
+            {"m": "m"},
+            {"r": "r"},
+            {"c": "c"}
+            ],
+        "instanceVCPUsMin": 2,
+        "instanceVCPUsMax": 96,
+        "memoryMin": 4,
+        "memoryMax": 2000
 
         }
-    ]
+    
 }

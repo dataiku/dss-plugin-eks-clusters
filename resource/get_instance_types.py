@@ -12,7 +12,7 @@ def do(payload, config, plugin_config, inputs):
 
     instances_df = instances_df[(instances_df.vCPUs >= instanceVCPUsMin) & 
                                 (instances_df.vCPUs <= instanceVCPUsMax) &
-                                (instances_df.Memory <= memoryMin) &
+                                (instances_df.Memory >= memoryMin) &
                                 (instances_df.Memory <= memoryMax)
                                
                                ]

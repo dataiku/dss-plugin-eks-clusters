@@ -94,7 +94,7 @@
         {
             "name": "alwaysSpot",
             "label": "Always Run Node groups as Spot",
-            "description": "Making this selection will create all nodegroups as Spot instances. While these have significant cost savings ~80% to 90%, your job can be stopped if nodes are needed elsewhere in AWS. If you intend to run jobs that cannot be interrupted, do not select this option. Instead select the Run As Spot option when building individual node groups to run Spot and On-Demand instances within the same cluster.",
+            "description": "Making this selection will create all nodegroups as Spot instances. While these have significant cost savings ~80% to 90%, your job can be stopped if nodes are needed elsewhere in AWS. If you intend to run jobs that cannot be interrupted, do not select this option. As an alternative, select the Run As Spot option when building individual node groups to run Spot and On-Demand instances within the same cluster.",
             "type": "BOOLEAN",
             "defaultValue": false,
             "mandatory": false

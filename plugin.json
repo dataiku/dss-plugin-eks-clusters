@@ -18,7 +18,8 @@
         {
             "name": "defParams",
             "label": "DSS Cluster-wide Instance Types Available for Use",
-            "description": "Use these parameters to restrict what Instance Types are available when building node groups. \n These configurations only restrict the selection of specific nodes in the lists.",
+            "description": "Use these parameters to restrict what Instance Types are available when building node groups. \
+            This configuration only restricts the selection of specific nodes in the lists.",
             "type": "SEPARATOR",
             "mandatory": false
         },

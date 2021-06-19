@@ -1,13 +1,10 @@
 def do(payload, config, plugin_config, inputs):
-    from dku_aws.boto3_command import get_instances_and_spot
-
-
-    self.plugin_config = plugin_config
-
-    instanceVCPUsMin = self.config.plugin_config('instanceVCPUsMin', {})
-    instanceVCPUsMax = self.config.plugin_config('instanceVCPUsMax', {})
-    memoryMin = self.config.plugin_config('memoryMin', {})
-    memoryMax = self.config.plugin_config('memoryMax', {})
+    from dku_aws.boto3_command import get_instances_and_spot 
+    
+    instanceVCPUsMin = plugin_config.get("instanceVCPUsMin")
+    instanceVCPUsMax = plugin_config.get("instanceVCPUsMax")
+    memoryMin = plugin_config.get("memoryMin")
+    memoryMax = plugin_config.get("memoryMax")
 
     instances_df = get_instances_and_spot()
     instances_df = instances_df[['Instance_Type','vCPUs','Memory','GPU_Ind','Processor_Speed','Current_Spot_Price','Instance_Recommended']]

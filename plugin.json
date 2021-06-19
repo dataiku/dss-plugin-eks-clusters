@@ -18,14 +18,14 @@
         {
             "name": "defParams",
             "label": "DSS Cluster-wide Instance Types Available for Use",
-            "description": "Use these parameters to restrict what Instance Types are available when building node groups.",
+            "description": "Use these parameters to restrict what Instance Types are available when building node groups. \n These configurations only restrict the selection of specific nodes in the lists.",
             "type": "SEPARATOR",
             "mandatory": false
         },
         {
             "name": "instanceFamily",
             "label": "Instance Families",
-            "description": "Choose the AWS Instance Families to be returned when building node pools. These configurations only restrict the selection of specific nodes in the lists.",
+            "description": "Choose the AWS Instance Families to be returned when building node pools.",
             "type": "MULTISELECT",
             "selectChoices": [
                 {"value": "m", "label": "M Family - General Purpose*"},

@@ -17,7 +17,6 @@ def do(payload, config, plugin_config, inputs):
                                 (instances_df.Memory >= memoryMin) &
                                 (instances_df.Memory <= memoryMax) & 
                                 (instances_df.Instance_Family.isin(instanceFamily))
-                               
                                ]
 
     instances_df['Inst_Description'] = (

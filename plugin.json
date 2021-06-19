@@ -25,7 +25,7 @@
         {
             "name": "instanceFamily",
             "label": "Instance Families",
-            "description": "Choose the AWS Instance Families to be returned when building node pools. \n These configurations only restrict the selection of specific nodes in the lists.",
+            "description": "Choose the AWS Instance Families to be returned when building node pools. These configurations only restrict the selection of specific nodes in the lists.",
             "type": "MULTISELECT",
             "selectChoices": [
                 {"value": "m", "label": "M Family - General Purpose*"},

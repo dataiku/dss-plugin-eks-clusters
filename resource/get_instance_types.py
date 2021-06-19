@@ -10,8 +10,7 @@ def do(payload, config, plugin_config, inputs):
     instances_df = instances_df[['Instance_Type','vCPUs','Memory','GPU_Ind','Processor_Speed','Current_Spot_Price','Instance_Recommended']]
     instances_df = instances_df.sort_values(by=['Instance_Recommended', 'GPU_Ind', 'vCPUs', 'Memory', 'Processor_Speed', 'Current_Spot_Price'], ascending=[False, True, True, False, False, True])
 
-    instances_df = instances_df[instances_df.vCPUs >= @instanceVCPUsMin
-                               ]
+    instances_df = instances_df[instances_df.vCPUs >= instanceVCPUsMin]
 
     instances_df['Inst_Description'] = (
         instances_df['Instance_Type'] + '/' + 

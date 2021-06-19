@@ -102,7 +102,7 @@
         {
             "name": "alwaysDSSZone",
             "label": "Always Run Nodegroups in the DSS Availability Zone",
-            "description": "Making this selection will create all EC2 cluster instances in the region and availability zone as DSS. This reduces network transfer costs between DSS and the cluster at the expense of reducing the pool of potential node types.",
+            "description": "Making this selection will create all EC2 instances in the cluster in the same region and availability zone as DSS. This reduces network transfer costs between DSS and the cluster at the expense of reducing the pool of potential node types.",
             "type": "BOOLEAN",
             "defaultValue": false,
             "mandatory": false

@@ -1,5 +1,14 @@
 from six import text_type
+from io import StringIO, BytesIO
 from collections import Mapping, Iterable
+
+def _convert_to_string(data):
+    for i in range(0,len(data)):
+        try:
+            data[i] = data[i].decode()
+        except (UnicodeDecodeError, AttributeError):
+            pass
+    return data
 
 def _get_in_object_or_array(o, chunk, d):
     if isinstance(chunk, int):

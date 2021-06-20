@@ -1,5 +1,5 @@
 import sys, os, subprocess, logging, json, requests, shutil
-from dku_utils.access import _has_not_blank_property
+from dku_utils.access import _has_not_blank_property, _convert_to_string
 
 class AwsCommand(object):
     def __init__(self, args, connection_info):
@@ -9,11 +9,13 @@ class AwsCommand(object):
             self.env['AWS_ACCESS_KEY_ID'] = connection_info['accessKey']
         if _has_not_blank_property(connection_info, 'secretKey'):
             self.env['AWS_SECRET_ACCESS_KEY'] = connection_info['secretKey']
+        if _has_not_blank_property(connection_info, 'sessionToken'):
+            self.env['AWS_SESSION_TOKEN'] = connection_info['sessionToken']
         if _has_not_blank_property(connection_info, 'region'):
             self.env['AWS_DEFAULT_REGION'] = connection_info['region']
         
     def run_and_get_output(self):
-        cmd = ["aws"] + self.args
+        cmd = _convert_to_string(["aws"] + self.args)
         logging.info('Running %s' % (' '.join(cmd)))
         p = subprocess.Popen(cmd,
                              shell=False,
@@ -24,7 +26,7 @@ class AwsCommand(object):
         return o
     
     def run_and_log(self):
-        cmd = ["aws"] + self.args
+        cmd = _convert_to_string(["aws"] + self.args)
         logging.info('Running %s' % (' '.join(cmd)))
         p = subprocess.Popen(cmd,
                              shell=False,

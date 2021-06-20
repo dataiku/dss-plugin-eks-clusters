@@ -17,9 +17,14 @@ class MyRunnable(Runnable):
 
     def run(self, progress_callback):
         
-        cluster_data, dss_cluster_settings, dss_cluster_config = get_cluster_from_dss_cluster(self.config['clusterId'])
+        try:
+            unicode('')
+        except NameError:
+            unicode = str
 
-        print("Test Netwokr 1")
+        print(get_cluster_from_dss_cluster(self.config['clusterId']))
+        cluster_data, dss_cluster_settings, _ = get_cluster_from_dss_cluster(self.config['clusterId'])
+        print("Getting Cluster Data")
 
         # the cluster is accessible via the kubeconfig
         kube_config_path = dss_cluster_settings.get_raw()['containerSettings']['executionConfigsGenericOverrides']['kubeConfigPath']

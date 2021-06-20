@@ -57,7 +57,7 @@
         {
             "name": "privateNetworking",
             "label": "Private Nodes",
-            "description": "Use this option when using the advanced YAML configuration for the EKS cluster and prviate networking",
+            "description": "Use this option when using the advanced YAML configuration for the EKS cluster and private networking",
             "type": "BOOLEAN"
         }
     ]

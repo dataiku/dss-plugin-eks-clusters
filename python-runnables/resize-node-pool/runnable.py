@@ -69,7 +69,7 @@ class MyRunnable(Runnable):
             
         desired_count = self.config['numNodes']
         logging.info("Resize to %s" % desired_count)
-        if desired_count == 0:
+        if self.config['deleteNodeGroup']:
             args = ['delete', 'nodegroup']
             args = args + ['-v', '4']
             args = args + ['--cluster', cluster_id]

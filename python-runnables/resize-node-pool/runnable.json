@@ -27,12 +27,19 @@
             "description": "Cluster (in DSS)",
             "mandatory": true
         },
+	{
+            "name": "deleteNodeGroup",
+            "label": "Delete Node Group",
+            "type": "BOOLEAN",
+            "defaultValue": false
+        },
         {
             "name": "numNodes",
             "label": "Number of nodes",
-            "description": "Set to 0 to delete the node group",
+            "description": "Select desired number of nodes for current state",
             "type": "INT",
-            "mandatory": true
+            "mandatory": true,
+            "visibilityCondition": "model.deleteNodeGroup == false"
         },
         {
             "name": "minNumNodes",
@@ -40,7 +47,8 @@
             "type": "INT",
             "description": "-1 for optional",
             "mandatory" : true,
-            "defaultValue": -1
+            "defaultValue": -1,
+            "visibilityCondition": "model.deleteNodeGroup == false"
         },
         {
             "name": "maxNumNodes",
@@ -48,7 +56,8 @@
             "type": "INT",
             "description": "-1 for optional",
             "mandatory" : true,
-            "defaultValue": -1
+            "defaultValue": -1,
+            "visibilityCondition": "model.deleteNodeGroup == false"
         },
         {
             "name": "nodeGroupId",

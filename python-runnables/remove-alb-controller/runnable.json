@@ -1,0 +1,30 @@
+{
+     "meta": {
+         "label": "Remove ALB controller",
+
+         "description": "Remove the controller on the cluster that creates ingresses using ALB.",
+
+         "icon": "icon-trash"
+     },
+    
+     "longDescription": "Policies that might have been added by the create ALB controller macro are not cleaned up",
+
+     "impersonate": false,
+
+     "macroRoles": [
+         { "type":"CLUSTER", "targetParamsKey":"clusterId", "limitToSamePlugin":true }
+     ],
+
+     "params": [
+     ],
+
+     "permissions": [],
+
+     "resultType": "HTML",
+
+     "resultLabel": "Removal output",
+
+     "extension": "txt",
+
+     "mimeType": "text/plain"
+ }

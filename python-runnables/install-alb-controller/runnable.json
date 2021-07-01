@@ -1,0 +1,52 @@
+{
+     "meta": {
+         "label": "Add ALB controller",
+
+         "description": "Add a controller on the cluster to create ingresses using ALB.",
+
+         "icon": "icon-fullscreen"
+     },
+    
+     "longDescription": ":warning: the ALB ingress controller doesn't work on private clusters\n\nUsage: annotate your ingresses with:\n * kubernetes.io/ingress.class: alb\n * alb.ingress.kubernetes.io/scheme: internet-facing (otherwise the ALB is private)\n\nPrerequisites:\n * the controller needs an IAM policy to spawn ALB instances. Provided the active credentials allow it, the macro can create it according to [the AWS sample](https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.8/docs/examples/iam-policy.json) \n * the VPC subnets that the ALB instances will use need to be tagged with \n   - kubernetes.io/role/internal-elb &rightarrow; 1 \n   - kubernetes.io/role/elb &rightarrow; 1 ",
+
+     "impersonate": false,
+
+     "macroRoles": [
+         { "type":"CLUSTER", "targetParamsKey":"clusterId", "limitToSamePlugin":true }
+     ],
+
+     "params": [
+         {
+             "name": "policyName",
+             "label": "IAM policy",
+             "type": "STRING",
+             "description": "Name of a policy to use or create (default: ALBIngressControllerIAMPolicy)",
+             "mandatory": false
+         },
+         {
+             "name": "createPolicy",
+             "label": "Create if needed",
+             "type": "BOOLEAN",
+             "description": "Create the IAM policy if it doesn't exist",
+             "mandatory": false,
+             "defaultValue": false
+         },
+         {
+             "name": "tagSubnets",
+             "label": "Tag subnets",
+             "description": "Tag the subnets of this cluster's settings with kubernetes.io/role/{elb,internal-elb} (for clusters created by this plugin)",
+             "type": "BOOLEAN",
+             "defaultValue": false
+         }
+     ],
+
+     "permissions": [],
+
+     "resultType": "HTML",
+
+     "resultLabel": "Installation output",
+
+     "extension": "txt",
+
+     "mimeType": "text/plain"
+ }

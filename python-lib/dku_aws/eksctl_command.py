@@ -14,12 +14,16 @@ class EksctlCommand(object):
         if _has_not_blank_property(connection_info, 'region'):
             self.env['AWS_DEFAULT_REGION'] = connection_info['region']
         
-    def run_and_get_output(self):
+    def run(self):
         cmd = [self.eksctl_bin] + self.args
         print('Running %s' % (' '.join(cmd)))
         p = subprocess.Popen(cmd, shell=False, env=self.env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         (o, e) = p.communicate()
-        return o
+        rv = p.wait()
+        return (cmd, rv, o, e)
+    
+    def run_and_get_output(self):
+        return self.run()[2]
     
     def run_and_log(self):
         cmd = [self.eksctl_bin] + self.args

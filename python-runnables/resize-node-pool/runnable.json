@@ -35,6 +35,22 @@
             "mandatory": true
         },
         {
+            "name": "minNumNodes",
+            "label": "Min number of nodes",
+            "type": "INT",
+            "description": "-1 for optional",
+            "mandatory" : true,
+            "defaultValue": -1
+        },
+        {
+            "name": "maxNumNodes",
+            "label": "Max number of nodes",
+            "type": "INT",
+            "description": "-1 for optional",
+            "mandatory" : true,
+            "defaultValue": -1
+        },
+        {
             "name": "nodeGroupId",
             "label": "Node group",
             "description": "Id of node group to resize, if not default",

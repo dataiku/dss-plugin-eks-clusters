@@ -81,15 +81,26 @@ class MyRunnable(Runnable):
                 args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
 
             c = EksctlCommand(args, connection_info)
-            c.run_and_log()
-            logging.info("Cluster node group deleted")
-            return '<div>Deleted</div><pre class="debug">%s</pre>' % node_group_id
+            rv, out, err = c.run_and_get()
+            if rv == 0:
+                logging.info("Cluster node group deleted")
+                return '<div>Deleted</div><pre class="debug">%s</pre>' % node_group_id
+            else:
+                logging.info("Cluster node group failed to delete")
+                return '<div>Failed to delete the node group</div><pre class="debug">%s</pre>' % (err)
+                
         else:
             args = ['scale', 'nodegroup']
             args = args + ['-v', '4']
             args = args + ['--cluster', cluster_id]
             args = args + ['--name', node_group_id]
             args = args + ['--nodes', str(desired_count)]
+            desired_min_count = self.config.get('minNumNodes', -1)
+            desired_max_count = self.config.get('maxNumNodes', -1)
+            if desired_min_count > 0:
+                args = args + ['--nodes-min', str(desired_min_count)]
+            if desired_max_count > 0:
+                args = args + ['--nodes-max', str(desired_max_count)]
 
             if _has_not_blank_property(connection_info, 'region'):
                 args = args + ['--region', connection_info['region']]
@@ -97,9 +108,13 @@ class MyRunnable(Runnable):
                 args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
 
             c = EksctlCommand(args, connection_info)
-            c.run_and_log()
-            logging.info("Cluster node group resized")
-            return '<div>Resized</div><pre class="debug">%s</pre>' % node_group_id
+            rv, out, err = c.run_and_get()
+            if rv == 0:
+                logging.info("Cluster node group resized")
+                return '<div>Resized</div><pre class="debug">%s</pre>' % node_group_id
+            else:
+                logging.info("Cluster node group failed to resize")
+                return '<div>Failed to resize the node group</div><pre class="debug">%s</pre>' % (err)
         
         
         

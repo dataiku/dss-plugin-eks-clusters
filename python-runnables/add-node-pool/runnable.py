@@ -2,6 +2,7 @@ from dataiku.runnables import Runnable
 import dataiku
 import os, json, logging
 from dku_kube.autoscaler import add_autoscaler_if_needed
+from dku_kube.gpu_driver import add_gpu_driver_if_needed
 from dku_aws.eksctl_command import EksctlCommand
 from dku_aws.aws_command import AwsCommand
 from dku_utils.cluster import get_cluster_from_dss_cluster
@@ -48,7 +49,7 @@ class MyRunnable(Runnable):
         if dss_cluster_config['config'].get('useEcr', False):
             args = args + ['--full-ecr-access']
             
-        if dss_cluster_config.get('privateNetworking', False):
+        if dss_cluster_config.get('privateNetworking', False) or self.config.get('privateNetworking', None):
             args = args + ['--node-private-networking']
             
         security_groups = dss_cluster_config['config'].get('securityGroups', [])
@@ -77,6 +78,10 @@ class MyRunnable(Runnable):
         if node_pool.get('numNodesAutoscaling', False):
             logging.info("Nodegroup is autoscaling, ensuring autoscaler")
             add_autoscaler_if_needed(cluster_id, kube_config_path)
+            
+        if node_pool.get('enableGPU', False):
+            logging.info("Nodegroup is GPU-enabled, ensuring NVIDIA GPU Drivers")
+            add_gpu_driver_if_needed(self.config['clusterId'], kube_config_path, connection_info)
 
         args = ['get', 'nodegroup']
         #args = args + ['-v', '4']

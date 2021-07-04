@@ -74,6 +74,9 @@ class MyCluster(Cluster):
             print(node_pool)
                         
             instance_lst = ','.join(node_pool['machineType'])  
+
+            print("Instance List")
+            print(instance_lst)
                 
             node_pool = self.config.get(instance_lst, {})
             if 'machineType' in node_pool:

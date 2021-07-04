@@ -75,12 +75,8 @@ class MyCluster(Cluster):
                         
             instance_lst = ','.join(node_pool['machineType'])  
 
-            print("Instance List")
-            print(instance_lst)
-                
-            node_pool = self.config.get(instance_lst, {})
             if 'machineType' in node_pool:
-                args = args + ['--node-type', node_pool['machineType']]
+                args = args + ['--node-type', instance_lst]
             if 'diskType' in node_pool:
                 args = args + ['--node-volume-type', node_pool['diskType']]
             if 'diskSizeGb' in node_pool and node_pool['diskSizeGb'] > 0:

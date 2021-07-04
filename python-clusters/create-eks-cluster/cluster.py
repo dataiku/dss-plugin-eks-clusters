@@ -110,7 +110,7 @@ class MyCluster(Cluster):
 
         print(args)
 
-        sys.exit()
+        #sys.exit()
 
         c = EksctlCommand(args, connection_info)
         if c.run_and_log() != 0:

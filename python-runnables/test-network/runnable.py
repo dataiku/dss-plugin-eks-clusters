@@ -3,6 +3,7 @@ import os, sys, json, yaml, random, subprocess, socket, re, traceback, ipaddress
 from dku_kube.busybox_pod import BusyboxPod
 from dku_kube.kubectl_command import KubeCommandException
 from dku_utils.cluster import get_cluster_from_dss_cluster
+from six import text_type
 
 class MyRunnable(Runnable):
 
@@ -15,7 +16,15 @@ class MyRunnable(Runnable):
         return None
 
     def run(self, progress_callback):
+        
+        try:
+            unicode('')
+        except NameError:
+            unicode = str
+
+        print(get_cluster_from_dss_cluster(self.config['clusterId']))
         cluster_data, dss_cluster_settings, _ = get_cluster_from_dss_cluster(self.config['clusterId'])
+        print("Getting Cluster Data")
 
         # the cluster is accessible via the kubeconfig
         kube_config_path = dss_cluster_settings.get_raw()['containerSettings']['executionConfigsGenericOverrides']['kubeConfigPath']
@@ -27,6 +36,8 @@ class MyRunnable(Runnable):
         if cluster_def is None:
             raise Exception("No cluster definition (starting failed?)")
         
+        print("Test Netwokr 2")
+
         result = ''
         
         host = os.environ.get('DKU_BACKEND_EXT_HOST', socket.gethostname())
@@ -36,13 +47,15 @@ class MyRunnable(Runnable):
         def add_to_result(result, op, cmd, out, err):
              return result + '<h5>%s</h5><div style="margin-left: 20px;"><div>Command</div><pre class="debug">%s</pre><div>Output</div><pre class="debug">%s</pre><div>Error</div><pre class="debug">%s</pre></div>' % (op, json.dumps(cmd), out, err)
 
+        print("Test Netwokr 3")
+
         try:
             # sanity check
             if host.startswith("127.0.0") or 'localhost' in host:
                 raise Exception('Host appears to not be a public hostname. Set DKU_BACKEND_EXT_HOST')
             with BusyboxPod(kube_config_path) as b:
                 try:
-                    ip = str(ipaddress.ip_address(unicode(host)))
+                    ip = text_type(ipaddress.ip_address((host)))
                     result = result + '<h5>Host %s is an ip. No need to resolve it, testing connection directly</h5>' % (host)
 
                 except ValueError:

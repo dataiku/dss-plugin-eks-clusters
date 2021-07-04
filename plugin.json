@@ -6,9 +6,107 @@
         "description": "Interact with Amazon Elastic Kubernetes Service clusters",
         "author": "Dataiku",
         "icon": "icon-amazon-elastic-kubernetes icon-cloud",
-        "tags": ["Cloud", "AWS"],
+        "tags": [
+            "Cloud",
+            "AWS"
+        ],
         "url": "https://www.dataiku.com/dss/plugins/info/eks-clusters.html",
         "licenseInfo": "Apache Software License",
         "supportLevel": "TIER2_SUPPORT"
-    }
+    },
+    "params": [
+        {
+            "name": "defParams",
+            "label": "DSS Cluster-wide Instance Types Available for Use",
+            "description": "Use these parameters to restrict what Instance Types are available when building node groups. This configuration only restricts the selection of specific nodes in the lists. If a node group has built already, these parameters will not stop",
+            "type": "SEPARATOR",
+            "mandatory": false
+        },
+        {
+            "name": "instanceFamily",
+            "label": "Instance Families",
+            "description": "Choose the AWS Instance Families to be returned when building node pools.",
+            "type": "MULTISELECT",
+            "selectChoices": [
+                {"value": "m", "label": "M Family - General Purpose*"},
+                {"value": "r", "label": "R Family - Memory-Optimized*"},
+                {"value": "c", "label": "C Family - Compute-Optimized*"},
+                {"value": "t", "label": "T Family - Burstable General Purpose"},
+                {"value": "p", "label": "P Family - GPU-Optimized"},
+                {"value": "g", "label": "G Family - GPU-Optimized"},
+                {"value": "inf", "label": "Inf Family - ML Inteference"},
+                {"value": "x", "label": "X Family - High Memory"},
+                {"value": "z", "label": "Z Family - High Memory - High Compute"},
+                {"value": "d", "label": "D Family - Storage Optimized"},
+                {"value": "h", "label": "H Family - Storage Optimized"},
+                {"value": "i", "label": "I Family - Storage Optimized"}
+              ],
+            "defaultValue": ["m","r","c"],
+            "mandatory": false
+        },
+        {
+            "name": "instanceVCPUsMin",
+            "label": "Min vCPUs",
+            "description": "Minimum Number of vCPUs an Instance Type can have (will be set to 2 if not selected).",
+            "type": "INT",
+            "minI": 2,
+            "maxI": 96,
+            "defaultValue": 4,
+            "mandatory": false
+        },
+        {
+            "name": "instanceVCPUsMax",
+            "label": "Max vCPUs",
+            "description": "Maximum Number of vCPUs an Instance Type.",
+            "type": "INT",
+            "minI": 2,
+            "maxI": 96,
+            "defaultValue": 16,
+            "mandatory": false
+        },
+        {
+            "name": "memoryMin",
+            "label": "Min Memory",
+            "description": "Minimum Memory (GB) of an Instance Type (will be set to 4 if not selected).",
+            "type": "INT",
+            "minI": 4,
+            "maxI": 96,
+            "defaultValue": 4,
+            "mandatory": false
+        },
+        {
+            "name": "memoryMax",
+            "label": "Max Memory",
+            "description": "Maximum Memory (GB) of an Instance Type.",
+            "type": "INT",
+            "minI": 2,
+            "maxI": 96,
+            "defaultValue": 128,
+            "mandatory": false
+        },
+        {
+            "name": "defParams2",
+            "label": "Nodegroup Creation Checks",
+            "description": "These parameters will be enforced when a node group is attached to a cluster.",
+            "type": "SEPARATOR",
+            "mandatory": false
+        },
+        {
+            "name": "alwaysSpot",
+            "label": "Always Run Node groups as Spot",
+            "description": "Making this selection will create all nodegroups as Spot instances. While these have significant cost savings ~80% to 90%, your job can be stopped if nodes are needed elsewhere in AWS. If you intend to run jobs that cannot be interrupted, do not select this option. As an alternative, select the Run As Spot option when building individual node groups to run Spot and On-Demand instances within the same cluster.",
+            "type": "BOOLEAN",
+            "defaultValue": false,
+            "mandatory": false
+        },
+        {
+            "name": "alwaysDSSZone",
+            "label": "Always Run Nodegroups in the DSS Availability Zone",
+            "description": "Making this selection will create all EC2 instances in the cluster in the same region and availability zone as DSS. This reduces network transfer costs between DSS and the cluster at the expense of reducing the pool of potential node types.",
+            "type": "BOOLEAN",
+            "defaultValue": false,
+            "mandatory": false
+        }
+    ]
+
 }

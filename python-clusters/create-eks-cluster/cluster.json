@@ -7,6 +7,7 @@
     },
     
     "architecture" : "KUBERNETES",
+    "paramsPythonSetup": "get_instance_types.py",
     
     "params": [
         {
@@ -15,6 +16,13 @@
             "type": "PRESET",
             "parameterSetId" : "connection-info",
             "mandatory" : true
+        },
+        {
+            "name": "arn",
+            "label": "IAM Role ARN to assume",
+            "description": "Assumes an IAM role to perform cluster operations instead of the default AWS credential provider chain. If empty, uses AWS credentials defined above",
+            "type": "STRING",
+            "mandatory": false
         },
         {
             "name": "s-network",

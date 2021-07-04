@@ -69,6 +69,8 @@ class MyCluster(Cluster):
                 args = args + ['--node-security-groups', ','.join(security_groups)]
                 
             node_pool = self.config.get('nodePool', {})
+
+            print(node_pool)
                         
             instance_lst = ','.join(node_pool['machineType'])  
                 

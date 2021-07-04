@@ -6,18 +6,25 @@
         "icon" : "icon-tasks"
 
     },
-    
     "defaultDefinableInline" : true,
     "defaultDefinableAtProjectLevel" : true,
-
+    "paramsPythonSetup": "get_instance_types.py",
     "params": [
         {
+            "type":"SEPARATOR",
+            "label" :"EC2 Instance Types"
+        },
+        {
             "name": "machineType",
-            "label": "Machine type",
-            "description": "EC2 instance type for the nodes. See EC2 documentation for available instance types",
-            "type": "STRING",
-            "defaultValue": "m5.2xlarge",
+            "label": "EC2 Instance Types",
+            "description": "Collection of Instance Types available to the Node Pool. See EC2 documentation for available instance types https://aws.amazon.com/ec2/instance-types/",
+            "type": "MULTISELECT",
+            "getChoicesFromPython": true,
             "mandatory" : false
+        },
+        {
+            "type":"SEPARATOR",
+            "label" :"Node Group Configuration"
         },
         {
             "name": "numNodes",
@@ -31,7 +38,7 @@
             "label": "Enable nodes autoscaling",
             "type": "BOOLEAN",
             "mandatory" : true,
-            "defaultValue" : false
+            "defaultValue" : true
         },
         {
             "name": "minNumNodes",
@@ -52,21 +59,37 @@
 
         {
             "type":"SEPARATOR",
-            "label" :"Advanced options"
+            "label" :"Storage Options"
         },
         {
             "name": "diskType",
             "label": "Disk type",
-            "description": "EBS disk type for the nodes. Leave empty for default (gp2)",
-            "type": "STRING",
-            "mandatory" : false
+            "description": "EBS disk type for the nodes. Leave empty for default (gp3)",
+            "type": "SELECT",
+            "selectChoices": [
+                {"value": "gp3", "label": "gp3"},
+                {"value": "gp2", "label": "gp2"},
+                {"value": "io2", "label": "io2"},
+                {"value": "io1", "label": "io1"}
+              ],
+            "mandatory" : false,
+            "defaultValue" : "gp3"
         },
         {
             "name": "diskSizeGb",
             "label": "Disk size",
-            "description": "Disk size for the nodes. Leave 0 for default (20 GB)",
+            "description": "Disk size for the nodes in GB. Leave 0 for default (20 GB)",
             "type": "INT",
+            "minI": 5,
+            "maxI": 10000,
+            "defaultValue": 20,
             "mandatory" : false
+        },
+
+        {
+            "type":"SEPARATOR",
+            "label" :"GPU Options",
+            "description": "If you select GPU Instance Type ensure you make a selection below."
         },
         {
             "name": "enableGPU",

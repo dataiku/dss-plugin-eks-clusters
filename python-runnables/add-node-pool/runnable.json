@@ -35,6 +35,19 @@
             "mandatory": false
         },
         {
+            "name": "nodeLabels",
+            "label": "Node Labels",
+            "description": "Add set of labels in a comma-delimited format like k1=v1,k2=v2",
+            "type": "STRING",
+            "mandatory": false
+        },
+        {
+            "name": "spotPool",
+            "label": "Run as Spot",
+            "description": "Check to run Nodegroup as a Spot Instance",
+            "type": "BOOLEAN"
+        },
+        {
             "name": "nodePool",
             "label": "Node group",
             "type": "PRESET",
@@ -44,7 +57,7 @@
         {
             "name": "privateNetworking",
             "label": "Private Nodes",
-            "description": "Use this option when using the advanced YAML configuration for the EKS cluster and prviate networking",
+            "description": "Use this option when using the advanced YAML configuration for the EKS cluster and private networking",
             "type": "BOOLEAN"
         }
     ]

@@ -70,6 +70,7 @@ class MyCluster(Cluster):
                 
             node_pool = self.config.get('nodePool', {})
 
+            print("Node Pool")
             print(node_pool)
                         
             instance_lst = ','.join(node_pool['machineType'])  

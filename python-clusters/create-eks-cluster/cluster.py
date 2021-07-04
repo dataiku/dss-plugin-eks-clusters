@@ -1,5 +1,4 @@
 import os, sys, json, subprocess, time, logging, yaml
-from icecream import ic
 
 
 from dataiku.cluster import Cluster
@@ -107,7 +106,11 @@ class MyCluster(Cluster):
 
         print('Start Cluster - 4. Start Eksctl Command') #Debugger
 
-        c = EksctlCommand(ic(args), connection_info)
+        print(args)
+
+        sys.exit()
+
+        c = EksctlCommand(args, connection_info)
         if c.run_and_log() != 0:
             raise Exception("Failed to start cluster")
         

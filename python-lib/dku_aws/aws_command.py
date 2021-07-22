@@ -14,8 +14,13 @@ class AwsCommand(object):
         
     def run(self):
         cmd = ["aws"] + self.args
-        print('Running %s' % (' '.join(cmd)))
-        p = subprocess.Popen(cmd, shell=False, env=self.env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        logging.info('Running %s' % (' '.join(cmd)))
+        p = subprocess.Popen(cmd,
+                             shell=False,
+                             env=self.env,
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE,
+                             universal_newlines=True)
         (o, e) = p.communicate()
         rv = p.wait()
         return (cmd, rv, o, e)
@@ -25,8 +30,13 @@ class AwsCommand(object):
     
     def run_and_log(self):
         cmd = ["aws"] + self.args
-        print('Running %s' % (' '.join(cmd)))
-        p = subprocess.Popen(cmd, shell=False, env=self.env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        logging.info('Running %s' % (' '.join(cmd)))
+        p = subprocess.Popen(cmd,
+                             shell=False,
+                             env=self.env,
+                             stdout=subprocess.PIPE, 
+                             stderr=subprocess.STDOUT,
+                             universal_newlines=True)
         with p.stdout as s:
             for line in iter(s.readline, b''):
                 logging.info(line)

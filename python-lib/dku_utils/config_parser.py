@@ -3,8 +3,10 @@
 SECURITY_GROUPS = 'securityGroups'
 SECURITY_GROUPS_ARG = '--node-security-groups'
 
-# retrieves the EKS Cluster SecurityGroups (network param), remove all leading and trailing
-# spaces and returns it as a eksctl command line argument
+# retrieves the EKS Cluster SecurityGroups (network param),
+# removes all leading and trailing spaces
+# removes empty groups (which contain only spaces)
+# returns it as a eksctl command line argument
 def getSecurityGroupsArg(config):
     if config is None or not isinstance(config, dict):
         raise Exception("config can not be null and has to be a dictionnary.")

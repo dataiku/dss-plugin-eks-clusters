@@ -8,7 +8,7 @@ from dku_kube.autoscaler import add_autoscaler_if_needed
 from dku_kube.gpu_driver import add_gpu_driver_if_needed
 from dku_utils.cluster import make_overrides
 from dku_utils.access import _has_not_blank_property, _is_none_or_blank
-from dku_utils.config_parser import getSecurityGroupsArg
+from dku_utils.config_parser import get_security_groups_arg
 
 class MyCluster(Cluster):
     def __init__(self, cluster_id, cluster_name, config, plugin_config, global_settings):
@@ -44,7 +44,7 @@ class MyCluster(Cluster):
             if len(subnets) > 0:
                 args = args + ['--vpc-public-subnets', ','.join(subnets)]
                 
-            args += getSecurityGroupsArg(networking_settings)
+            args += get_security_groups_arg(networking_settings)
                 
             node_pool = self.config.get('nodePool', {})
             if 'machineType' in node_pool:

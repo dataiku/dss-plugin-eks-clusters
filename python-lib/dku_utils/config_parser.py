@@ -1,8 +1,9 @@
 # Provide some utility methods to parse the saved configuration, clean it,
-# normalize it and return in a predifined format (ex: command line args)
+# normalize it and return in a predefined format (ex: command line args)
 
 SECURITY_GROUPS = 'securityGroups'
 SECURITY_GROUPS_ARG = '--node-security-groups'
+
 
 def get_security_groups_arg(config):
     """

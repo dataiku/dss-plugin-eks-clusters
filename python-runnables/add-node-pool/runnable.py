@@ -7,7 +7,6 @@ from dku_aws.eksctl_command import EksctlCommand
 from dku_aws.aws_command import AwsCommand
 from dku_utils.cluster import get_cluster_from_dss_cluster
 from dku_utils.access import _has_not_blank_property
-from dku_utils.config_parser import get_security_groups_arg
 
 class MyRunnable(Runnable):
     def __init__(self, project_key, config, plugin_config):
@@ -53,7 +52,10 @@ class MyRunnable(Runnable):
         if dss_cluster_config.get('privateNetworking', False) or self.config.get('privateNetworking', None):
             args = args + ['--node-private-networking']
             
-        args += get_security_groups_arg(dss_cluster_config['config'])
+        security_groups = dss_cluster_config['config'].get('securityGroups', [])
+        if len(security_groups) > 0:
+            args = args + ['--node-security-groups', ','.join(security_groups)]
+            
             
         node_pool = self.config.get('nodePool', {})
         if 'machineType' in node_pool:

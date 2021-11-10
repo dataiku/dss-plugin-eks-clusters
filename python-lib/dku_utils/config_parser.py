@@ -19,6 +19,6 @@ def get_security_groups_arg(config):
     if len(params) == 0:
         return []
 
-    params = list(map(str.strip, params))
+    params = list(map(lambda param: param.strip(), params))
     params = list(filter(None, params))
     return [SECURITY_GROUPS_ARG, ','.join(params)]

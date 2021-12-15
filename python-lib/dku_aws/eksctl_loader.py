@@ -2,7 +2,7 @@ import sys, os, subprocess, logging, json, requests, shutil
 
 def get_eksctl_or_fetch():
     try:
-        machine_eksctl = subprocess.check_output(["which", "eksctl"]).strip()
+        machine_eksctl = subprocess.check_output(["which", "eksctl"]).strip().decode('utf8')
         logging.info("Found eksctl on the machine")
         return machine_eksctl
     except:
@@ -12,7 +12,7 @@ def get_eksctl_or_fetch():
         if not os.path.exists(local_eksctl_folder):
             os.makedirs(local_eksctl_folder)
         if not os.path.exists(local_eksctl):
-            arch = subprocess.check_output(["uname", "-s"]).strip()
+            arch = subprocess.check_output(["uname", "-s"]).strip().decode('utf8')
             logging.info("Downloading eksctl for %s" % arch)
             r = requests.get("https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_%s_amd64.tar.gz" % arch, stream=True)
             local_eksctl_archive = os.path.join(local_eksctl_folder, 'eksctl.tar.gz')

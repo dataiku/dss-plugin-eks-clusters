@@ -1,3 +1,4 @@
+from six import text_type
 from collections import Mapping, Iterable
 from six import text_type
 from io import StringIO, BytesIO

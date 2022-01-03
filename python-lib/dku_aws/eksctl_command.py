@@ -16,9 +16,9 @@ class EksctlCommand(object):
         if _has_not_blank_property(connection_info, 'region'):
             self.env['AWS_DEFAULT_REGION'] = connection_info['region']
         
-    def run_and_get_output(self):
+    def run(self):
         cmd = _convert_to_string([self.eksctl_bin] + self.args)
-        logging.info('Running %s' % ' '.join(cmd))
+        logging.info('Running %s' % (' '.join(cmd)))
         p = subprocess.Popen(cmd,
                              shell=False,
                              env=self.env,
@@ -26,11 +26,15 @@ class EksctlCommand(object):
                              stderr=subprocess.PIPE,
                              universal_newlines=True)
         (o, e) = p.communicate()
-        return o
+        rv = p.wait()
+        return (cmd, rv, o, e)
+
+    def run_and_get_output(self):
+        return self.run()[2]
     
     def run_and_log(self):
-        cmd = _convert_to_string([self.eksctl_bin] + self.args)
-        logging.info('Running %s' % ' '.join(cmd))
+        cmd = _convert_to_string[self.eksctl_bin] + self.args)
+        logging.info('Running %s' % (' '.join(cmd)))
         p = subprocess.Popen(cmd,
                              shell=False,
                              env=self.env,
@@ -44,7 +48,7 @@ class EksctlCommand(object):
     
     def run_and_get(self):
         cmd = _convert_to_string([self.eksctl_bin] + self.args)
-        logging.info('Running %s' % ' '.join(cmd))
+        logging.info('Running %s' % (' '.join(cmd)))
         p = subprocess.Popen(cmd,
                              shell=False,
                              env=self.env,

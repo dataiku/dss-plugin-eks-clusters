@@ -8,6 +8,9 @@ For more details, please see https://doc.dataiku.com/dss/latest/containers/eks
 
 ## Release notes
 
+### v1.0.5
+Add support for Python 3
+
 ### v1.0.4
 - Add GPU Driver support
 

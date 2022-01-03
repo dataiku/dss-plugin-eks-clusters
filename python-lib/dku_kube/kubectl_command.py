@@ -1,10 +1,11 @@
 import os, sys, json, yaml, logging, subprocess, time
 
 class KubeCommandException(Exception):
-    def __init__(self, message, out, err):
+    def __init__(self, message, out, err, rv):
         super(KubeCommandException, self).__init__(message)
         self.out = out
         self.err = err
+        self.rv = rv
         
 def run_with_timeout(cmd, env=None, timeout=3, nokill=False):
     p = subprocess.Popen(cmd,
@@ -25,7 +26,7 @@ def run_with_timeout(cmd, env=None, timeout=3, nokill=False):
     out, err = p.communicate()
     rv = p.wait()
     if rv != 0:
-        raise KubeCommandException("Command failed with %s" % rv, out, err)
+        raise KubeCommandException("Command failed with %s" % rv, out, err, rv)
     return out, err
 
 

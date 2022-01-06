@@ -33,7 +33,7 @@ class EksctlCommand(object):
         return self.run()[2]
     
     def run_and_log(self):
-        cmd = _convert_to_string[self.eksctl_bin] + self.args)
+        cmd = _convert_to_string([self.eksctl_bin] + self.args)
         logging.info('Running %s' % (' '.join(cmd)))
         p = subprocess.Popen(cmd,
                              shell=False,

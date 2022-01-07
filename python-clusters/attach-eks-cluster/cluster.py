@@ -72,6 +72,7 @@ users:
             f.write(kube_config_str)
 
         # If the arn exists, then add it to the kubeconfig so it is the assumed role for future use
+        arn = self.config.get('assumeRoleARN', '')
         if arn:
             add_assumed_arn(kube_config_path, arn)
         elif _has_not_blank_property(connection_info, 'accessKey') and _has_not_blank_property(connection_info, 'secretKey'):

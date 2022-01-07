@@ -3,8 +3,7 @@ import dataiku
 import os, json, logging
 from dku_aws.eksctl_command import EksctlCommand
 from dku_aws.aws_command import AwsCommand
-from dku_aws.boto3_sts_assumerole import Boto3STSService
-from dku_utils.cluster import get_cluster_from_dss_cluster
+from dku_utils.cluster import get_cluster_from_dss_cluster, get_connection_info
 from dku_utils.access import _has_not_blank_property
 
 class MyRunnable(Runnable):
@@ -27,14 +26,7 @@ class MyRunnable(Runnable):
             raise Exception("No cluster definition (starting failed?)")
         cluster_id = cluster_def["Name"]
 
-        arn  = dss_cluster_config.get('config', {}).get('arn', None)
-        info = dss_cluster_config.get('config', {}).get('connectionInfo', {})
-        if arn:
-            connection_info = Boto3STSService(arn).credentials
-            if _has_not_blank_property(info, 'region' ):
-                connection_info['region'] = info['region']
-        else:
-            connection_info = info
+        connection_info = get_connection_info(dss_cluster_config)
         
         node_group_id = self.config.get('nodeGroupId', None)
         if node_group_id is None or len(node_group_id) == 0:

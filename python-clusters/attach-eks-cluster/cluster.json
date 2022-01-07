@@ -22,7 +22,7 @@
             "mandatory" : true
         },
         {
-            "name": "arn",
+            "name": "assumeRoleARN",
             "label": "IAM Role ARN to assume",
             "description": "Assumes an IAM role to perform cluster operations instead of the default AWS credential provider chain. If empty, uses AWS credentials defined above",
             "type": "STRING",

@@ -41,5 +41,6 @@ class AwsCommand(object):
                              universal_newlines=True)
         with p.stdout as s:
             for line in iter(s.readline, b''):
-                logging.info(line)
+                if len(line) > 0:
+                    logging.info(line)
         return p.wait()

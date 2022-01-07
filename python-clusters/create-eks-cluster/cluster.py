@@ -3,11 +3,10 @@ import os, sys, json, subprocess, time, logging, yaml
 from dataiku.cluster import Cluster
 
 from dku_aws.eksctl_command import EksctlCommand
-from dku_aws.boto3_sts_assumerole import Boto3STSService
 from dku_kube.kubeconfig import merge_or_write_config, add_authenticator_env
 from dku_kube.autoscaler import add_autoscaler_if_needed
 from dku_kube.gpu_driver import add_gpu_driver_if_needed
-from dku_utils.cluster import make_overrides
+from dku_utils.cluster import make_overrides, get_connection_info
 from dku_utils.access import _has_not_blank_property, _is_none_or_blank
 from dku_utils.config_parser import get_security_groups_arg
 
@@ -20,17 +19,7 @@ class MyCluster(Cluster):
         self.global_settings = global_settings
         
     def start(self):
-        # grab the ARN if it exists
-        arn = self.config.get('arn', '')
-        info = self.config.get('connectionInfo', {})
-        # If the arn exists use boto3 to assumeRole to it, otherwise use the regular connection info
-        if arn:
-            connection_info = Boto3STSService(arn).credentials
-            if _has_not_blank_property(info, 'region' ):
-                connection_info['region'] = info['region']
-        else:
-            connection_info = info
-            
+        connection_info = get_connection_info(self.config)
         networking_settings = self.config["networkingSettings"]
         
         args = ['create', 'cluster']

@@ -42,9 +42,8 @@ class EksctlCommand(object):
                              stderr=subprocess.STDOUT,
                              universal_newlines=True)
         with p.stdout as s:
-            for line in iter(s.readline, b''):
-                if len(line) > 0:
-                    logging.info(line)
+            for line in iter(s.readline, ''):
+                logging.info(line)
         return p.wait()
     
     def run_and_get(self):

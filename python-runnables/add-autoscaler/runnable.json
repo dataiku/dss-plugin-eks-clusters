@@ -1,7 +1,7 @@
 {
     "meta": {
         "label": "Add autoscaler",
-        "description": "Ensure the existence an autoscaler in the cluster",
+        "description": "Ensure the existence of an autoscaler in the cluster",
         "icon": "icon-plus-sign"
     },
 

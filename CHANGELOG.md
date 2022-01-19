@@ -3,6 +3,7 @@
 ## Version 1.0.6 - Bugfix release
 - Trim security group parameter string
 - Update eksctl download URL
+- Fix several Python 3 related issues
 
 ## Version 1.0.5 - Internal release
 - Add support for Python 3

@@ -5,7 +5,7 @@ from dataiku.cluster import Cluster
 from dku_aws.eksctl_command import EksctlCommand
 from dku_kube.kubeconfig import setup_creds_env
 from dku_utils.cluster import make_overrides, get_connection_info
-from dku_utils.access import _has_not_blank_property
+from dku_utils.config_parser import get_region_arg
 
 class MyCluster(Cluster):
     def __init__(self, cluster_id, cluster_name, config, plugin_config, global_settings):
@@ -26,10 +26,7 @@ class MyCluster(Cluster):
         args = ['get', 'cluster']
         args = args + ['--name', cluster_id]
 
-        if _has_not_blank_property(connection_info, 'region' ):
-            args = args + ['--region', connection_info['region']]
-        elif 'AWS_DEFAULT_REGION' in os.environ:
-            args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
+        args = args + get_region_arg(connection_info)
         args = args + ['-o', 'json']
 
         c = EksctlCommand(args, connection_info)

@@ -5,9 +5,9 @@ import requests
 from dku_aws.eksctl_command import EksctlCommand
 from dku_aws.aws_command import AwsCommand
 from dku_utils.cluster import get_cluster_from_dss_cluster, get_cluster_generic_property, set_cluster_generic_property
-from dku_utils.access import _has_not_blank_property
 from dku_kube.kubectl_command import run_with_timeout, KubeCommandException
-from dku_utils.access import _has_not_blank_property, _is_none_or_blank
+from dku_utils.access import _is_none_or_blank
+from dku_utils.config_parser import get_region_arg
 
 def make_html(command_outputs):
     divs = []
@@ -61,11 +61,7 @@ class InstallAlb(Runnable):
         args = ['utils', 'associate-iam-oidc-provider', '--approve']
         #args = args + ['-v', '4']
         args = args + ['--cluster', cluster_id]
-
-        if _has_not_blank_property(connection_info, 'region'):
-            args = args + ['--region', connection_info['region']]
-        elif 'AWS_DEFAULT_REGION' in os.environ:
-            args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
+        args = args + get_region_arg(connection_info)
 
         c = EksctlCommand(args, connection_info)
         command_outputs.append(c.run())
@@ -76,11 +72,7 @@ class InstallAlb(Runnable):
         policy_name = self.config.get('policyName', 'ALBIngressControllerIAMPolicy')
         
         args = ['iam', 'list-policies']
-
-        if _has_not_blank_property(connection_info, 'region'):
-            args = args + ['--region', connection_info['region']]
-        elif 'AWS_DEFAULT_REGION' in os.environ:
-            args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
+        args = args + get_region_arg(connection_info)
 
         c = AwsCommand(args, connection_info)
         command_outputs.append(c.run())
@@ -104,11 +96,7 @@ class InstallAlb(Runnable):
             args = ['iam', 'create-policy']
             args = args + ['--policy-name', policy_name]
             args = args + ['--policy-document', 'file://policy.json']
-            
-            if _has_not_blank_property(connection_info, 'region'):
-                args = args + ['--region', connection_info['region']]
-            elif 'AWS_DEFAULT_REGION' in os.environ:
-                args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
+            args = args + get_region_arg(connection_info)
 
             c = AwsCommand(args, connection_info)
             command_outputs.append(c.run())
@@ -138,11 +126,7 @@ class InstallAlb(Runnable):
         args = args + ['--namespace', 'kube-system'] # that's the name in the rbac-role.yaml
         args = args + ['--cluster', cluster_id]
         args = args + ['--attach-policy-arn', policy_arn]
-
-        if _has_not_blank_property(connection_info, 'region'):
-            args = args + ['--region', connection_info['region']]
-        elif 'AWS_DEFAULT_REGION' in os.environ:
-            args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
+        args = args + get_region_arg(connection_info)
 
         c = EksctlCommand(args, connection_info)
         command_outputs.append(c.run())
@@ -181,12 +165,7 @@ class InstallAlb(Runnable):
                 
             def add_tags(resources, tag, connection_info, command_outputs):
                 args = ['ec2', 'create-tags']
-
-                if _has_not_blank_property(connection_info, 'region'):
-                    args = args + ['--region', connection_info['region']]
-                elif 'AWS_DEFAULT_REGION' in os.environ:
-                    args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
-
+                args = args + get_region_arg(connection_info)
                 args = args + ["--resources"] + resources
                 args = args + ["--tags", tag]
 

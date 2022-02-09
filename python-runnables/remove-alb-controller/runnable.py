@@ -5,9 +5,9 @@ import requests
 from dku_aws.eksctl_command import EksctlCommand
 from dku_aws.aws_command import AwsCommand
 from dku_utils.cluster import get_cluster_from_dss_cluster, get_cluster_generic_property, set_cluster_generic_property
-from dku_utils.access import _has_not_blank_property
 from dku_kube.kubectl_command import run_with_timeout, KubeCommandException
-from dku_utils.access import _has_not_blank_property, _is_none_or_blank
+from dku_utils.access import _is_none_or_blank
+from dku_utils.config_parser import get_region_arg
 
 def make_html(command_outputs):
     divs = []
@@ -76,11 +76,7 @@ class RemoveAlb(Runnable):
         args = args + ['--name', 'alb-ingress-controller'] # that's the name in the rbac-role.yaml
         args = args + ['--namespace', 'kube-system'] # that's the name in the rbac-role.yaml
         args = args + ['--cluster', cluster_id]
-
-        if _has_not_blank_property(connection_info, 'region'):
-            args = args + ['--region', connection_info['region']]
-        elif 'AWS_DEFAULT_REGION' in os.environ:
-            args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
+        args = args + get_region_arg(connection_info)
 
         c = EksctlCommand(args, connection_info)
         command_outputs.append(c.run())

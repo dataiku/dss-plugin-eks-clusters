@@ -4,7 +4,7 @@ import os, json, logging
 from dku_aws.eksctl_command import EksctlCommand
 from dku_aws.aws_command import AwsCommand
 from dku_utils.cluster import get_cluster_from_dss_cluster, get_connection_info
-from dku_utils.access import _has_not_blank_property
+from dku_utils.config_parser import get_region_arg
 
 class MyRunnable(Runnable):
     def __init__(self, project_key, config, plugin_config):
@@ -33,12 +33,7 @@ class MyRunnable(Runnable):
             args = ['get', 'nodegroup']
             #args = args + ['-v', '4']
             args = args + ['--cluster', cluster_id]
-
-            if _has_not_blank_property(connection_info, 'region'):
-                args = args + ['--region', connection_info['region']]
-            elif 'AWS_DEFAULT_REGION' in os.environ:
-                args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
-
+            args = args + get_region_arg(connection_info)
             args = args + ['-o', 'json']
 
             c = EksctlCommand(args, connection_info)
@@ -52,12 +47,7 @@ class MyRunnable(Runnable):
         #args = args + ['-v', '4']
         args = args + ['--cluster', cluster_id]
         args = args + ['--name', node_group_id]
-
-        if _has_not_blank_property(connection_info, 'region'):
-            args = args + ['--region', connection_info['region']]
-        elif 'AWS_DEFAULT_REGION' in os.environ:
-            args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
-
+        args = args + get_region_arg(connection_info)
         args = args + ['-o', 'json']
 
         c = EksctlCommand(args, connection_info)
@@ -74,11 +64,7 @@ class MyRunnable(Runnable):
             args = args + ['-v', '4']
             args = args + ['--cluster', cluster_id]
             args = args + ['--name', node_group_id]
-
-            if _has_not_blank_property(connection_info, 'region'):
-                args = args + ['--region', connection_info['region']]
-            elif 'AWS_DEFAULT_REGION' in os.environ:
-                args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
+            args = args + get_region_arg(connection_info)
 
             c = EksctlCommand(args, connection_info)
             rv, out, err = c.run_and_get()
@@ -101,11 +87,7 @@ class MyRunnable(Runnable):
                 args = args + ['--nodes-min', str(desired_min_count)]
             if desired_max_count > 0:
                 args = args + ['--nodes-max', str(desired_max_count)]
-
-            if _has_not_blank_property(connection_info, 'region'):
-                args = args + ['--region', connection_info['region']]
-            elif 'AWS_DEFAULT_REGION' in os.environ:
-                args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
+            args = args + get_region_arg(connection_info)
 
             c = EksctlCommand(args, connection_info)
             rv, out, err = c.run_and_get()

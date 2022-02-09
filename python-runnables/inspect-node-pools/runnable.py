@@ -4,7 +4,7 @@ import json, logging, os
 from dku_aws.eksctl_command import EksctlCommand
 from dku_aws.aws_command import AwsCommand
 from dku_utils.cluster import get_cluster_from_dss_cluster, get_connection_info
-from dku_utils.access import _has_not_blank_property
+from dku_utils.config_parser import get_region_arg
 
 
 class MyRunnable(Runnable):
@@ -17,9 +17,6 @@ class MyRunnable(Runnable):
         return None
 
     def run(self, progress_callback):
-        
-
-            
         cluster_data, dss_cluster_settings, dss_cluster_config = get_cluster_from_dss_cluster(self.config['clusterId'])
 
         # retrieve the actual name in the cluster's data
@@ -38,12 +35,7 @@ class MyRunnable(Runnable):
             args = ['get', 'nodegroup']
             #args = args + ['-v', '4']
             args = args + ['--cluster', cluster_id]
-
-            if _has_not_blank_property(connection_info, 'region'):
-                args = args + ['--region', connection_info['region']]
-            elif 'AWS_DEFAULT_REGION' in os.environ:
-                args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
-
+            args = args + get_region_arg(connection_info)
             args = args + ['-o', 'json']
 
             c = EksctlCommand(args, connection_info)
@@ -58,12 +50,7 @@ class MyRunnable(Runnable):
             #args = args + ['-v', '4']
             args = args + ['--cluster', cluster_id]
             args = args + ['--name', node_group_id]
-
-            if _has_not_blank_property(connection_info, 'region'):
-                args = args + ['--region', connection_info['region']]
-            elif 'AWS_DEFAULT_REGION' in os.environ:
-                args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
-
+            args = args + get_region_arg(connection_info)
             args = args + ['-o', 'json']
 
             c = EksctlCommand(args, connection_info)

@@ -64,7 +64,7 @@ class InstallAlb(Runnable):
 
         if _has_not_blank_property(connection_info, 'region'):
             args = args + ['--region', connection_info['region']]
-        elif 'AWS_DEFAULT_REGION' is os.environ:
+        elif 'AWS_DEFAULT_REGION' in os.environ:
             args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
 
         c = EksctlCommand(args, connection_info)
@@ -79,7 +79,7 @@ class InstallAlb(Runnable):
 
         if _has_not_blank_property(connection_info, 'region'):
             args = args + ['--region', connection_info['region']]
-        elif 'AWS_DEFAULT_REGION' is os.environ:
+        elif 'AWS_DEFAULT_REGION' in os.environ:
             args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
 
         c = AwsCommand(args, connection_info)
@@ -107,7 +107,7 @@ class InstallAlb(Runnable):
             
             if _has_not_blank_property(connection_info, 'region'):
                 args = args + ['--region', connection_info['region']]
-            elif 'AWS_DEFAULT_REGION' is os.environ:
+            elif 'AWS_DEFAULT_REGION' in os.environ:
                 args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
 
             c = AwsCommand(args, connection_info)
@@ -141,7 +141,7 @@ class InstallAlb(Runnable):
 
         if _has_not_blank_property(connection_info, 'region'):
             args = args + ['--region', connection_info['region']]
-        elif 'AWS_DEFAULT_REGION' is os.environ:
+        elif 'AWS_DEFAULT_REGION' in os.environ:
             args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
 
         c = EksctlCommand(args, connection_info)
@@ -184,7 +184,7 @@ class InstallAlb(Runnable):
 
                 if _has_not_blank_property(connection_info, 'region'):
                     args = args + ['--region', connection_info['region']]
-                elif 'AWS_DEFAULT_REGION' is os.environ:
+                elif 'AWS_DEFAULT_REGION' in os.environ:
                     args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
 
                 args = args + ["--resources"] + resources

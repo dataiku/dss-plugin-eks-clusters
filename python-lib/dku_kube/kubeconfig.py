@@ -69,3 +69,13 @@ def add_assumed_arn(kube_config_path, arn):
         existing['users'][0]['user']['exec']['args'].extend(['-r',arn])
     with open(kube_config_path, "w") as f:
         yaml.safe_dump(existing, f)
+
+def setup_creds_env(kube_config_path, connection_info, config):
+    # If the arn exists, then add it to the kubeconfig so it is the assumed role for future use
+    arn = config.get('assumeRoleARN', '')
+    if arn:
+        logging.info("Assuming role %s" % arn)
+        add_assumed_arn(kube_config_path, arn)
+    elif _has_not_blank_property(connection_info, 'accessKey') and _has_not_blank_property(connection_info, 'secretKey'):
+        creds_in_env = {'AWS_ACCESS_KEY_ID':connection_info['accessKey'], 'AWS_SECRET_ACCESS_KEY':connection_info['secretKey']}
+        add_authenticator_env(kube_config_path, creds_in_env)

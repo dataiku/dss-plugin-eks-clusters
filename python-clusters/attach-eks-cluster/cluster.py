@@ -3,7 +3,7 @@ import os, sys, json, subprocess, time, logging, yaml
 from dataiku.cluster import Cluster
 
 from dku_aws.eksctl_command import EksctlCommand
-from dku_kube.kubeconfig import merge_or_write_config, add_authenticator_env, add_assumed_arn
+from dku_kube.kubeconfig import setup_creds_env
 from dku_utils.cluster import make_overrides, get_connection_info
 from dku_utils.access import _has_not_blank_property
 
@@ -71,13 +71,7 @@ users:
         with open(kube_config_path, 'w') as f:
             f.write(kube_config_str)
 
-        # If the arn exists, then add it to the kubeconfig so it is the assumed role for future use
-        arn = self.config.get('assumeRoleARN', '')
-        if arn:
-            add_assumed_arn(kube_config_path, arn)
-        elif _has_not_blank_property(connection_info, 'accessKey') and _has_not_blank_property(connection_info, 'secretKey'):
-            creds_in_env = {'AWS_ACCESS_KEY_ID':connection_info['accessKey'], 'AWS_SECRET_ACCESS_KEY':connection_info['secretKey']}
-            add_authenticator_env(kube_config_path, creds_in_env)
+        setup_creds_env(kube_config_path, connection_info, self.config)
 
         kube_config = yaml.safe_load(kube_config_str)
 

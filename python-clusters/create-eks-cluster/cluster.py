@@ -3,7 +3,7 @@ import os, sys, json, subprocess, time, logging, yaml
 from dataiku.cluster import Cluster
 
 from dku_aws.eksctl_command import EksctlCommand
-from dku_kube.kubeconfig import merge_or_write_config, add_authenticator_env
+from dku_kube.kubeconfig import setup_creds_env
 from dku_kube.autoscaler import add_autoscaler_if_needed
 from dku_kube.gpu_driver import add_gpu_driver_if_needed
 from dku_utils.cluster import make_overrides, get_connection_info
@@ -30,7 +30,7 @@ class MyCluster(Cluster):
             
             if _has_not_blank_property(connection_info, 'region'):
                 args = args + ['--region', connection_info['region']]
-            elif 'AWS_DEFAULT_REGION' is os.environ:
+            elif 'AWS_DEFAULT_REGION' in os.environ:
                 args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
                 
             args = args + ['--full-ecr-access']
@@ -85,13 +85,11 @@ class MyCluster(Cluster):
         
         if _has_not_blank_property(connection_info, 'region'):
             args = args + ['--region', connection_info['region']]
-        elif 'AWS_DEFAULT_REGION' is os.environ:
+        elif 'AWS_DEFAULT_REGION' in os.environ:
             args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
         args = args + ['-o', 'json']
         
-        if _has_not_blank_property(connection_info, 'accessKey') and _has_not_blank_property(connection_info, 'secretKey'):
-            creds_in_env = {'AWS_ACCESS_KEY_ID':connection_info['accessKey'], 'AWS_SECRET_ACCESS_KEY':connection_info['secretKey']}
-            add_authenticator_env(kube_config_path, creds_in_env)
+        setup_creds_env(kube_config_path, connection_info, self.config)
         
         if not self.config.get('advanced'):
             if node_pool.get('numNodesAutoscaling', False):
@@ -119,14 +117,14 @@ class MyCluster(Cluster):
         return [overrides, {'kube_config_path':kube_config_path, 'cluster':cluster_info}]
 
     def stop(self, data):
-        connection_info = self.config.get('connectionInfo', {})
+        connection_info = get_connection_info(self.config)
 
         args = ['delete', 'cluster']
         args = args + ['-v', '4']
         args = args + ['--name', self.cluster_id]
         if _has_not_blank_property(connection_info, 'region'):
             args = args + ['--region', connection_info['region']]
-        elif 'AWS_DEFAULT_REGION' is os.environ:
+        elif 'AWS_DEFAULT_REGION' in os.environ:
             args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
         c = EksctlCommand(args, connection_info)
 

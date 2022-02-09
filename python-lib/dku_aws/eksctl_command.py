@@ -43,7 +43,7 @@ class EksctlCommand(object):
                              universal_newlines=True)
         with p.stdout as s:
             for line in iter(s.readline, ''):
-                logging.info(line)
+                logging.info(line.rstrip())
         return p.wait()
     
     def run_and_get(self):

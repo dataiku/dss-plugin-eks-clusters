@@ -44,7 +44,7 @@ class MyRunnable(Runnable):
         
         if _has_not_blank_property(connection_info, 'region'):
             args = args + ['--region', connection_info['region']]
-        elif 'AWS_DEFAULT_REGION' is os.environ:
+        elif 'AWS_DEFAULT_REGION' in os.environ:
             args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
             
         if dss_cluster_config['config'].get('useEcr', False):
@@ -87,7 +87,7 @@ class MyRunnable(Runnable):
 
         if _has_not_blank_property(connection_info, 'region'):
             args = args + ['--region', connection_info['region']]
-        elif 'AWS_DEFAULT_REGION' is os.environ:
+        elif 'AWS_DEFAULT_REGION' in os.environ:
             args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
 
         args = args + ['-o', 'json']

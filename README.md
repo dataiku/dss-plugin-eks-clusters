@@ -9,8 +9,8 @@ For more details, please see https://doc.dataiku.com/dss/latest/containers/eks
 ## Release notes
 
 ### v1.0.6
-- IAM role to assume capability on all cluster operation added
-- fixed use of `AWS_DEFAULT_REGION` environment variable
+- Add capability to assume IAM role on all cluster operation
+- Fix use of `AWS_DEFAULT_REGION` environment variable
 
 ### v1.0.5
 - Add support for Python 3

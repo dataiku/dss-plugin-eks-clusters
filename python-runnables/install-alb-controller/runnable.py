@@ -4,7 +4,7 @@ import json, logging, os, re, tempfile, time
 import requests 
 from dku_aws.eksctl_command import EksctlCommand
 from dku_aws.aws_command import AwsCommand
-from dku_utils.cluster import get_cluster_from_dss_cluster, get_cluster_generic_property, set_cluster_generic_property
+from dku_utils.cluster import get_cluster_from_dss_cluster, get_cluster_generic_property, set_cluster_generic_property, get_connection_info
 from dku_kube.kubectl_command import run_with_timeout, KubeCommandException
 from dku_utils.access import _is_none_or_blank
 from dku_utils.config_parser import get_region_arg
@@ -49,7 +49,7 @@ class InstallAlb(Runnable):
             raise Exception("No cluster definition (starting failed?)")
         cluster_id = cluster_def["Name"]
         kube_config_path = dss_cluster_settings.get_raw()['containerSettings']['executionConfigsGenericOverrides']['kubeConfigPath']
-        connection_info = dss_cluster_config.get('config', {}).get('connectionInfo', {})
+        connection_info = get_connection_info(dss_cluster_config)
         
         env = os.environ.copy()
         env['KUBECONFIG'] = kube_config_path

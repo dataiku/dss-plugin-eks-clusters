@@ -3,6 +3,7 @@
 ## Version 1.0.7 - Bugfix release
 - Add capability to assume IAM role on all cluster operation
 - Fix use of `AWS_DEFAULT_REGION` environment variable
+
 ## Version 1.0.6 - Bugfix release
 - Trim security group parameter string
 - Update eksctl download URL

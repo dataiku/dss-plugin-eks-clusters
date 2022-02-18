@@ -14,7 +14,7 @@
             "name": "subnets",
             "label": "VPC subnets",
             "type": "STRINGS",
-            "description": "Put at least 2 subnets. Check https://github.com/weaveworks/eksctl#use-existing-vpc-any-custom-configuration for constraints.",
+            "description": "Put at least 2 subnets. Check https://eksctl.io/usage/vpc-configuration/#use-existing-vpc-other-custom-configuration for constraints.",
             "mandatory" : false
         },
         {
@@ -29,7 +29,7 @@
             "label": "VPC private subnets",
             "visibilityCondition": "model.privateNetworking == true",
             "type": "STRINGS",
-            "description": "Put at least 2 subnets. Check https://github.com/weaveworks/eksctl#use-existing-vpc-any-custom-configuration for constraints.",
+            "description": "Put at least 2 subnets. Check https://eksctl.io/usage/vpc-configuration/#use-existing-vpc-other-custom-configuration for constraints.",
             "mandatory" : false
         },
         {

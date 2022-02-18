@@ -71,7 +71,8 @@ class MyCluster(Cluster):
         kube_config_path = os.path.join(os.getcwd(), 'kube_config')
         args = args + ['--kubeconfig', kube_config_path]
         
-        #we want a fresh kubeconfig file
+        # if a previous kubeconfig exists, it will be merged with the current configuration, possibly keeping unwanted configuration
+        # deleting it ensures a coherent configuration for the cluster
         if os.path.isfile(kube_config_path):
             os.remove(kube_config_path)
 

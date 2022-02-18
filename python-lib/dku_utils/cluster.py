@@ -2,6 +2,7 @@ from dku_utils.access import _default_if_blank, _default_if_property_blank
 import dataiku
 from dataiku.core.intercom import backend_json_call
 from dku_utils.access import _has_not_blank_property
+from dku_aws.boto3_sts_assumerole import Boto3STSService
 import json, logging
 
 def make_overrides(config, kube_config, kube_config_path):
@@ -60,4 +61,16 @@ def set_cluster_generic_property(dss_cluster_settings, key, value, replace_if_ex
     elif replace_if_exists:
         found_prop['value'] = value
         dss_cluster_settings.save()
-        
+
+def get_connection_info(config):
+    # grab the ARN if it exists
+    arn = config.get('assumeRoleARN', '')
+    info = config.get('connectionInfo', {})
+    # If the arn exists use boto3 to assumeRole to it, otherwise use the regular connection info
+    if arn:
+        connection_info = Boto3STSService(arn).credentials
+        if _has_not_blank_property(info, 'region'):
+            connection_info['region'] = info['region']
+    else:
+        connection_info = info
+    return connection_info

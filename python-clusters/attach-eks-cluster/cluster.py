@@ -3,9 +3,9 @@ import os, sys, json, subprocess, time, logging, yaml
 from dataiku.cluster import Cluster
 
 from dku_aws.eksctl_command import EksctlCommand
-from dku_kube.kubeconfig import merge_or_write_config, add_authenticator_env
-from dku_utils.cluster import make_overrides
-from dku_utils.access import _has_not_blank_property
+from dku_kube.kubeconfig import setup_creds_env
+from dku_utils.cluster import make_overrides, get_connection_info
+from dku_utils.config_parser import get_region_arg
 
 class MyCluster(Cluster):
     def __init__(self, cluster_id, cluster_name, config, plugin_config, global_settings):
@@ -14,24 +14,24 @@ class MyCluster(Cluster):
         self.config = config
         self.plugin_config = plugin_config
         self.global_settings = global_settings
-        
+
     def start(self):
         cluster_id = self.config['clusterId']
+        
         # retrieve the cluster info from EKS
         # this will fail if the cluster doesn't exist, but the API message is enough
-        connection_info = self.config.get('connectionInfo', {})
+
+        connection_info = get_connection_info(self.config)
+            
         args = ['get', 'cluster']
         args = args + ['--name', cluster_id]
-        
-        if _has_not_blank_property(connection_info, 'region' ):
-            args = args + ['--region', connection_info['region']]
-        elif 'AWS_DEFAULT_REGION' is os.environ:
-            args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
+
+        args = args + get_region_arg(connection_info)
         args = args + ['-o', 'json']
-        
+
         c = EksctlCommand(args, connection_info)
         cluster_info = json.loads(c.run_and_get_output())[0]
-                
+
         kube_config_str = """
 apiVersion: v1
 clusters:
@@ -68,12 +68,10 @@ users:
         with open(kube_config_path, 'w') as f:
             f.write(kube_config_str)
 
-        if _has_not_blank_property(connection_info, 'accessKey') and _has_not_blank_property(connection_info, 'secretKey'):
-            creds_in_env = {'AWS_ACCESS_KEY_ID':connection_info['accessKey'], 'AWS_SECRET_ACCESS_KEY':connection_info['secretKey']}
-            add_authenticator_env(kube_config_path, creds_in_env)
-            
+        setup_creds_env(kube_config_path, connection_info, self.config)
+
         kube_config = yaml.safe_load(kube_config_str)
-                
+
         # collect and prepare the overrides so that DSS can know where and how to use the cluster
         overrides = make_overrides(self.config, kube_config, kube_config_path)
         return [overrides, {'kube_config_path':kube_config_path, 'cluster':cluster_info}]

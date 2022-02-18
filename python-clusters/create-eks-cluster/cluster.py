@@ -3,12 +3,12 @@ import os, sys, json, subprocess, time, logging, yaml
 from dataiku.cluster import Cluster
 
 from dku_aws.eksctl_command import EksctlCommand
-from dku_kube.kubeconfig import merge_or_write_config, add_authenticator_env
+from dku_kube.kubeconfig import setup_creds_env
 from dku_kube.autoscaler import add_autoscaler_if_needed
 from dku_kube.gpu_driver import add_gpu_driver_if_needed
-from dku_utils.cluster import make_overrides
-from dku_utils.access import _has_not_blank_property, _is_none_or_blank
-from dku_utils.config_parser import get_security_groups_arg
+from dku_utils.cluster import make_overrides, get_connection_info
+from dku_utils.access import _is_none_or_blank
+from dku_utils.config_parser import get_security_groups_arg, get_region_arg
 
 class MyCluster(Cluster):
     def __init__(self, cluster_id, cluster_name, config, plugin_config, global_settings):
@@ -19,7 +19,7 @@ class MyCluster(Cluster):
         self.global_settings = global_settings
         
     def start(self):
-        connection_info = self.config.get('connectionInfo', {})
+        connection_info = get_connection_info(self.config)
         networking_settings = self.config["networkingSettings"]
         
         args = ['create', 'cluster']
@@ -27,12 +27,7 @@ class MyCluster(Cluster):
 
         if not self.config.get('advanced'):
             args = args + ['--name', self.cluster_id]
-            
-            if _has_not_blank_property(connection_info, 'region'):
-                args = args + ['--region', connection_info['region']]
-            elif 'AWS_DEFAULT_REGION' is os.environ:
-                args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
-                
+            args = args + get_region_arg(connection_info)
             args = args + ['--full-ecr-access']
                 
             subnets = networking_settings.get('subnets', [])
@@ -75,6 +70,11 @@ class MyCluster(Cluster):
         # and because 2 different clusters could be concurrently editing the config file
         kube_config_path = os.path.join(os.getcwd(), 'kube_config')
         args = args + ['--kubeconfig', kube_config_path]
+        
+        # if a previous kubeconfig exists, it will be merged with the current configuration, possibly keeping unwanted configuration
+        # deleting it ensures a coherent configuration for the cluster
+        if os.path.isfile(kube_config_path):
+            os.remove(kube_config_path)
 
         c = EksctlCommand(args, connection_info)
         if c.run_and_log() != 0:
@@ -82,16 +82,10 @@ class MyCluster(Cluster):
         
         args = ['get', 'cluster']
         args = args + ['--name', self.cluster_id]
-        
-        if _has_not_blank_property(connection_info, 'region'):
-            args = args + ['--region', connection_info['region']]
-        elif 'AWS_DEFAULT_REGION' is os.environ:
-            args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
+        args = args + get_region_arg(connection_info)
         args = args + ['-o', 'json']
         
-        if _has_not_blank_property(connection_info, 'accessKey') and _has_not_blank_property(connection_info, 'secretKey'):
-            creds_in_env = {'AWS_ACCESS_KEY_ID':connection_info['accessKey'], 'AWS_SECRET_ACCESS_KEY':connection_info['secretKey']}
-            add_authenticator_env(kube_config_path, creds_in_env)
+        setup_creds_env(kube_config_path, connection_info, self.config)
         
         if not self.config.get('advanced'):
             if node_pool.get('numNodesAutoscaling', False):
@@ -119,15 +113,12 @@ class MyCluster(Cluster):
         return [overrides, {'kube_config_path':kube_config_path, 'cluster':cluster_info}]
 
     def stop(self, data):
-        connection_info = self.config.get('connectionInfo', {})
+        connection_info = get_connection_info(self.config)
 
         args = ['delete', 'cluster']
         args = args + ['-v', '4']
         args = args + ['--name', self.cluster_id]
-        if _has_not_blank_property(connection_info, 'region'):
-            args = args + ['--region', connection_info['region']]
-        elif 'AWS_DEFAULT_REGION' is os.environ:
-            args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
+        args = args + get_region_arg(connection_info)
         c = EksctlCommand(args, connection_info)
 
         if c.run_and_log() != 0:

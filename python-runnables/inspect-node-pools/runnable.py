@@ -3,8 +3,9 @@ import dataiku
 import json, logging, os
 from dku_aws.eksctl_command import EksctlCommand
 from dku_aws.aws_command import AwsCommand
-from dku_utils.cluster import get_cluster_from_dss_cluster
-from dku_utils.access import _has_not_blank_property
+from dku_utils.cluster import get_cluster_from_dss_cluster, get_connection_info
+from dku_utils.config_parser import get_region_arg
+
 
 class MyRunnable(Runnable):
     def __init__(self, project_key, config, plugin_config):
@@ -25,20 +26,16 @@ class MyRunnable(Runnable):
         if cluster_def is None:
             raise Exception("No cluster definition (starting failed?)")
         cluster_id = cluster_def["Name"]
-
-        connection_info = dss_cluster_config.get('config', {}).get('connectionInfo', {})
+        
+        connection_info = get_connection_info(dss_cluster_config)
         
         node_group_id = self.config.get('nodeGroupId', None)
+        
         if node_group_id is None or len(node_group_id) == 0:
             args = ['get', 'nodegroup']
             #args = args + ['-v', '4']
             args = args + ['--cluster', cluster_id]
-
-            if _has_not_blank_property(connection_info, 'region'):
-                args = args + ['--region', connection_info['region']]
-            elif 'AWS_DEFAULT_REGION' is os.environ:
-                args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
-
+            args = args + get_region_arg(connection_info)
             args = args + ['-o', 'json']
 
             c = EksctlCommand(args, connection_info)
@@ -53,12 +50,7 @@ class MyRunnable(Runnable):
             #args = args + ['-v', '4']
             args = args + ['--cluster', cluster_id]
             args = args + ['--name', node_group_id]
-
-            if _has_not_blank_property(connection_info, 'region'):
-                args = args + ['--region', connection_info['region']]
-            elif 'AWS_DEFAULT_REGION' is os.environ:
-                args = args + ['--region', os.environ['AWS_DEFAULT_REGION']]
-
+            args = args + get_region_arg(connection_info)
             args = args + ['-o', 'json']
 
             c = EksctlCommand(args, connection_info)

@@ -1,7 +1,7 @@
 # Changelog
 
 ## Version 1.0.8 - Internal release
-- Deprecated macro `Run Kubectl command`(natively supported in DSS 10.0.6)
+- Deprecated macro `Run Kubectl command` (natively supported in DSS 10.0.6)
 
 ## Version 1.0.7 - Bugfix release
 - Add capability to assume IAM role on all cluster operation

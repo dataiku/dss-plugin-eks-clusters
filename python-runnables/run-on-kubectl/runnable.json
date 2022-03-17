@@ -2,7 +2,7 @@
     "meta": {
         "label": "Run Kubectl command",
 
-        "description": "Run a kubectl command on the cluster (deprecated: as of V10.0.6 that feature will be natively supported).",
+        "description": "Run a kubectl command on the cluster (deprecated: as of DSS 10.0.6 this feature is natively supported).",
 
         "icon": "icon-play"
     },

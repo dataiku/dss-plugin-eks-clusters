@@ -1,7 +1,7 @@
 # Changelog
 
 ## Version 1.0.8 - Bugfix release
-- Removed action `Run Kubectl command` which introduces a security breach
+- Remove action `Run Kubectl command` which introduces a security breach
 
 ## Version 1.0.7 - Bugfix release
 - Add capability to assume IAM role on all cluster operation

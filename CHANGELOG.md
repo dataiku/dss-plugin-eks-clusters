@@ -1,7 +1,7 @@
 # Changelog
 
 ## Version 1.0.8 - Bugfix release
-- Remove action `Run Kubectl command` which introduces a security breach
+- Remove macro `Run Kubectl command` (natively supported in DSS 10.0.6)
 
 ## Version 1.0.7 - Bugfix release
 - Add capability to assume IAM role on all cluster operation

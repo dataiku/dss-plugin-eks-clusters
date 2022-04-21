@@ -26,7 +26,7 @@ class MyRunnable(Runnable):
             raise Exception("No cluster definition (starting failed?)")
         cluster_id = cluster_def["Name"]
 
-        connection_info = get_connection_info(dss_cluster_config)
+        connection_info = get_connection_info(dss_cluster_config.get('config'))
         
         node_group_id = self.config.get('nodeGroupId', None)
         if node_group_id is None or len(node_group_id) == 0:

@@ -49,7 +49,7 @@ class InstallAlb(Runnable):
             raise Exception("No cluster definition (starting failed?)")
         cluster_id = cluster_def["Name"]
         kube_config_path = dss_cluster_settings.get_raw()['containerSettings']['executionConfigsGenericOverrides']['kubeConfigPath']
-        connection_info = get_connection_info(dss_cluster_config)
+        connection_info = get_connection_info(dss_cluster_config.get('config'))
         
         env = os.environ.copy()
         env['KUBECONFIG'] = kube_config_path

@@ -48,6 +48,9 @@ class MyCluster(Cluster):
                 args = args + ['--node-volume-type', node_pool['diskType']]
             if 'diskSizeGb' in node_pool and node_pool['diskSizeGb'] > 0:
                 args = args + ['--node-volume-size', str(node_pool['diskSizeGb'])]
+
+            if node_pool.get('useSpotInstances', False):
+                args = args + ['--managed', '--spot']
                 
             args = args + ['--nodes', str(node_pool.get('numNodes', 3))]
             if node_pool.get('numNodesAutoscaling', False):

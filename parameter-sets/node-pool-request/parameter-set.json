@@ -27,6 +27,13 @@
             "defaultValue" : 3
         },
         {
+            "name": "useSpotInstances",
+            "label": "Use EC2 spot instances",
+            "type": "BOOLEAN",
+            "defaultValue": false,
+            "mandatory": false
+        },
+        {
             "name": "numNodesAutoscaling",
             "label": "Enable nodes autoscaling",
             "type": "BOOLEAN",

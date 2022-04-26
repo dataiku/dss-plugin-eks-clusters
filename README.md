@@ -7,6 +7,6 @@ Requires DSS 6.0 or above.
 For more details, please see https://doc.dataiku.com/dss/latest/containers/eks
 
 ## License
-Copyright (C) 2019-2021 Dataiku
+Copyright (C) 2019-2022 Dataiku
 
 Licensed under the Apache License, version 2.0

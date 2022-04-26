@@ -65,6 +65,11 @@ class MyRunnable(Runnable):
             args = args + ['--nodes-min', str(node_pool.get('minNumNodes', 2))]
             args = args + ['--nodes-max', str(node_pool.get('maxNumNodes', 5))]
 
+        tags = node_pool.get('tags', {})
+        if len(tags) > 0:
+            tag_list = [key + '=' + value for key, value in tags.items()]
+            args = args + ['--tags', ','.join(tag_list)]
+
         c = EksctlCommand(args, connection_info)
         if c.run_and_log() != 0:
             raise Exception("Failed to add nodegroup")

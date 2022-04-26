@@ -1,5 +1,8 @@
 # Changelog
 
+## Next version
+- Support tagging nodes 
+
 ## Version 1.0.7 - Bugfix release
 - Add capability to assume IAM role on all cluster operation
 - Fix use of `AWS_DEFAULT_REGION` environment variable

@@ -79,7 +79,7 @@
             "name": "tags",
             "label": "Tags",
             "description": "Tags to apply on the created EC2 instances",
-            "type": "STRING",
+            "type": "MAP",
             "mandatory" : false
         }
     ]

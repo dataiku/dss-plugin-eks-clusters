@@ -7,6 +7,7 @@ from dku_aws.eksctl_command import EksctlCommand
 from dku_aws.aws_command import AwsCommand
 from dku_utils.cluster import get_cluster_from_dss_cluster, get_connection_info
 from dku_utils.config_parser import get_security_groups_arg, get_region_arg
+from dku_utils.node_pool import get_node_pool_args
 
 class MyRunnable(Runnable):
     def __init__(self, project_key, config, plugin_config):
@@ -50,25 +51,9 @@ class MyRunnable(Runnable):
             args = args + ['--node-private-networking']
             
         args += get_security_groups_arg(dss_cluster_config['config'])
-            
-        node_pool = self.config.get('nodePool', {})
-        if 'machineType' in node_pool:
-            args = args + ['--node-type', node_pool['machineType']]
-        if 'diskType' in node_pool:
-            args = args + ['--node-volume-type', node_pool['diskType']]
-        if 'diskSizeGb' in node_pool and node_pool['diskSizeGb'] > 0:
-            args = args + ['--node-volume-size', str(node_pool['diskSizeGb'])]
-            
-        args = args + ['--nodes', str(node_pool.get('numNodes', 3))]
-        if node_pool.get('numNodesAutoscaling', False):
-            args = args + ['--asg-access']
-            args = args + ['--nodes-min', str(node_pool.get('minNumNodes', 2))]
-            args = args + ['--nodes-max', str(node_pool.get('maxNumNodes', 5))]
 
-        tags = node_pool.get('tags', {})
-        if len(tags) > 0:
-            tag_list = [key + '=' + value for key, value in tags.items()]
-            args = args + ['--tags', ','.join(tag_list)]
+        node_pool = self.config.get('nodePool', {})
+        args += get_node_pool_args(node_pool)
 
         c = EksctlCommand(args, connection_info)
         if c.run_and_log() != 0:

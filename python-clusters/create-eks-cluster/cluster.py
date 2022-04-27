@@ -9,6 +9,7 @@ from dku_kube.gpu_driver import add_gpu_driver_if_needed
 from dku_utils.cluster import make_overrides, get_connection_info
 from dku_utils.access import _is_none_or_blank
 from dku_utils.config_parser import get_security_groups_arg, get_region_arg
+from dku_utils.node_pool import get_node_pool_args
 
 class MyCluster(Cluster):
     def __init__(self, cluster_id, cluster_name, config, plugin_config, global_settings):
@@ -40,20 +41,9 @@ class MyCluster(Cluster):
                 args = args + ['--vpc-public-subnets', ','.join(subnets)]
                 
             args += get_security_groups_arg(networking_settings)
-                
+
             node_pool = self.config.get('nodePool', {})
-            if 'machineType' in node_pool:
-                args = args + ['--node-type', node_pool['machineType']]
-            if 'diskType' in node_pool:
-                args = args + ['--node-volume-type', node_pool['diskType']]
-            if 'diskSizeGb' in node_pool and node_pool['diskSizeGb'] > 0:
-                args = args + ['--node-volume-size', str(node_pool['diskSizeGb'])]
-                
-            args = args + ['--nodes', str(node_pool.get('numNodes', 3))]
-            if node_pool.get('numNodesAutoscaling', False):
-                args = args + ['--asg-access']
-                args = args + ['--nodes-min', str(node_pool.get('minNumNodes', 2))]
-                args = args + ['--nodes-max', str(node_pool.get('maxNumNodes', 5))]
+            args += get_node_pool_args(node_pool)
 
             k8s_version = self.config.get("k8sVersion", None)
             if not _is_none_or_blank(k8s_version):

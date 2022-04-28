@@ -1,4 +1,4 @@
-def get_node_pool_args(node_pool = {}):
+def get_node_pool_args(node_pool):
     args = []
     if 'machineType' in node_pool:
         args = args + ['--node-type', node_pool['machineType']]

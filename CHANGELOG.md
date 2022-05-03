@@ -1,7 +1,8 @@
 # Changelog
 
 ## Next version
-- Support tagging nodes 
+- Fix "Inspect node pools" macro when using managed node groups
+- Support tagging nodes
 
 ## Version 1.0.7 - Bugfix release
 - Add capability to assume IAM role on all cluster operation

@@ -6,4 +6,4 @@ def install_metrics_server(kube_config_path):
     env['KUBECONFIG'] = kube_config_path
     cmd = ['kubectl', 'apply', '-f', 'https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml']
     logging.info("Installing Metrics Server with : %s" % json.dumps(cmd))
-    out, err = run_with_timeout(cmd, env=env, timeout=5)
+    out, err = run_with_timeout(cmd, env=env, timeout=30)

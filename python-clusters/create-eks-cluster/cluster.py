@@ -6,10 +6,10 @@ from dku_aws.eksctl_command import EksctlCommand
 from dku_kube.kubeconfig import setup_creds_env
 from dku_kube.autoscaler import add_autoscaler_if_needed
 from dku_kube.gpu_driver import add_gpu_driver_if_needed
+from dku_kube.metrics_server import install_metrics_server
 from dku_utils.cluster import make_overrides, get_connection_info
 from dku_utils.access import _is_none_or_blank
 from dku_utils.config_parser import get_security_groups_arg, get_region_arg
-from dku_utils.metrics_server import install_metrics_server
 
 class MyCluster(Cluster):
     def __init__(self, cluster_id, cluster_name, config, plugin_config, global_settings):

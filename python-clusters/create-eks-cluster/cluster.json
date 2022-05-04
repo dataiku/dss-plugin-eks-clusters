@@ -5,9 +5,9 @@
         "icon" : "icon-puzzle-piece",
         "longDescription" : ""
     },
-    
+
     "architecture" : "KUBERNETES",
-    
+
     "params": [
         {
             "name": "connectionInfo",
@@ -83,6 +83,18 @@
             "type": "TEXTAREA",
             "mandatory" : false,
             "visibilityCondition": "model.advanced == true"
+        },
+        {
+            "name": "metricsServer",
+            "type":"SEPARATOR",
+            "label": "Metrics Server"
+        },
+        {
+             "name": "installMetricsServer",
+             "label": "Install metrics server",
+             "type": "BOOLEAN",
+             "mandatory" : true,
+             "defaultValue" : true
         }
     ]
 }

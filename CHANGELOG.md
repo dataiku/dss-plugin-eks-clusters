@@ -1,6 +1,7 @@
 # Changelog
 
 ## Next version
+- Fix "Inspect node pools" macro when using managed node groups
 - Support spot instances in node groups
 
 ## Version 1.0.7 - Bugfix release

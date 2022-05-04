@@ -60,6 +60,13 @@
             "description" : "Leave empty for current default of eksctl"
         },
         {
+             "name": "installMetricsServer",
+             "label": "Install metrics server",
+             "type": "BOOLEAN",
+             "mandatory" : true,
+             "defaultValue" : true
+        },
+        {
             "name": "advanced",
             "label": "Use Advanced Configuration",
             "type": "BOOLEAN"
@@ -83,18 +90,6 @@
             "type": "TEXTAREA",
             "mandatory" : false,
             "visibilityCondition": "model.advanced == true"
-        },
-        {
-            "name": "metricsServer",
-            "type":"SEPARATOR",
-            "label": "Metrics Server"
-        },
-        {
-             "name": "installMetricsServer",
-             "label": "Install metrics server",
-             "type": "BOOLEAN",
-             "mandatory" : true,
-             "defaultValue" : true
         }
     ]
 }

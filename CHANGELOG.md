@@ -1,8 +1,8 @@
 # Changelog
 
 ## Next version
-- Fix "Inspect node pools" macro when using managed node groups
 - Add option to install Metrics Server
+- Fix "Inspect node pools" macro when using managed node groups
 
 ## Version 1.0.7 - Bugfix release
 - Add capability to assume IAM role on all cluster operation

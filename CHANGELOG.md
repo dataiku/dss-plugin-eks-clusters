@@ -2,6 +2,7 @@
 
 ## Next version
 - Fix "Inspect node pools" macro when using managed node groups
+- Remove macro `Run Kubectl command` (natively supported in DSS 10.0.6)
 - Support spot instances in node groups
 
 ## Version 1.0.7 - Bugfix release

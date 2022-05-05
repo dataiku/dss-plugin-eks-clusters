@@ -9,5 +9,8 @@ def install_metrics_server(kube_config_path):
         logging.info("Installing Metrics Server with : %s" % json.dumps(cmd))
         out, err = run_with_timeout(cmd, env=env, timeout=30)
     except KubeCommandException as e:
-        traceback.print_exc()
         logging.warning('Failed to install metrics server: %s' % json.dumps([cmd, e.rv, e.out, e.err]))
+        traceback.print_exc()
+    except Exception:
+        logging.warning('Failed to install metrics server')
+        traceback.print_exc()

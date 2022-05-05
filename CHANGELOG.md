@@ -1,6 +1,7 @@
 # Changelog
 
-## Version 1.0.8 - Bugfix release
+## Next version
+- Fix "Inspect node pools" macro when using managed node groups
 - Remove macro `Run Kubectl command` (natively supported in DSS 10.0.6)
 
 ## Version 1.0.7 - Bugfix release

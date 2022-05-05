@@ -31,7 +31,7 @@ class MyRunnable(Runnable):
         # the cluster is accessible via the kubeconfig
         kube_config_path = dss_cluster_settings.get_raw()['containerSettings']['executionConfigsGenericOverrides']['kubeConfigPath']
 
-        connection_info = get_connection_info(dss_cluster_config)
+        connection_info = get_connection_info(dss_cluster_config.get('config'))
         
         node_group_id = self.config.get('nodeGroupId', None)
         

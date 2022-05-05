@@ -5,9 +5,9 @@
         "icon" : "icon-puzzle-piece",
         "longDescription" : ""
     },
-    
+
     "architecture" : "KUBERNETES",
-    
+
     "params": [
         {
             "name": "connectionInfo",
@@ -58,6 +58,13 @@
             "type": "STRING",
             "mandatory" : false,
             "description" : "Leave empty for current default of eksctl"
+        },
+        {
+             "name": "installMetricsServer",
+             "label": "Install metrics server",
+             "type": "BOOLEAN",
+             "mandatory" : true,
+             "defaultValue" : true
         },
         {
             "name": "advanced",

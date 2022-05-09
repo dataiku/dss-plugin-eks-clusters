@@ -50,12 +50,9 @@ class MyCluster(Cluster):
             if 'diskSizeGb' in node_pool and node_pool['diskSizeGb'] > 0:
                 args = args + ['--node-volume-size', str(node_pool['diskSizeGb'])]
 
-<<<<<<< HEAD
             if node_pool.get('useSpotInstances', False):
                 args = args + ['--managed', '--spot']
                 
-=======
->>>>>>> master
             args = args + ['--nodes', str(node_pool.get('numNodes', 3))]
             if node_pool.get('numNodesAutoscaling', False):
                 args = args + ['--asg-access']

@@ -29,6 +29,7 @@
         {
             "name": "useSpotInstances",
             "label": "Use EC2 spot instances",
+            "description": "See EC2 documentation for information about spot instances: https://aws.amazon.com/ec2/spot/",
             "type": "BOOLEAN",
             "defaultValue": false,
             "mandatory": false

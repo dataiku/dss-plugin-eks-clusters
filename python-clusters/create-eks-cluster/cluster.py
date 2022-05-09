@@ -6,6 +6,7 @@ from dku_aws.eksctl_command import EksctlCommand
 from dku_kube.kubeconfig import setup_creds_env
 from dku_kube.autoscaler import add_autoscaler_if_needed
 from dku_kube.gpu_driver import add_gpu_driver_if_needed
+from dku_kube.metrics_server import install_metrics_server
 from dku_utils.cluster import make_overrides, get_connection_info
 from dku_utils.access import _is_none_or_blank
 from dku_utils.config_parser import get_security_groups_arg, get_region_arg
@@ -17,11 +18,11 @@ class MyCluster(Cluster):
         self.config = config
         self.plugin_config = plugin_config
         self.global_settings = global_settings
-        
+
     def start(self):
         connection_info = get_connection_info(self.config)
         networking_settings = self.config["networkingSettings"]
-        
+
         args = ['create', 'cluster']
         args = args + ['-v', '4']
 
@@ -29,7 +30,7 @@ class MyCluster(Cluster):
             args = args + ['--name', self.cluster_id]
             args = args + get_region_arg(connection_info)
             args = args + ['--full-ecr-access']
-                
+
             subnets = networking_settings.get('subnets', [])
             if networking_settings.get('privateNetworking', False):
                 args = args + ['--node-private-networking']
@@ -38,9 +39,9 @@ class MyCluster(Cluster):
                     args = args + ['--vpc-private-subnets', ','.join(private_subnets)]
             if len(subnets) > 0:
                 args = args + ['--vpc-public-subnets', ','.join(subnets)]
-                
+
             args += get_security_groups_arg(networking_settings)
-                
+
             node_pool = self.config.get('nodePool', {})
             if 'machineType' in node_pool:
                 args = args + ['--node-type', node_pool['machineType']]
@@ -49,9 +50,12 @@ class MyCluster(Cluster):
             if 'diskSizeGb' in node_pool and node_pool['diskSizeGb'] > 0:
                 args = args + ['--node-volume-size', str(node_pool['diskSizeGb'])]
 
+<<<<<<< HEAD
             if node_pool.get('useSpotInstances', False):
                 args = args + ['--managed', '--spot']
                 
+=======
+>>>>>>> master
             args = args + ['--nodes', str(node_pool.get('numNodes', 3))]
             if node_pool.get('numNodesAutoscaling', False):
                 args = args + ['--asg-access']
@@ -73,7 +77,7 @@ class MyCluster(Cluster):
         # and because 2 different clusters could be concurrently editing the config file
         kube_config_path = os.path.join(os.getcwd(), 'kube_config')
         args = args + ['--kubeconfig', kube_config_path]
-        
+
         # if a previous kubeconfig exists, it will be merged with the current configuration, possibly keeping unwanted configuration
         # deleting it ensures a coherent configuration for the cluster
         if os.path.isfile(kube_config_path):
@@ -82,14 +86,14 @@ class MyCluster(Cluster):
         c = EksctlCommand(args, connection_info)
         if c.run_and_log() != 0:
             raise Exception("Failed to start cluster")
-        
+
         args = ['get', 'cluster']
         args = args + ['--name', self.cluster_id]
         args = args + get_region_arg(connection_info)
         args = args + ['-o', 'json']
-        
+
         setup_creds_env(kube_config_path, connection_info, self.config)
-        
+
         if not self.config.get('advanced'):
             if node_pool.get('numNodesAutoscaling', False):
                 logging.info("Nodegroup is autoscaling, ensuring autoscaler")
@@ -105,12 +109,15 @@ class MyCluster(Cluster):
                 logging.info("Nodegroup is GPU-enabled, ensuring NVIDIA GPU Drivers")
                 add_gpu_driver_if_needed(self.cluster_id, kube_config_path, connection_info)
 
+        if self.config.get('installMetricsServer'):
+            install_metrics_server(kube_config_path)
+
         c = EksctlCommand(args, connection_info)
         cluster_info = json.loads(c.run_and_get_output())[0]
-        
+
         with open(kube_config_path, "r") as f:
             kube_config = yaml.safe_load(f)
-        
+
         # collect and prepare the overrides so that DSS can know where and how to use the cluster
         overrides = make_overrides(self.config, kube_config, kube_config_path)
         return [overrides, {'kube_config_path':kube_config_path, 'cluster':cluster_info}]

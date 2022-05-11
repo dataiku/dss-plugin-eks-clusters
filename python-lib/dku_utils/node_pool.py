@@ -18,4 +18,7 @@ def get_node_pool_args(node_pool):
         tag_list = [key + '=' + value for key, value in tags.items()]
         args = args + ['--tags', ','.join(tag_list)]
 
+    if node_pool.get('useSpotInstances', False):
+        args = args + ['--managed', '--spot']
+
     return args

@@ -1,8 +1,10 @@
 # Changelog
 
 ## Next version
+- Add option to install Metrics Server
 - Fix "Inspect node pools" macro when using managed node groups
 - Support tagging nodes
+- Remove macro `Run Kubectl command` (natively supported in DSS 10.0.6)
 
 ## Version 1.0.7 - Bugfix release
 - Add capability to assume IAM role on all cluster operation

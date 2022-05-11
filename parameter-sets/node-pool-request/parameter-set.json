@@ -74,6 +74,13 @@
             "description": "Enable GPU workloads on the cluster",
             "type": "BOOLEAN",
             "defaultValue": false
+        },
+        {
+            "name": "tags",
+            "label": "Tags",
+            "description": "Tags to apply on the created EC2 instances",
+            "type": "MAP",
+            "mandatory" : false
         }
     ]
 }

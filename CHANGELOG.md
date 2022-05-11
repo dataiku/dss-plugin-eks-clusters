@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.0.8 - Internal release
+## Version 1.0.8 - Feature and bugfix release
 - Add option to install Metrics Server
 - Fix "Inspect node pools" macro when using managed node groups
 - Support tagging nodes

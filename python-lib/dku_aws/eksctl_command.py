@@ -34,7 +34,7 @@ class EksctlCommand(object):
         if result[1] != 0:
             cmd = _convert_to_string([self.eksctl_bin] + self.args)
             raise Exception('Execution of command \'%s\' Failed. Returned error: %s' % (' '.join(cmd), result[3]))
-        else :
+        else:
             return result[2]
 
     def run_and_log(self):

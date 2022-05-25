@@ -13,7 +13,7 @@ class AwsCommand(object):
             self.env['AWS_SESSION_TOKEN'] = connection_info['sessionToken']
         if _has_not_blank_property(connection_info, 'region'):
             self.env['AWS_DEFAULT_REGION'] = connection_info['region']
-        
+
     def run(self):
         cmd = _convert_to_string(["aws"] + self.args)
         logging.info('Running %s' % (' '.join(cmd)))
@@ -28,8 +28,13 @@ class AwsCommand(object):
         return (cmd, rv, o, e)
 
     def run_and_get_output(self):
-        return self.run()[2]
-    
+        result = self.run()
+        if result[1] != 0:
+            cmd = _convert_to_string([self.eksctl_bin] + self.args)
+            raise Exception('Execution of command \'%s\' Failed. Returned error: %s' % (' '.join(cmd), result[3]))
+        else :
+            return result[2]
+
     def run_and_log(self):
         cmd = _convert_to_string(["aws"] + self.args)
         logging.info('Running %s' % (' '.join(cmd)))

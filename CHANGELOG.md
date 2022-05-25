@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 1.0.9 - Feature and bugfix release
+- Throwing an exception when command launched by `EksctlCommand.run_and_get_output` or `AwsCommand.run_and_get_output` fails
+
 ## Version 1.0.8 - Feature and bugfix release
 - Add option to install Metrics Server
 - Fix "Inspect node pools" macro when using managed node groups

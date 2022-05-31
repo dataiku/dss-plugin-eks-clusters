@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.0.9 - Feature and bugfix release
+## NEXT VERSION
 - Throwing an exception when command invoked by `EksctlCommand.run_and_get_output` or `AwsCommand.run_and_get_output` fails
 
 ## Version 1.0.8 - Feature and bugfix release

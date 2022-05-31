@@ -30,8 +30,9 @@ class AwsCommand(object):
     def run_and_get_output(self):
         result = self.run()
         if result[1] != 0:
+            logging.error(result[3])
             cmd = _convert_to_string(["aws"] + self.args)
-            raise Exception('Failed to execute command: \'%s\'.' % (' '.join(cmd)))
+            raise Exception('Failed to execute command: \'%s\'. See log for more details.' % (' '.join(cmd)))
         else:
             return result[2]
 

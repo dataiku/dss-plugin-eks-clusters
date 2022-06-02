@@ -31,7 +31,7 @@ class AwsCommand(object):
         result = self.run()
         if result[1] != 0:
             cmd = _convert_to_string(["aws"] + self.args)
-            logging.error('Failed to execute aws command:\n%s\nError:\n%s' % (' '.join(cmd), result[3]))
+            logging.error('Failed to execute aws command:\n%s\n%s' % (' '.join(cmd), result[3]))
             raise Exception('Failed to execute aws command. See log for more details.')
         else:
             return result[2]

@@ -30,9 +30,9 @@ class AwsCommand(object):
     def run_and_get_output(self):
         result = self.run()
         if result[1] != 0:
+            logging.error(result[3])
             cmd = _convert_to_string(["aws"] + self.args)
-            logging.error('Failed to execute aws command:\n%s\n%s' % (' '.join(cmd), result[3]))
-            raise Exception('Failed to execute aws command. See log for more details.')
+            raise Exception('Failed to execute command: \'%s\'. See log for more details.' % (' '.join(cmd)))
         else:
             return result[2]
 

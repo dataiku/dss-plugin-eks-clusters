@@ -15,7 +15,7 @@ class EksctlCommand(object):
             self.env['AWS_SESSION_TOKEN'] = connection_info['sessionToken']
         if _has_not_blank_property(connection_info, 'region'):
             self.env['AWS_DEFAULT_REGION'] = connection_info['region']
-        
+
     def run(self):
         cmd = _convert_to_string([self.eksctl_bin] + self.args)
         logging.info('Running %s' % (' '.join(cmd)))
@@ -30,8 +30,14 @@ class EksctlCommand(object):
         return (cmd, rv, o, e)
 
     def run_and_get_output(self):
-        return self.run()[2]
-    
+        result = self.run()
+        if result[1] != 0:
+            logging.error(result[3])
+            cmd = _convert_to_string([self.eksctl_bin] + self.args)
+            raise Exception('Failed to execute command: \'%s\'. See log for more details.' % (' '.join(cmd)))
+        else:
+            return result[2]
+
     def run_and_log(self):
         cmd = _convert_to_string([self.eksctl_bin] + self.args)
         logging.info('Running %s' % (' '.join(cmd)))
@@ -45,7 +51,7 @@ class EksctlCommand(object):
             for line in iter(s.readline, ''):
                 logging.info(line.rstrip())
         return p.wait()
-    
+
     def run_and_get(self):
         cmd = _convert_to_string([self.eksctl_bin] + self.args)
         logging.info('Running %s' % (' '.join(cmd)))

@@ -1,6 +1,6 @@
 {
     "id": "eks-clusters",
-    "version": "1.0.8",
+    "version": "1.0.9",
     "meta": {
         "label": "EKS clusters",
         "description": "Interact with Amazon Elastic Kubernetes Service clusters",

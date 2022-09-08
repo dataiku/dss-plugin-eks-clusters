@@ -24,10 +24,29 @@ class MyCluster(Cluster):
         connection_info = get_connection_info(self.config)
         networking_settings = self.config["networkingSettings"]
 
-        args = ['create', 'cluster']
-        args = args + ['-v', '4']
+        has_autoscaling = False
+        has_gpu = False
+        
+        if self.config.get('advanced', False):
+            has_autoscaling = self.config.get('clusterAutoScaling')
+            has_gpu = self.config.get("advancedGPU")
 
-        if not self.config.get('advanced'):
+            # create the cluster directly from a yaml def
+            yaml_dict = yaml.safe_load(self.config.get("advancedYaml"))
+
+        else:
+            node_pool = self.config.get('nodePool', {})
+
+            has_autoscaling = node_pool.get('numNodesAutoscaling', False)
+            has_gpu = node_pool.get("enableGPU", False)
+
+            # build the yaml def. As a first step we run eksctl with
+            # as many command line args as possible to get it to produce
+            # a good base for the cluster yaml def, then we spice it up
+            # according to the settings that don't have a command-line 
+            # arg
+            args = ['create', 'cluster']
+            args = args + ['-v', '3'] # not -v 4 otherwise there is a debug line in the beginning of the output
             args = args + ['--name', self.cluster_id]
             args = args + get_region_arg(connection_info)
             args = args + ['--full-ecr-access']
@@ -43,19 +62,54 @@ class MyCluster(Cluster):
 
             args += get_security_groups_arg(networking_settings)
 
-            node_pool = self.config.get('nodePool', {})
             args += get_node_pool_args(node_pool)
 
             k8s_version = self.config.get("k8sVersion", None)
             if not _is_none_or_blank(k8s_version):
                 args = args + ['--version', k8s_version.strip()]
-        else:
-            yaml_dict = yaml.safe_load(self.config.get("advancedYaml"))
-            yaml_loc = os.path.join(os.getcwd(), self.cluster_id +'_advanced.yaml')
-            with open(yaml_loc, 'w') as outfile:
-                yaml.dump(yaml_dict, outfile, default_flow_style=False)
+                
+            c = EksctlCommand(args + ["--dry-run"], connection_info)
+            yaml_spec = c.run_and_get_output()
+            logging.info("Got spec:\n%s" % yaml_spec)
+            
+            yaml_dict = yaml.safe_load(yaml_spec)
+            
+            if self.config.get('privateCluster', False):
+                logging.info("Making the cluster fully-private")
+                
+                private_cluster = yaml_dict.get('privateCluster', {})
+                yaml_dict['privateCluster'] = private_cluster
+                private_cluster['enabled'] = True
+                if self.config.get('skipEndpointCreation', False):
+                    private_cluster['skipEndpointCreation'] = True
+                else:
+                    private_cluster['skipEndpointCreation'] = False
+                    if has_autoscaling:
+                        private_cluster["additionalEndpointServices"] = private_cluster.get('additionalEndpointServices', [])
+                        if not 'autoscaling' in private_cluster["additionalEndpointServices"]:
+                            private_cluster["additionalEndpointServices"].append('autoscaling')
+                        
+                # clear the vpc.clusterEndpoints 
+                yaml_dict['vpc'] = yaml_dict.get('vpc', {})
+                yaml_dict['vpc']['clusterEndpoints'] = None
+                
+                    
+                
+                # make sure we have a security group to use as shared security group
+                security_group = self.config.get('sharedSG', '').strip()
+                if len(security_group) == 0:
+                    raise Exception("A shared SG is needed to guarantee that the control plane will be accessible from the DSS VM")
+                yaml_dict['vpc']['sharedNodeSecurityGroup'] = security_group
 
-            args = args + ['-f', yaml_loc]
+        # whatever the setting, make the cluster from the yaml config
+        yaml_loc = os.path.join(os.getcwd(), self.cluster_id +'_config.yaml')
+        with open(yaml_loc, 'w') as outfile:
+            yaml.dump(yaml_dict, outfile, default_flow_style=False)
+        logging.info("Final spec\n%s" % yaml.dump(yaml_dict))
+
+        args = ['create', 'cluster']
+        args = args + ['-v', '4']
+        args = args + ['-f', yaml_loc]
 
         # we don't add the context to the main config file, to not end up with an oversized config,
         # and because 2 different clusters could be concurrently editing the config file
@@ -78,20 +132,12 @@ class MyCluster(Cluster):
 
         setup_creds_env(kube_config_path, connection_info, self.config)
 
-        if not self.config.get('advanced'):
-            if node_pool.get('numNodesAutoscaling', False):
-                logging.info("Nodegroup is autoscaling, ensuring autoscaler")
-                add_autoscaler_if_needed(self.cluster_id, kube_config_path)
-            if node_pool.get("enableGPU", False):
-                logging.info("Nodegroup is GPU-enabled, ensuring NVIDIA GPU Drivers")
-                add_gpu_driver_if_needed(self.cluster_id, kube_config_path, connection_info)
-        else:
-            if self.config.get('clusterAutoScaling'):
-                logging.info("Nodegroup is autoscaling, ensuring autoscaler")
-                add_autoscaler_if_needed(self.cluster_id, kube_config_path)
-            if self.config.get("advancedGPU"):
-                logging.info("Nodegroup is GPU-enabled, ensuring NVIDIA GPU Drivers")
-                add_gpu_driver_if_needed(self.cluster_id, kube_config_path, connection_info)
+        if has_autoscaling:
+            logging.info("Nodegroup is autoscaling, ensuring autoscaler")
+            add_autoscaler_if_needed(self.cluster_id, kube_config_path)
+        if has_gpu:
+            logging.info("Nodegroup is GPU-enabled, ensuring NVIDIA GPU Drivers")
+            add_gpu_driver_if_needed(self.cluster_id, kube_config_path, connection_info)
 
         if self.config.get('installMetricsServer'):
             install_metrics_server(kube_config_path)

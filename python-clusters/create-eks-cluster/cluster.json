@@ -67,6 +67,25 @@
              "defaultValue" : true
         },
         {
+            "name": "privateCluster",
+            "label": "Fully-private",
+            "type": "BOOLEAN",
+            "description": "VPC endpoints will be created for the cluster. The first security group of the Network Settings will be used as shared SG."
+        },
+        {
+            "name": "skipEndpointCreation",
+            "label": "Skip VPC Endpoints creation",
+            "type": "BOOLEAN",
+            "description": "If the VPC endpoints already exist, don't attempt to create new ones"
+        },
+        {
+            "name": "sharedSG",
+            "label": "Shared Security Group",
+            "type": "STRING",
+            "description": "Security group to used for the control plane. Should allow access from the DSS VM.",
+            "visibilityCondition": "model.privateCluster == true"
+        },
+        {
             "name": "advanced",
             "label": "Use Advanced Configuration",
             "type": "BOOLEAN"

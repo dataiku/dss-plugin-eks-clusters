@@ -152,30 +152,15 @@ class MyMacro(Runnable):
         rsave = command_outputs[0][2].replace('\n',' ').replace('"','').replace(',','').replace('[','').replace(']','').split()
 
 
-#        for kk in rsave:
-#            args = []
-#            args = ['ec2', 'terminate-instances', '--instance-ids', kk]
-#            c = None
-#            c = AwsCommand(args, connection_info)
-#            command_outputs = []
-#            command_outputs.append(c.run())
+        for kk in rsave:
+            args = []
+            args = ['ec2', 'terminate-instances', '--instance-ids', kk]
+            c = None
+            c = AwsCommand(args, connection_info)
+            command_outputs = []
+            command_outputs.append(c.run())
 
-        
 
-       
-        
-        
-        #can get rid of it afterwards. Only used for testing syntax as successful return will not generate the output
-        with open("test.yaml", "w") as f:
-            f.write("""apiVersion: crd.k8s.amazonaws.com/v1alpha1
-            kind: ENIConfig
-            metadata:
-              name: """ + "us-east-1a" + """
-                spec:
-            subnet: """ + str(s[0]) + """    #add multiple subnets 
-              securityGroups:
-              - """ + securitygroup)
-            f.close()
         
         result = "success"
         return result

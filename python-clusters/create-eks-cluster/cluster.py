@@ -94,20 +94,27 @@ class MyCluster(Cluster):
                 yaml_dict['vpc']['clusterEndpoints'] = None
                 
                 # make sure we have a security group to use as shared security group
+                # the issue being that eksctl puts this guy on the private VPC endpoints
+                # and if you don't control it, then the DSS VM will have no access to the 
+                # endpoints, and eksctl will start failing on calls to EC2
                 security_group = self.config.get('sharedSG', '').strip()
                 if len(security_group) == 0:
                     raise Exception("A shared SG is needed to guarantee that the control plane will be accessible from the DSS VM")
                 yaml_dict['vpc']['sharedNodeSecurityGroup'] = security_group
+                                
                 
-            if node_pool.get('addPreBootstrapCommands', False) and not _is_none_or_blank(node_pool.get("preBootstrapCommands", "")):
-                # has to be added in the yaml, there is no command line flag for that
-                commands = node_pool.get("preBootstrapCommands", "")
+            def add_pre_bootstrap_commands(commands, yaml_dict):
                 for node_pool_dict in yaml_dict['managedNodeGroups']:
                     if node_pool_dict.get('preBootstrapCommands') is None:
                         node_pool_dict['preBootstrapCommands'] = []
                     for command in commands.split('\n'):
                         if len(command.strip()) > 0:
                             node_pool_dict['preBootstrapCommands'].append(command)
+                
+            if node_pool.get('addPreBootstrapCommands', False) and not _is_none_or_blank(node_pool.get("preBootstrapCommands", "")):
+                # has to be added in the yaml, there is no command line flag for that
+                commands = node_pool.get("preBootstrapCommands", "")
+                add_pre_bootstrap_commands(commands, yaml_dict)
 
         # whatever the setting, make the cluster from the yaml config
         yaml_loc = os.path.join(os.getcwd(), self.cluster_id +'_config.yaml')

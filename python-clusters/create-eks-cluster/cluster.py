@@ -99,7 +99,7 @@ class MyCluster(Cluster):
                     raise Exception("A shared SG is needed to guarantee that the control plane will be accessible from the DSS VM")
                 yaml_dict['vpc']['sharedNodeSecurityGroup'] = security_group
                 
-            if not _is_none_or_blank(node_pool.get("preBootstrapCommands", "")):
+            if node_pool.get('addPreBootstrapCommands', False) and not _is_none_or_blank(node_pool.get("preBootstrapCommands", "")):
                 # has to be added in the yaml, there is no command line flag for that
                 commands = node_pool.get("preBootstrapCommands", "")
                 for node_pool_dict in yaml_dict['managedNodeGroups']:

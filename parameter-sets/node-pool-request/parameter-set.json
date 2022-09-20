@@ -84,11 +84,17 @@
             "defaultValue": false
         },
         {
+            "name": "addPreBootstrapCommands",
+            "label": "Add pre-bootstrap commands",
+            "type": "BOOLEAN"
+        },
+        {
             "name": "preBootstrapCommands",
             "label": "Pre-bootstrap commands",
             "description": "Executed before bootstrapping instances to the cluster",
             "type": "TEXTAREA",
-            "codeMirrorDialect": "text/x-sh"
+            "codeMirrorDialect": "text/x-sh",
+            "visibilityCondition": "model.addPreBootstrapCommands == true"
         },
         {
             "name": "tags",

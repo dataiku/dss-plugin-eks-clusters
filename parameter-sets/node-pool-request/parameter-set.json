@@ -84,6 +84,13 @@
             "defaultValue": false
         },
         {
+            "name": "preBootstrapCommands",
+            "label": "Pre-bootstrap commands",
+            "description": "Executed before bootstrapping instances to the cluster",
+            "type": "TEXTAREA",
+            "codeMirrorDialect": "text/x-sh"
+        },
+        {
             "name": "tags",
             "label": "Tags",
             "description": "Tags to apply on the created EC2 instances",

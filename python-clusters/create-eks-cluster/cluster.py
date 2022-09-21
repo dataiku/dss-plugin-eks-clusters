@@ -97,20 +97,20 @@ class MyCluster(Cluster):
                 yaml_dict['vpc'] = yaml_dict.get('vpc', {})
                 yaml_dict['vpc']['clusterEndpoints'] = None
                 
-                # make sure we have a security group to use as shared security group
-                # the issue being that eksctl puts this guy on the private VPC endpoints
-                # and if you don't control it, then the DSS VM will have no access to the 
-                # endpoints, and eksctl will start failing on calls to EC2
-                control_plane_security_group = self.config.get('controlPlaneSG', '').strip()
-                shared_security_group = self.config.get('sharedSG', '').strip()
-                if len(control_plane_security_group) > 0:
-                    yaml_dict['vpc']['securityGroup'] = control_plane_security_group
-                elif len(shared_security_group) > 0:
-                    yaml_dict['vpc']['sharedNodeSecurityGroup'] = shared_security_group
-                else:
-                    # we'll need to make eksctl able to reach the stuff bearing the 
-                    # SG created by eksctl
-                    attach_vm_to_security_groups = True
+            # make sure we have a security group to use as shared security group
+            # the issue being that eksctl puts this guy on the private VPC endpoints
+            # and if you don't control it, then the DSS VM will have no access to the 
+            # endpoints, and eksctl will start failing on calls to EC2
+            control_plane_security_group = networking_settings.get('controlPlaneSG', '').strip()
+            shared_security_group = networking_settings.get('sharedSG', '').strip()
+            if len(control_plane_security_group) > 0:
+                yaml_dict['vpc']['securityGroup'] = control_plane_security_group
+            elif len(shared_security_group) > 0:
+                yaml_dict['vpc']['sharedNodeSecurityGroup'] = shared_security_group
+            elif self.config.get('privateCluster', False):
+                # we'll need to make eksctl able to reach the stuff bearing the 
+                # SG created by eksctl
+                attach_vm_to_security_groups = True
                 
             def add_pre_bootstrap_commands(commands, yaml_dict):
                 for node_pool_dict in yaml_dict['managedNodeGroups']:

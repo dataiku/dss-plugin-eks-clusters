@@ -1,15 +1,16 @@
-import os, sys, json, subprocess, time, logging, yaml
+import os, sys, json, subprocess, time, logging, yaml, threading
 
 from dataiku.cluster import Cluster
 
 from dku_aws.eksctl_command import EksctlCommand
+from dku_aws.aws_command import AwsCommand
 from dku_kube.kubeconfig import setup_creds_env
 from dku_kube.autoscaler import add_autoscaler_if_needed
 from dku_kube.gpu_driver import add_gpu_driver_if_needed
 from dku_kube.metrics_server import install_metrics_server
 from dku_utils.cluster import make_overrides, get_connection_info
 from dku_utils.access import _is_none_or_blank
-from dku_utils.config_parser import get_security_groups_arg, get_region_arg
+from dku_utils.config_parser import get_security_groups_arg, get_region_arg, get_private_ip_from_metadata
 from dku_utils.node_pool import get_node_pool_args
 
 class MyCluster(Cluster):
@@ -27,6 +28,9 @@ class MyCluster(Cluster):
         has_autoscaling = False
         has_gpu = False
         
+        attach_vm_to_security_groups = False
+        injected_security_group = self.config.get('injectedSG', '').strip()
+       
         if self.config.get('advanced', False):
             has_autoscaling = self.config.get('clusterAutoScaling')
             has_gpu = self.config.get("advancedGPU")
@@ -97,11 +101,16 @@ class MyCluster(Cluster):
                 # the issue being that eksctl puts this guy on the private VPC endpoints
                 # and if you don't control it, then the DSS VM will have no access to the 
                 # endpoints, and eksctl will start failing on calls to EC2
-                security_group = self.config.get('sharedSG', '').strip()
-                if len(security_group) == 0:
-                    raise Exception("A shared SG is needed to guarantee that the control plane will be accessible from the DSS VM")
-                yaml_dict['vpc']['sharedNodeSecurityGroup'] = security_group
-                                
+                control_plane_security_group = self.config.get('controlPlaneSG', '').strip()
+                shared_security_group = self.config.get('sharedSG', '').strip()
+                if len(control_plane_security_group) > 0:
+                    yaml_dict['vpc']['securityGroup'] = control_plane_security_group
+                elif len(shared_security_group) > 0:
+                    yaml_dict['vpc']['sharedNodeSecurityGroup'] = shared_security_group
+                else:
+                    # we'll need to make eksctl able to reach the stuff bearing the 
+                    # SG created by eksctl
+                    attach_vm_to_security_groups = True
                 
             def add_pre_bootstrap_commands(commands, yaml_dict):
                 for node_pool_dict in yaml_dict['managedNodeGroups']:
@@ -136,6 +145,66 @@ class MyCluster(Cluster):
         if os.path.isfile(kube_config_path):
             os.remove(kube_config_path)
 
+        if len(injected_security_group) > 0 or attach_vm_to_security_groups:
+            # we'll sniff the stack of the cluster and wait for its shared SG id.
+            # It'd have been nice if publicAccessCIDRs could do it automatically
+            # but the cloudformation fails on private CIDRs in this field
+            def add_vm_to_sg():
+                stack_name = None
+                # first pester eksctl until it can give the stack name
+                # (this is normally when the EKS cluster object is ready)
+                stack_name_args = ['utils', 'describe-stacks']
+                stack_name_args = stack_name_args + ['--cluster', self.cluster_id]
+                stack_name_args = stack_name_args + get_region_arg(connection_info)
+                stack_name_args = stack_name_args + ['--output', 'json']
+                while stack_name is None:
+                    time.sleep(5)
+                    try:
+                        stack_name_c = EksctlCommand(stack_name_args, connection_info)
+                        stack_spec = stack_name_c.run_and_get_output()
+                        stack_name = json.loads(stack_spec)[0]["StackName"]
+                    except:
+                        logging.info("Not yet able to get stack name")
+                logging.info("Stack name is %s" % stack_name)
+                # then describe the stack resources to get the shared sg. It should be ready
+                # (you can't wait for the outputs, they're only available when the cluster is
+                # done starting, and that's too late for eksctl)
+                sg_ids = []
+                for resource_id in ["ControlPlaneSecurityGroup", "ClusterSharedNodeSecurityGroup"]:
+                    describe_resource_args = ['cloudformation', 'describe-stack-resource']
+                    describe_resource_args = describe_resource_args + get_region_arg(connection_info)
+                    describe_resource_args = describe_resource_args + ['--stack-name', stack_name]
+                    describe_resource_args = describe_resource_args + ['--logical-resource-id', resource_id]
+                    describe_resource_c = AwsCommand(describe_resource_args, connection_info)
+                    describe_resource = json.loads(describe_resource_c.run_and_get_output()).get('StackResourceDetail', {})
+                    sg_id = describe_resource.get("PhysicalResourceId", None)
+                    logging.info("%s SG is %s" % (resource_id, sg_id))
+                    if sg_id is not None and sg_id != injected_security_group:
+                        sg_ids.append(sg_id)
+                    
+                # attach a rule to the shared SG so that the DSS VM can access it (and the VPC endpoints that use it)
+                if len(injected_security_group) > 0:
+                    inbound = ['--source-group', injected_security_group]
+                else:
+                    # if no sg has been given for the VM, use a CIDR with an IP
+                    private_ip = get_private_ip_from_metadata()
+                    inbound = ['--cidr', "%s/32" % private_ip]
+                    
+                logging.info("Add SG=%s to inbound of SG" % injected_security_group)
+                for sg_id in sg_ids:
+                    add_sg_rule_args = ['ec2', 'authorize-security-group-ingress']
+                    add_sg_rule_args = add_sg_rule_args + get_region_arg(connection_info)
+                    add_sg_rule_args = add_sg_rule_args + ['--group-id', sg_id]
+                    add_sg_rule_args = add_sg_rule_args + ['--protocol', "all"]
+                    add_sg_rule_args = add_sg_rule_args + inbound
+                    add_sg_rule_c = AwsCommand(add_sg_rule_args, connection_info)
+                    if add_sg_rule_c.run_and_log() != 0:
+                        logging.info("Failed to add security group rule")
+
+            t = threading.Thread(target=add_vm_to_sg)
+            t.daemon = True
+            t.start()
+            
         c = EksctlCommand(args, connection_info)
         if c.run_and_log() != 0:
             raise Exception("Failed to start cluster")

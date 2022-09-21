@@ -83,14 +83,14 @@
             "name": "controlPlaneSG",
             "label": "Control plane SG",
             "type": "STRING",
-            "description": "Security group to use for the control plane. Should allow access from the DSS VM.",
+            "description": "Security group to use for the control plane. Can be used to allow access from the DSS VM.",
             "visibilityCondition": "model.privateCluster == true"
         },
         {
             "name": "sharedSG",
             "label": "Shared SG",
             "type": "STRING",
-            "description": "Security group to use for control plane and VPC endpoints. Should allow access from the DSS VM.",
+            "description": "Security group to use for control plane and VPC endpoints. Can be used to allow access from the DSS VM.",
             "visibilityCondition": "model.privateCluster == true"
         },
         {
@@ -98,6 +98,12 @@
             "label": "Injected DSS SG",
             "type": "STRING",
             "description": "Security group to add as inbound on the cluster's autocreated SGs. Should allow access from the DSS VM."
+        },
+        {
+            "name": "makePrivateOnly",
+            "label": "Revoke public access",
+            "type": "BOOLEAN",
+            "description": "If true, the EKS endpoint is made private-only"
         },
         {
             "name": "advanced",

@@ -176,12 +176,15 @@ class MyCluster(Cluster):
                     describe_resource_args = describe_resource_args + ['--stack-name', stack_name]
                     describe_resource_args = describe_resource_args + ['--logical-resource-id', resource_id]
                     describe_resource_c = AwsCommand(describe_resource_args, connection_info)
-                    describe_resource = json.loads(describe_resource_c.run_and_get_output()).get('StackResourceDetail', {})
-                    sg_id = describe_resource.get("PhysicalResourceId", None)
-                    logging.info("%s SG is %s" % (resource_id, sg_id))
-                    if sg_id is not None and sg_id != injected_security_group:
-                        sg_ids.append(sg_id)
-                    
+                    try:
+                        describe_resource = json.loads(describe_resource_c.run_and_get_output()).get('StackResourceDetail', {})
+                        sg_id = describe_resource.get("PhysicalResourceId", None)
+                        logging.info("%s SG is %s" % (resource_id, sg_id))
+                        if sg_id is not None and sg_id != injected_security_group:
+                            sg_ids.append(sg_id)
+                    except:
+                        logging.warn("Not able to get SG id for %s" % resource_id)
+                        
                 # attach a rule to the shared SG so that the DSS VM can access it (and the VPC endpoints that use it)
                 if len(injected_security_group) > 0:
                     inbound = ['--source-group', injected_security_group]

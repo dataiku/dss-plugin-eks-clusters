@@ -77,6 +77,12 @@
             "mandatory" : false
         },
         {
+            "name": "publicKeyName",
+            "label": "Keypair name",
+            "description": "Name of a keypair to use on the instances of the node group",
+            "type": "STRING"
+        },
+        {
             "name": "enableGPU",
             "label": "GPU",
             "description": "Enable GPU workloads on the cluster",

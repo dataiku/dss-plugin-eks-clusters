@@ -80,20 +80,6 @@
             "visibilityCondition": "model.privateCluster == true"
         },
         {
-            "name": "controlPlaneSG",
-            "label": "Control plane SG",
-            "type": "STRING",
-            "description": "Security group to use for the control plane. Can be used to allow access from the DSS VM.",
-            "visibilityCondition": "model.privateCluster == true"
-        },
-        {
-            "name": "sharedSG",
-            "label": "Shared SG",
-            "type": "STRING",
-            "description": "Security group to use for control plane and VPC endpoints. Can be used to allow access from the DSS VM.",
-            "visibilityCondition": "model.privateCluster == true"
-        },
-        {
             "name": "injectedSG",
             "label": "Injected DSS SG",
             "type": "STRING",

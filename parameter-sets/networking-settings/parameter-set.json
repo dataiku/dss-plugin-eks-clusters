@@ -38,6 +38,18 @@
             "type": "STRINGS",
             "description": "Additional security groups for the nodes. Needed to give access to the node running DSS",
             "mandatory" : false
+        },
+        {
+            "name": "controlPlaneSG",
+            "label": "Control plane SG",
+            "type": "STRING",
+            "description": "Optional: Control Plane will be put in this SG. Must allow inbound from DSS if you don't use Shared SG"
+        },
+        {
+            "name": "sharedSG",
+            "label": "Shared SG",
+            "type": "STRING",
+            "description": "Optional: Control Plane, Nodes and VPC endpoints will be put in this SG. Should be allow inbound from DSS"
         }
     ]
 }

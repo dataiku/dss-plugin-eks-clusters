@@ -77,11 +77,30 @@
             "mandatory" : false
         },
         {
+            "name": "publicKeyName",
+            "label": "Keypair name",
+            "description": "Name of a keypair to use on the instances of the node group",
+            "type": "STRING"
+        },
+        {
             "name": "enableGPU",
             "label": "GPU",
             "description": "Enable GPU workloads on the cluster",
             "type": "BOOLEAN",
             "defaultValue": false
+        },
+        {
+            "name": "addPreBootstrapCommands",
+            "label": "Add pre-bootstrap commands",
+            "type": "BOOLEAN"
+        },
+        {
+            "name": "preBootstrapCommands",
+            "label": "Pre-bootstrap commands",
+            "description": "Executed before bootstrapping instances to the cluster",
+            "type": "TEXTAREA",
+            "codeMirrorDialect": "text/x-sh",
+            "visibilityCondition": "model.addPreBootstrapCommands == true"
         },
         {
             "name": "tags",

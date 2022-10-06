@@ -21,4 +21,8 @@ def get_node_pool_args(node_pool):
     if node_pool.get('useSpotInstances', False):
         args = args + ['--managed', '--spot']
 
+    if len(node_pool.get('publicKeyName', '')) > 0:
+        args = args + ["--ssh-access"]
+        args = args + ['--ssh-public-key', node_pool.get('publicKeyName', '')]
+        
     return args

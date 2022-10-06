@@ -67,6 +67,31 @@
              "defaultValue" : true
         },
         {
+            "name": "privateCluster",
+            "label": "Fully-private",
+            "type": "BOOLEAN",
+            "description": "VPC endpoints will be created for the cluster. The first security group of the Network Settings will be used as shared SG."
+        },
+        {
+            "name": "skipEndpointCreation",
+            "label": "Skip VPC Endpoints creation",
+            "type": "BOOLEAN",
+            "description": "If the VPC endpoints already exist, don't attempt to create new ones",
+            "visibilityCondition": "model.privateCluster == true"
+        },
+        {
+            "name": "injectedSG",
+            "label": "Injected DSS SG",
+            "type": "STRING",
+            "description": "Security group to add as inbound on the cluster's autocreated SGs. Should allow inbound from DSS."
+        },
+        {
+            "name": "makePrivateOnly",
+            "label": "Revoke public access",
+            "type": "BOOLEAN",
+            "description": "If true, the EKS endpoint is made private-only"
+        },
+        {
             "name": "advanced",
             "label": "Use Advanced Configuration",
             "type": "BOOLEAN"

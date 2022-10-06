@@ -43,13 +43,13 @@
             "name": "controlPlaneSG",
             "label": "Control plane SG",
             "type": "STRING",
-            "description": "Optional: security group to use for the control plane"
+            "description": "Optional: Control Plane will be put in this SG. Must allow inbound from DSS if you don't use Shared SG"
         },
         {
             "name": "sharedSG",
             "label": "Shared SG",
             "type": "STRING",
-            "description": "Optional: security group to use for control plane, nodes and VPC endpoints (in private cluse-ters)"
+            "description": "Optional: Control Plane, Nodes and VPC endpoints will be put in this SG. Should be allow inbound from DSS"
         }
     ]
 }

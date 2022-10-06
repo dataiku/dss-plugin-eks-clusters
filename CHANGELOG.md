@@ -2,6 +2,7 @@
 
 ## NEXT VERSION
 - Throwing an exception when command invoked by `EksctlCommand.run_and_get_output` or `AwsCommand.run_and_get_output` fails
+- Handle creating fully-private clusters (nodes in private subnets and private control plane endpoint)
 
 ## Version 1.0.8 - Feature and bugfix release
 - Add option to install Metrics Server

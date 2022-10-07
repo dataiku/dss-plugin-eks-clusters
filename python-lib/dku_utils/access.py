@@ -3,6 +3,11 @@ from collections import Mapping, Iterable
 from io import StringIO, BytesIO
 import sys
 
+if sys.version_info > (3,):
+    dku_basestring_type = str
+else:
+    dku_basestring_type = basestring
+
 def _convert_to_string(data):
     for i in range(0,len(data)):
         try:
@@ -44,12 +49,6 @@ def _default_if_property_blank(d, k, v):
     x = d[k]
     return _default_if_blank(x, v)
 
-def check_type_for_string(a, b):
-    if sys.version_info < (3, 0):
-        return (isinstance(a, str) or isinstance(a, unicode)) and (isinstance(b, str) or isinstance(b, unicode))
-    else:
-        return isinstance(a, str) and isinstance(b, str)
-
 def _merge_objects(a, b):
     if isinstance(a, Mapping) and isinstance(b, Mapping):
         r = {}
@@ -62,7 +61,7 @@ def _merge_objects(a, b):
             else:
                 r[k] = a[k]
         return r
-    elif check_type_for_string(a, b):
+    elif isinstance(a, dku_basestring_type) and isinstance(b, dku_basestring_type):
         return b
     elif isinstance(a, Iterable) and isinstance(b, Iterable):
         ret = []

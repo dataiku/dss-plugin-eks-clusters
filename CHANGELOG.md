@@ -1,5 +1,8 @@
 # Changelog
 
+## Next version
+- Fix the merging mechanism for custom string parameters in cluster configurations
+
 ## Version 1.0.9 - Bugfix release
 - Throwing an exception when command invoked by `EksctlCommand.run_and_get_output` or `AwsCommand.run_and_get_output` fails
 

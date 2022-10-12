@@ -213,7 +213,7 @@ class MyCluster(Cluster):
             raise Exception("Failed to start cluster")
 
         # if you leave eksctl work, you have a public/private EKS endpoint, so we can tighten it even more
-        if not self.config.get('makePrivateOnly', False):
+        if self.config.get('makePrivateOnly', False):
             privatize_args = ['utils', 'update-cluster-endpoints']
             privatize_args = privatize_args + ['--name', self.cluster_id]
             privatize_args = privatize_args + ['--private-access=true', '--public-access=false']

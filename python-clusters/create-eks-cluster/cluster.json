@@ -83,13 +83,13 @@
             "name": "injectedSG",
             "label": "Injected DSS SG",
             "type": "STRING",
-            "description": "Security group to add as inbound on the cluster's autocreated SGs. Should allow inbound from DSS."
+            "description": "Security group id to add as inbound on the cluster's autocreated SGs. Should allow inbound from DSS."
         },
         {
             "name": "makePrivateOnly",
             "label": "Revoke public access",
             "type": "BOOLEAN",
-            "description": "If true, the EKS endpoint is made private-only"
+            "description": "If true, the EKS endpoint is made private-only (otherwise it will remain both public and private)"
         },
         {
             "name": "advanced",

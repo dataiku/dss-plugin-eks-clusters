@@ -1,6 +1,6 @@
 # Changelog
 
-## Next version
+## Version 1.0.10 - Feature release
 - Fix the cluster configuration's merging mechanism for string parameters
 
 ## Version 1.0.9 - Bugfix release

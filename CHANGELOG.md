@@ -1,7 +1,7 @@
 # Changelog
 
-## Next version
-- Fix the cluster configuration's merging mechanism for string parameters
+## Version 1.0.10 - Feature release
+- Add support for fully-managed private clusters
 
 ## Version 1.0.9 - Bugfix release
 - Throwing an exception when command invoked by `EksctlCommand.run_and_get_output` or `AwsCommand.run_and_get_output` fails

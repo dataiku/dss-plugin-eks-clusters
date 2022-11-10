@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.0.10 - Feature release
+## Version 1.1.0 - Feature release
 - Add support for fully-managed private clusters
 
 ## Version 1.0.9 - Bugfix release

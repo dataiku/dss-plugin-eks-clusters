@@ -68,6 +68,9 @@ users:
         with open(kube_config_path, 'w') as f:
             f.write(kube_config_str)
 
+        logging.info("Cluster attached. Cluster configuration:")
+        logging.info(kube_config_str)
+
         setup_creds_env(kube_config_path, connection_info, self.config)
 
         kube_config = yaml.safe_load(kube_config_str)

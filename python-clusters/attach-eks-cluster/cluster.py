@@ -32,6 +32,9 @@ class MyCluster(Cluster):
         c = EksctlCommand(args, connection_info)
         cluster_info = json.loads(c.run_and_get_output())[0]
 
+        logging.info("Retrieved information about the cluster:")
+        logging.info(json.dumps(cluster_info, indent=4))
+
         kube_config_str = """
 apiVersion: v1
 clusters:
@@ -68,7 +71,7 @@ users:
         with open(kube_config_path, 'w') as f:
             f.write(kube_config_str)
 
-        logging.info("Cluster attached. Cluster configuration:")
+        logging.info("Cluster attached. Cluster configuration (Kube config):")
         logging.info(kube_config_str)
 
         setup_creds_env(kube_config_path, connection_info, self.config)

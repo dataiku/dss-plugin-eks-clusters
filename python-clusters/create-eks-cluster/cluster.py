@@ -243,9 +243,6 @@ class MyCluster(Cluster):
         c = EksctlCommand(args, connection_info)
         cluster_info = json.loads(c.run_and_get_output())[0]
 
-        logging.info("Cluster created with configuration:")
-        logging.info(json.dumps(cluster_info, indent=4))
-
         with open(kube_config_path, "r") as f:
             kube_config = yaml.safe_load(f)
 

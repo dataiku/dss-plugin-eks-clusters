@@ -6,6 +6,7 @@ from dku_aws.eksctl_command import EksctlCommand
 from dku_kube.kubeconfig import setup_creds_env
 from dku_utils.cluster import make_overrides, get_connection_info
 from dku_utils.config_parser import get_region_arg
+from dku_utils.tools_version import get_kubectl_version, kubectl_should_use_beta_apiVersion
 
 class MyCluster(Cluster):
     def __init__(self, cluster_id, cluster_name, config, plugin_config, global_settings):
@@ -32,6 +33,9 @@ class MyCluster(Cluster):
         c = EksctlCommand(args, connection_info)
         cluster_info = json.loads(c.run_and_get_output())[0]
 
+        kubectl_version = get_kubectl_version()
+        apiVersion_to_use = 'v1beta1' if kubectl_should_use_beta_apiVersion(kubectl_version) else 'v1alpha1'
+
         kube_config_str = """
 apiVersion: v1
 clusters:
@@ -51,14 +55,14 @@ users:
 - name: user-__CLUSTER_ID__
   user:
     exec:
-      apiVersion: client.authentication.k8s.io/v1alpha1
+      apiVersion: client.authentication.k8s.io/%s
       args:
       - token
       - -i
       - %s
       command: aws-iam-authenticator
       env: null
-        """ % (cluster_info['CertificateAuthority']['Data'], cluster_info['Endpoint'], cluster_id)
+        """ % (cluster_info['CertificateAuthority']['Data'], cluster_info['Endpoint'], apiVersion_to_use, cluster_id)
         kube_config_str = kube_config_str.replace("__CLUSTER_ID__", cluster_id) # cluster_id is as good as anything, since this kubeconfig won't be merged into another one
 
         # build the config file for kubectl

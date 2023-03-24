@@ -53,7 +53,7 @@ class MyRunnable(Runnable):
                     out, err = b.exec_cmd(cmd)
                     result =  result + '<h5>Resolve host</h5><div style="margin-left: 20px;"><div>Command</div><pre class="debug">%s</pre><div>Output</div><pre class="debug">%s</pre><div>Error</div><pre class="debug">%s</pre></div>' % (json.dumps(cmd), out, err)
                     for line in out.split('\n'):
-                        m = re.match('^Address.*\\s([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+[^\\s]*)\\s.*$', line)
+                        m = re.match('^Address.*\\s([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+[^\\s]*)(\\s.*)?$', line)
                         if m is not None:
                             ip = m.group(1)
                     if ip is None:

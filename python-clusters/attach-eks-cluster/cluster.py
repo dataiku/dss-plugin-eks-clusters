@@ -1,5 +1,6 @@
 import os, sys, json, subprocess, time, logging, yaml
 
+import dku_utils.tools_version
 from dataiku.cluster import Cluster
 
 from dku_aws.eksctl_command import EksctlCommand
@@ -17,6 +18,7 @@ class MyCluster(Cluster):
         self.global_settings = global_settings
 
     def start(self):
+        dku_utils.tools_version.check_versions()
         cluster_id = self.config['clusterId']
         
         # retrieve the cluster info from EKS

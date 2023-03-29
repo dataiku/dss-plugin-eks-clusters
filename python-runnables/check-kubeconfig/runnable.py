@@ -27,15 +27,12 @@ class CheckKubeconfig(Runnable):
             kubectl_version = dku_utils.tools_version.get_kubectl_version()
             result += '<div>Found kubectl version: %s.%s</div>' % (kubectl_version['major'], kubectl_version['minor'])
             should_use_beta_api = dku_utils.tools_version.kubectl_should_use_beta_apiVersion(kubectl_version)
-        except Exception as e:
-            return '<div class="alert alert-error">%s</div>' % str(e)
-        
-        try:
+
             aws_iam_authenticator_version = dku_utils.tools_version.get_authenticator_version()
             result += '<div>Found aws-iam-authenticator version: %s</div>' % aws_iam_authenticator_version
             # aws-iam-authenticator defaults to beta since 0.5.4 : https://github.com/kubernetes-sigs/aws-iam-authenticator/commit/0221afb8e2a5d14a20a93473edc4c2aa7676ce95
             if should_use_beta_api and aws_iam_authenticator_version < '0.5.4':
-                return result + '<div>kubectl and aws-iam-authenticator versions are incompatible, please upgrade aws-iam-authenticator.</div>'
+                return result + '<div class="alert alert-error"><div>kubectl and aws-iam-authenticator versions are incompatible, please upgrade aws-iam-authenticator.</div></div>'
         except Exception as e:
             return '<div class="alert alert-error">%s</div>' % str(e)
         

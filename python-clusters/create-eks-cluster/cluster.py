@@ -1,5 +1,6 @@
 import os, sys, json, subprocess, time, logging, yaml, threading
 
+import dku_utils.tools_version
 from dataiku.cluster import Cluster
 
 from dku_aws.eksctl_command import EksctlCommand
@@ -22,6 +23,7 @@ class MyCluster(Cluster):
         self.global_settings = global_settings
 
     def start(self):
+        dku_utils.tools_version.check_versions()
         connection_info = get_connection_info(self.config)
         networking_settings = self.config["networkingSettings"]
 

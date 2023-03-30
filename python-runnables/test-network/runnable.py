@@ -53,6 +53,11 @@ class MyRunnable(Runnable):
                     out, err = b.exec_cmd(cmd)
                     result =  result + '<h5>Resolve host</h5><div style="margin-left: 20px;"><div>Command</div><pre class="debug">%s</pre><div>Output</div><pre class="debug">%s</pre><div>Error</div><pre class="debug">%s</pre></div>' % (json.dumps(cmd), out, err)
                     for line in out.split('\n'):
+                        # always capture the last IP in the nslookup response independently from the fact that it may be followed by a DNS name or not
+                        # Examples of matches:
+                        # Address 1: 10.0.12.28 -captured-> 10.0.12.28
+                        # or
+                        # Address 1: 10.0.12.28 ip-10-0-12-28.eu-west-1.compute.internal -captured-> 10.0.12.28
                         m = re.match('^Address.*\\s([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+[^\\s]*)(\\s.*)?$', line)
                         if m is not None:
                             ip = m.group(1)

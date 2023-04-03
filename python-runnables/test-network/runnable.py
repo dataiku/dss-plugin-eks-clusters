@@ -58,7 +58,7 @@ class MyRunnable(Runnable):
                         # Address 1: 10.0.12.28 -captured-> 10.0.12.28
                         # or
                         # Address 1: 10.0.12.28 ip-10-0-12-28.eu-west-1.compute.internal -captured-> 10.0.12.28
-                        m = re.match('^Address.*\\s([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+[^\\s]*)(\\s.*)?$', line)
+                        m = re.match('^Address.*\\s(\\d+\\.\\d+\\.\\d+\\.\\d+)', line)
                         if m is not None:
                             ip = m.group(1)
                     if ip is None:

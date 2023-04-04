@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 1.1.1 - Bugfix release
+- Add support of v1beta1 apiVersion when attaching
+
 ## Version 1.1.0 - Feature release
 - Add support for fully-managed private clusters
 

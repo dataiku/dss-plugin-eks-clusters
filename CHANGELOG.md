@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 1.1.2 - Internal release
+- Added support for Python 3.8, 3.9, 3.10 (experimental), 3.11 (experimental) 
+
 ## Version 1.1.1 - Bugfix release
 - Add support of v1beta1 apiVersion when attaching
 

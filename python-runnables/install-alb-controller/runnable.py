@@ -21,7 +21,12 @@ def make_html(command_outputs):
         divs.append(out_html)
         if command_output[1] != 0 and not _is_none_or_blank(command_output[3]):
             divs.append(err_html)
-    return '\n'.join(divs).decode('utf8')
+    html = '\n'.join(divs)
+    try:
+        html.decode('utf8')
+    except (UnicodeDecodeError, AttributeError):
+        pass
+    return html
 
 class InstallAlb(Runnable):
     """
@@ -134,7 +139,7 @@ class InstallAlb(Runnable):
             return make_html(command_outputs)
 
         r = requests.get('https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.4/docs/examples/alb-ingress-controller.yaml')
-        service_data = r.content
+        service_data = r.text
         cluster_flag_pattern = '#.*cluster\\-name=.*'
         cluster_flag_replacement = '- --cluster-name=%s' % cluster_id
         service_data = re.sub(cluster_flag_pattern, cluster_flag_replacement, service_data)

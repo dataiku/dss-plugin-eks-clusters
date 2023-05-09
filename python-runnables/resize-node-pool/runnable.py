@@ -65,6 +65,7 @@ class MyRunnable(Runnable):
             args = args + ['--cluster', cluster_id]
             args = args + ['--name', node_group_id]
             args = args + get_region_arg(connection_info)
+            args = args + ['--wait']  # wait until resources are completely deleted
 
             c = EksctlCommand(args, connection_info)
             rv, out, err = c.run_and_get()

@@ -4,7 +4,7 @@
 import os, logging, requests, json
 from dku_utils.access import _has_not_blank_property
 
-
+NETWORK_SETTINGS = 'networkingSettings'
 SECURITY_GROUPS = 'securityGroups'
 SECURITY_GROUPS_ARG = '--node-security-groups'
 
@@ -18,7 +18,8 @@ def get_security_groups_arg(config):
     """
     if config is None or not isinstance(config, dict):
         raise Exception("config can not be null and has to be a dictionary.")
-    params = config.get(SECURITY_GROUPS, [])
+    network_params = config.get(NETWORK_SETTINGS, {})
+    params = network_params.get(SECURITY_GROUPS, [])
     if len(params) == 0:
         return []
 

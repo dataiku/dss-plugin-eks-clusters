@@ -60,7 +60,7 @@
         {
             "name": "wait",
             "label": "Wait for completion",
-            "description": "Wait until all resources have been fully deleted/resized",
+            "description": "Wait until all resources have been fully resized/deleted",
             "type": "BOOLEAN",
             "mandatory": false,
             "defaultValue": false

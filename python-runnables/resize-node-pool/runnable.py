@@ -65,7 +65,8 @@ class MyRunnable(Runnable):
             args = args + ['--cluster', cluster_id]
             args = args + ['--name', node_group_id]
             args = args + get_region_arg(connection_info)
-            args = args + ['--wait']  # wait until resources are completely deleted
+            if self.config.get('wait', False):
+                args = args + ['--wait']  # wait until resources are completely deleted
 
             c = EksctlCommand(args, connection_info)
             rv, out, err = c.run_and_get()
@@ -89,6 +90,8 @@ class MyRunnable(Runnable):
             if desired_max_count > 0:
                 args = args + ['--nodes-max', str(desired_max_count)]
             args = args + get_region_arg(connection_info)
+            if self.config.get('wait', False):
+                args = args + ['--wait']  # wait until resources are completely scaled
 
             c = EksctlCommand(args, connection_info)
             rv, out, err = c.run_and_get()

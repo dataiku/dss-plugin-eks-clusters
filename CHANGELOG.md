@@ -1,7 +1,7 @@
 # Changelog
 
 ## Next version
-- Added `wait` option to "resize node pool" macro
+- Added `wait` option to "resize cluster" macro
 
 ## Version 1.2.0 - Internal release
 - Added support for Python 3.8, 3.9, 3.10 (experimental), 3.11 (experimental)

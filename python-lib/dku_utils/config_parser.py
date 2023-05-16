@@ -4,7 +4,6 @@
 import os, logging, requests, json
 from dku_utils.access import _has_not_blank_property
 
-
 SECURITY_GROUPS = 'securityGroups'
 SECURITY_GROUPS_ARG = '--node-security-groups'
 

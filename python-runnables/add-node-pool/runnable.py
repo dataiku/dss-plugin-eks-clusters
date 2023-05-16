@@ -52,7 +52,7 @@ class MyRunnable(Runnable):
         if dss_cluster_config.get('privateNetworking', False) or self.config.get('privateNetworking', None):
             args = args + ['--node-private-networking']
             
-        args += get_security_groups_arg(dss_cluster_config['config'].get('networkSettings', {}))
+        args += get_security_groups_arg(dss_cluster_config['config'].get('networkingSettings', {}))
 
         node_pool = self.config.get('nodePool', {})
         args += get_node_pool_args(node_pool)

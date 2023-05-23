@@ -56,6 +56,14 @@
             "description": "Id of node group to resize, if not default",
             "type": "STRING",
             "mandatory": false
+        },
+        {
+            "name": "wait",
+            "label": "Wait for completion",
+            "description": "Wait until all resources have been fully resized/deleted",
+            "type": "BOOLEAN",
+            "mandatory": false,
+            "defaultValue": false
         }
     ]
 }

@@ -1,4 +1,4 @@
-import json
+import json, re
 from dku_kube.kubectl_command import run_with_timeout, KubeCommandException
 
 def get_kubectl_version():
@@ -6,13 +6,24 @@ def get_kubectl_version():
     out, err = run_with_timeout(cmd)
     return json.loads(out)['clientVersion']
 
+def get_kubectl_version_int(kubectl_version):
+    regex_minor_int = re.compile("^[^0-9]*([0-9]+).*")
+    results_minor_int = re.search(regex_minor_int, kubectl_version['minor'])
+    if len(results_minor_int) != 1:
+        raise Exception("Kubectl version found on the machine: %s. It was not possible to parse")
+    minor_int = int(results_minor_int[0])
+    return int(kubectl_version['major']), minor_int
+
 def get_authenticator_version():
     cmd = ['aws-iam-authenticator', 'version', '-o', 'json']
     out, err = run_with_timeout(cmd)
     return json.loads(out)['Version'].lstrip('v')
 
 def kubectl_should_use_beta_apiVersion(kubectl_version):
-    return int(kubectl_version['major']) > 1 or (int(kubectl_version['major']) == 1 and int(kubectl_version['minor']) > 23)  # v1alpha1 was deprecated in 1.24
+    version_int = get_kubectl_version_int(kubectl_version)
+    major = version_int[0]
+    minor = version_int[1]
+    return major > 1 or (major == 1 and minor > 23)  # v1alpha1 was deprecated in 1.24
 
 def check_versions():
     kubectl_version = get_kubectl_version()

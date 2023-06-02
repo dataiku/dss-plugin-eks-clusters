@@ -12,7 +12,7 @@ def get_kubectl_version_int(kubectl_version):
     regex_minor_int = re.compile("^[^0-9]*([0-9]+)")
     search_results_minor_int = re.search(regex_minor_int, kubectl_version['minor'])
     if len(search_results_minor_int.groups()) < 1:
-        raise Exception("Kubectl version found on the machine: %s. It was not possible to parse")
+        raise Exception("Kubectl version found on the machine: %s. It was not possible to parse" % (str(kubectl_version['major']) + '.' + str(kubectl_version['minor']))
     minor_int = int(search_results_minor_int.group(0))
     return int(kubectl_version['major']), minor_int
 

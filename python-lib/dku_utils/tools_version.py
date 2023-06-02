@@ -7,11 +7,13 @@ def get_kubectl_version():
     return json.loads(out)['clientVersion']
 
 def get_kubectl_version_int(kubectl_version):
-    regex_minor_int = re.compile("^[^0-9]*([0-9]+).*")
-    results_minor_int = re.search(regex_minor_int, kubectl_version['minor'])
-    if len(results_minor_int) != 1:
+    # the kubectl version downloaded from Amazon website has a minor version finishing by '+'
+    # keeping only the first numeric sequence for the minor version
+    regex_minor_int = re.compile("^[^0-9]*([0-9]+)")
+    search_results_minor_int = re.search(regex_minor_int, kubectl_version['minor'])
+    if len(search_results_minor_int.groups()) < 1:
         raise Exception("Kubectl version found on the machine: %s. It was not possible to parse")
-    minor_int = int(results_minor_int[0])
+    minor_int = int(search_results_minor_int.group(0))
     return int(kubectl_version['major']), minor_int
 
 def get_authenticator_version():

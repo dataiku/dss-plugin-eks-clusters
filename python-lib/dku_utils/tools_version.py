@@ -6,17 +6,20 @@ def get_kubectl_version():
     out, err = run_with_timeout(cmd)
     return json.loads(out)['clientVersion']
 
+def kubectl_version_to_string(kubectl_version):
+    major = str(kubectl_version['major']) if 'major' in kubectl_version else ''
+    minor = str(kubectl_version['minor']) if 'minor' in kubectl_version else ''
+    return major + '.' + minor
+
 def get_kubectl_version_int(kubectl_version):
     # the kubectl version downloaded from Amazon website has a minor version finishing by '+'
     # keeping only the first numeric sequence for the minor version
     if 'major' not in kubectl_version or 'minor' not in kubectl_version:
-        raise Exception("Kubectl version found on the machine is not correctly formatted")
+        raise Exception("Kubectl version found on the machine: %s. It is not correctly formatted" % kubectl_version_to_string(kubectl_version))
     regex_minor_int = re.compile("^[^0-9]*([0-9]+)([^0-9].*$|$)")
     search_results_minor_int = re.search(regex_minor_int, kubectl_version['minor'])
-    if not search_results_minor_int:
-        raise Exception("No kubectl minor version found")
-    if not search_results_minor_int.groups():
-        raise Exception("Kubectl version found on the machine: %s. It was not possible to parse" % (str(kubectl_version['major']) + '.' + str(kubectl_version['minor'])))
+    if not search_results_minor_int or not search_results_minor_int.groups():
+        raise Exception("Kubectl version found on the machine: %s. It was not possible to parse" % kubectl_version_to_string(kubectl_version))
     minor_int = int(search_results_minor_int.groups()[0])
     return int(kubectl_version['major']), minor_int
 

@@ -2,6 +2,7 @@
 
 ## Next version
 - Added `wait` option to "resize cluster" macro
+- Support non-numeric-only `kubectl` versions
 
 ## Version 1.2.0 - Internal release
 - Added support for Python 3.8, 3.9, 3.10 (experimental), 3.11 (experimental)

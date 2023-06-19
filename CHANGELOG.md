@@ -1,6 +1,6 @@
 # Changelog
 
-## Next version
+## Version 1.2.1 - Bugfix release
 - Added `wait` option to "resize cluster" macro
 - Support non-numeric-only `kubectl` versions
 

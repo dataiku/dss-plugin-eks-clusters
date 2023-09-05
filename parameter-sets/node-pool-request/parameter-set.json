@@ -72,9 +72,10 @@
         {
             "name": "diskSizeGb",
             "label": "Disk size",
-            "description": "Disk size for the nodes. Leave 0 for default (200 GB)",
+            "description": "Disk size for the nodes",
             "type": "INT",
-            "mandatory" : false
+            "mandatory" : false,
+            "defaultValue": 200
         },
         {
             "name": "publicKeyName",

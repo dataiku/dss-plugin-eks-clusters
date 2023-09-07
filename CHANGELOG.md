@@ -1,5 +1,8 @@
 # Changelog
 
+## Next release
+- Change default disk size for the nodes to 200GB
+
 ## Version 1.2.1 - Bugfix release
 - Added `wait` option to "resize cluster" macro
 - Support non-numeric-only `kubectl` versions

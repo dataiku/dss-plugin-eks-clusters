@@ -7,7 +7,7 @@ def get_node_pool_args(node_pool):
     if 'diskSizeGb' in node_pool and node_pool['diskSizeGb'] > 0:
         disk_size_gb = node_pool['diskSizeGb']
     else:
-        disk_size_gb = 200
+        disk_size_gb = 200 # also defined as default value in parameter-sets/node-pool-request/parameter-set.json
     args = args + ['--node-volume-size', str(disk_size_gb)]
 
     args = args + ['--nodes', str(node_pool.get('numNodes', 3))]

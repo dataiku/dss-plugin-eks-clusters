@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 1.2.2 - Bugfix release
+- Make plugin compatible with AWS requiring IMDS_V2 instances
+
 ## Version 1.2.1 - Bugfix release
 - Added `wait` option to "resize cluster" macro
 - Support non-numeric-only `kubectl` versions

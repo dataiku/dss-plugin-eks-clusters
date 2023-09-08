@@ -36,7 +36,8 @@ def get_region_fallback_to_metadata(connection_info):
         logging.info("Using AWS_DEFAULT_REGION %s" % os.environ['AWS_DEFAULT_REGION'])
         return os.environ['AWS_DEFAULT_REGION']
     try:
-        document = requests.get("http://169.254.169.254/latest/dynamic/instance-identity/document").text
+        imds_token = requests.put("http://169.254.169.254/latest/api/token", headers = {'X-aws-ec2-metadata-token-ttl-seconds': '2160'}).text
+        document = requests.get("http://169.254.169.254/latest/dynamic/instance-identity/document", headers={ 'X-aws-ec2-metadata-token': imds_token}).text
         return json.loads(document).get('region')
     except Exception as e:
         logging.error("Failed to get region from metadata: %s" % str(e))
@@ -50,7 +51,8 @@ def get_region_arg(connection_info):
 
 def get_private_ip_from_metadata():
     try:
-        document = requests.get("http://169.254.169.254/latest/dynamic/instance-identity/document").text
+        imds_token = requests.put("http://169.254.169.254/latest/api/token", headers = {'X-aws-ec2-metadata-token-ttl-seconds': '2160'}).text
+        document = requests.get("http://169.254.169.254/latest/dynamic/instance-identity/document", headers={ 'X-aws-ec2-metadata-token': imds_token}).text
         return json.loads(document).get('privateIp')
     except Exception as e:
         logging.error("Failed to get region from metadata: %s" % str(e))

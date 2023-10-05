@@ -1,5 +1,8 @@
 # Changelog
 
+## Next release
+- Increase default disk size for the nodes to 200GB
+
 ## Version 1.2.2 - Bugfix release
 - Make plugin compatible with AWS requiring IMDS_V2 instances
 

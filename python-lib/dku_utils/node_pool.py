@@ -5,7 +5,10 @@ def get_node_pool_args(node_pool):
     if 'diskType' in node_pool:
         args = args + ['--node-volume-type', node_pool['diskType']]
     if 'diskSizeGb' in node_pool and node_pool['diskSizeGb'] > 0:
-        args = args + ['--node-volume-size', str(node_pool['diskSizeGb'])]
+        disk_size_gb = node_pool['diskSizeGb']
+    else:
+        disk_size_gb = 200 # also defined as default value in parameter-sets/node-pool-request/parameter-set.json
+    args = args + ['--node-volume-size', str(disk_size_gb)]
 
     args = args + ['--nodes', str(node_pool.get('numNodes', 3))]
     if node_pool.get('numNodesAutoscaling', False):

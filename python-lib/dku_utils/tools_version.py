@@ -1,5 +1,7 @@
 import json, re
 from dku_kube.kubectl_command import run_with_timeout, KubeCommandException
+from dku_aws.eksctl_command import EksctlCommand
+from dku_utils.cluster import get_connection_info
 
 def get_kubectl_version():
     cmd = ['kubectl', 'version', '--client', '-o', 'json']
@@ -40,3 +42,8 @@ def check_versions():
     if kubectl_should_use_beta_apiVersion(kubectl_version) and authenticator_version < '0.5.4':
         raise Exception('Found kubectl %s and aws-iam-authenticator %s, which are incompatible. Please upgrade aws-iam-authenticator.' 
                         % (kubectl_version['major']+'.'+(kubectl_version['minor']), authenticator_version))
+
+def get_kubernetes_default_version(cluster_config):
+    cmd = EksctlCommand(['utils', 'schema'], get_connection_info(cluster_config))
+    out = cmd.run_and_get_output()
+    return json.loads(out)['definitions']['ClusterMeta']['properties']['version']['default']

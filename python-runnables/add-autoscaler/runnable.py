@@ -2,10 +2,7 @@ from dataiku.runnables import Runnable
 import dataiku
 import os, json, logging
 from dku_kube.autoscaler import add_autoscaler_if_needed, has_autoscaler
-from dku_aws.eksctl_command import EksctlCommand
-from dku_aws.aws_command import AwsCommand
 from dku_utils.cluster import get_cluster_from_dss_cluster
-from dku_utils.access import _has_not_blank_property
 
 class MyRunnable(Runnable):
     def __init__(self, project_key, config, plugin_config):
@@ -33,5 +30,5 @@ class MyRunnable(Runnable):
         if has_autoscaler(kube_config_path):
             return '<h5>An autoscaler pod already runs<h5>'
         else:
-            add_autoscaler_if_needed(cluster_id, kube_config_path)
+            add_autoscaler_if_needed(cluster_id, self.config, kube_config_path, self.config.get("k8sVersion", None))
             return '<h5>Created an autoscaler pod<h5>'

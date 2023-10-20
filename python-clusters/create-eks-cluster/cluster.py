@@ -32,6 +32,8 @@ class MyCluster(Cluster):
         
         attach_vm_to_security_groups = False
         injected_security_group = self.config.get('injectedSG', '').strip()
+
+        k8s_version = self.config.get("k8sVersion", None)
        
         if self.config.get('advanced', False):
             has_autoscaling = self.config.get('clusterAutoScaling')
@@ -70,7 +72,6 @@ class MyCluster(Cluster):
 
             args += get_node_pool_args(node_pool)
 
-            k8s_version = self.config.get("k8sVersion", None)
             if not _is_none_or_blank(k8s_version):
                 args = args + ['--version', k8s_version.strip()]
                 
@@ -234,7 +235,7 @@ class MyCluster(Cluster):
 
         if has_autoscaling:
             logging.info("Nodegroup is autoscaling, ensuring autoscaler")
-            add_autoscaler_if_needed(self.cluster_id, kube_config_path)
+            add_autoscaler_if_needed(self.cluster_id, self.config, kube_config_path, k8s_version)
         if has_gpu:
             logging.info("Nodegroup is GPU-enabled, ensuring NVIDIA GPU Drivers")
             add_gpu_driver_if_needed(self.cluster_id, kube_config_path, connection_info)

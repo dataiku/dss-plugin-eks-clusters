@@ -30,5 +30,5 @@ class MyRunnable(Runnable):
         if has_autoscaler(kube_config_path):
             return '<h5>An autoscaler pod already runs<h5>'
         else:
-            add_autoscaler_if_needed(cluster_id, self.config, kube_config_path, self.config.get("k8sVersion", None))
+            add_autoscaler_if_needed(cluster_id, self.config, cluster_def, kube_config_path)
             return '<h5>Created an autoscaler pod<h5>'

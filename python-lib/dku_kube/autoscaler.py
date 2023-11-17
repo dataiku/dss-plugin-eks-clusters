@@ -1,18 +1,14 @@
 import os, json, logging
 from .kubectl_command import run_with_timeout
 from dku_utils.access import _is_none_or_blank
-from dku_utils.tools_version import get_kubernetes_default_version
+from dku_utils.tools_version import strip_kubernetes_version
 
 AUTOSCALER_IMAGES = {
-    '1.20': 'k8s.gcr.io/autoscaling/cluster-autoscaler:v1.20.3',
-    '1.21': 'k8s.gcr.io/autoscaling/cluster-autoscaler:v1.21.2',
-    '1.22': 'k8s.gcr.io/autoscaling/cluster-autoscaler:v1.22.2',
-    '1.23': 'k8s.gcr.io/autoscaling/cluster-autoscaler:v1.23.1',
-    '1.24': 'registry.k8s.io/autoscaling/cluster-autoscaler:v1.24.3',
-    '1.25': 'registry.k8s.io/autoscaling/cluster-autoscaler:v1.25.3',
-    '1.26': 'registry.k8s.io/autoscaling/cluster-autoscaler:v1.26.4',
-    '1.27': 'registry.k8s.io/autoscaling/cluster-autoscaler:v1.27.3',
-    '1.28': 'registry.k8s.io/autoscaling/cluster-autoscaler:v1.28.0'
+    '1.24': 'v1.24.3',
+    '1.25': 'v1.25.3',
+    '1.26': 'v1.26.4',
+    '1.27': 'v1.27.3',
+    '1.28': 'v1.28.0'
 }
 
 def has_autoscaler(kube_config_path):
@@ -23,15 +19,18 @@ def has_autoscaler(kube_config_path):
     out, err = run_with_timeout(cmd, env=env, timeout=5)
     return len(out.strip()) > 0
 
-def add_autoscaler_if_needed(cluster_id, cluster_config, kube_config_path, kubernetes_version):
+def add_autoscaler_if_needed(cluster_id, cluster_config, cluster_def, kube_config_path):
     if not has_autoscaler(kube_config_path):
+        print("Amandine K8S version: %s" % cluster_config.get("k8sVersion", None))
+        kubernetes_version = strip_kubernetes_version(cluster_config.get("k8sVersion", None))
+        print("Amandine K8S stripped version: %s" % kubernetes_version)
         if _is_none_or_blank(kubernetes_version):
-            kubernetes_version = get_kubernetes_default_version(cluster_config)
+            kubernetes_version = cluster_def.get("Version")
         autoscaler_file_path = 'autoscaler.yaml'
-        if float(kubernetes_version) < 1.20:
-          autoscaler_image = AUTOSCALER_IMAGES.get('1.20', 'k8s.gcr.io/autoscaling/cluster-autoscaler:v1.20.3')
+        if float(kubernetes_version) < 1.24:
+            autoscaler_image = AUTOSCALER_IMAGES.get('1.24', 'v1.24.3')
         else:  
-          autoscaler_image = AUTOSCALER_IMAGES.get(kubernetes_version, 'registry.k8s.io/autoscaling/cluster-autoscaler:v1.28.0')
+            autoscaler_image = AUTOSCALER_IMAGES.get(kubernetes_version, 'v1.28.0')
         with open(autoscaler_file_path, 'w') as f:
             f.write(get_autoscaler_def(cluster_id, autoscaler_image))
         cmd = ['kubectl', 'create', '-f', os.path.abspath(autoscaler_file_path)]
@@ -40,7 +39,7 @@ def add_autoscaler_if_needed(cluster_id, cluster_config, kube_config_path, kuber
         env['KUBECONFIG'] = kube_config_path
         run_with_timeout(cmd, env=env, timeout=5)
         
-def get_autoscaler_def(cluster_id, autoscaler_image):
+def get_autoscaler_def(cluster_id, autoscaler_image_version):
     # the auto-discovery version from https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler/cloudprovider/aws
     # all the necessary roles and tags are handled by eksctl with the --asg-access flag
     yaml = """
@@ -182,7 +181,7 @@ spec:
     spec:
       serviceAccountName: cluster-autoscaler
       containers:
-        - image: %(autoscalerimage)s
+        - image: registry.k8s.io/autoscaling/cluster-autoscaler:%(autoscalerimageversion)s
           name: cluster-autoscaler
           resources:
             limits:
@@ -208,5 +207,5 @@ spec:
         - name: ssl-certs
           hostPath:
             path: "/etc/ssl/certs/ca-bundle.crt"
-""" % {'autoscalerimage': autoscaler_image, 'clusterid': cluster_id}
+""" % {'autoscalerimageversion': autoscaler_image_version, 'clusterid': cluster_id}
     return yaml

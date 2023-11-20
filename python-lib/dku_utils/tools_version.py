@@ -40,8 +40,6 @@ def strip_kubernetes_version(k8s_version_input):
     search_results_k8s_version = re.search(regex_k8s_version, k8s_version_input)
     if not search_results_k8s_version or not search_results_k8s_version.groups():
         raise Exception("Kubectl version specified: %s. No valid Kubernetes version found", k8s_version_input)
-    for g in search_results_k8s_version.groups():
-        print("Amandine capture group: %s" % g)
     return search_results_k8s_version.groups()[0]
 
 def get_authenticator_version():

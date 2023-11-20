@@ -21,12 +21,10 @@ def has_autoscaler(kube_config_path):
 
 def add_autoscaler_if_needed(cluster_id, cluster_config, cluster_def, kube_config_path):
     if not has_autoscaler(kube_config_path):
-        print("Amandine K8S version: %s" % cluster_config.get("k8sVersion", None))
         kubernetes_version = cluster_config.get("k8sVersion", None)
         if _is_none_or_blank(kubernetes_version):
             kubernetes_version = cluster_def.get("Version")
         kubernetes_version = strip_kubernetes_version(kubernetes_version)
-        print("Amandine K8S stripped version: %s" % kubernetes_version)
         autoscaler_file_path = 'autoscaler.yaml'
         if float(kubernetes_version) < 1.24:
             autoscaler_image = AUTOSCALER_IMAGES.get('1.24', 'v1.24.3')

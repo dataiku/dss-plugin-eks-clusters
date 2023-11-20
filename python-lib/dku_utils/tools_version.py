@@ -1,5 +1,7 @@
 import json, re
 from dku_kube.kubectl_command import run_with_timeout, KubeCommandException
+from dku_aws.eksctl_command import EksctlCommand
+from dku_utils.cluster import get_connection_info
 
 def get_kubectl_version():
     cmd = ['kubectl', 'version', '--client', '-o', 'json']
@@ -7,11 +9,18 @@ def get_kubectl_version():
     return json.loads(out)['clientVersion']
 
 def kubectl_version_to_string(kubectl_version):
+    """
+    Writes as a string the Kubernetes version coming from outcome of `kubectl version` command
+    """
     major = str(kubectl_version['major']) if 'major' in kubectl_version else ''
     minor = str(kubectl_version['minor']) if 'minor' in kubectl_version else ''
     return major + '.' + minor
 
 def get_kubectl_version_int(kubectl_version):
+    """
+    Extracts the integers representing the major version and the minor version coming from outcome
+    of `kubectl version` command
+    """
     # the kubectl version downloaded from Amazon website has a minor version finishing by '+'
     # keeping only the first numeric sequence for the minor version
     if 'major' not in kubectl_version or 'minor' not in kubectl_version:
@@ -22,6 +31,16 @@ def get_kubectl_version_int(kubectl_version):
         raise Exception("Kubectl version found on the machine: %s. It was not possible to parse" % kubectl_version_to_string(kubectl_version))
     minor_int = int(search_results_minor_int.groups()[0])
     return int(kubectl_version['major']), minor_int
+
+def strip_kubernetes_version(k8s_version_input):
+    """
+    Removes any additional characters from the Kubernetes version specified in the cluster creation form
+    """
+    regex_k8s_version = re.compile("^[^0-9]*([0-9]+\.?[0-9]+)([^0-9].*$|$)")
+    search_results_k8s_version = re.search(regex_k8s_version, k8s_version_input)
+    if not search_results_k8s_version or not search_results_k8s_version.groups():
+        raise Exception("Kubectl version specified: %s. No valid Kubernetes version found", k8s_version_input)
+    return search_results_k8s_version.groups()[0]
 
 def get_authenticator_version():
     cmd = ['aws-iam-authenticator', 'version', '-o', 'json']

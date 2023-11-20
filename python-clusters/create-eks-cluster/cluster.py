@@ -32,6 +32,8 @@ class MyCluster(Cluster):
         
         attach_vm_to_security_groups = False
         injected_security_group = self.config.get('injectedSG', '').strip()
+
+        k8s_version = self.config.get("k8sVersion", None)
        
         if self.config.get('advanced', False):
             has_autoscaling = self.config.get('clusterAutoScaling')
@@ -70,7 +72,6 @@ class MyCluster(Cluster):
 
             args += get_node_pool_args(node_pool)
 
-            k8s_version = self.config.get("k8sVersion", None)
             if not _is_none_or_blank(k8s_version):
                 args = args + ['--version', k8s_version.strip()]
                 
@@ -232,9 +233,6 @@ class MyCluster(Cluster):
 
         setup_creds_env(kube_config_path, connection_info, self.config)
 
-        if has_autoscaling:
-            logging.info("Nodegroup is autoscaling, ensuring autoscaler")
-            add_autoscaler_if_needed(self.cluster_id, kube_config_path)
         if has_gpu:
             logging.info("Nodegroup is GPU-enabled, ensuring NVIDIA GPU Drivers")
             add_gpu_driver_if_needed(self.cluster_id, kube_config_path, connection_info)
@@ -244,6 +242,10 @@ class MyCluster(Cluster):
 
         c = EksctlCommand(args, connection_info)
         cluster_info = json.loads(c.run_and_get_output())[0]
+
+        if has_autoscaling:
+            logging.info("Nodegroup is autoscaling, ensuring autoscaler")
+            add_autoscaler_if_needed(self.cluster_id, self.config, cluster_info, kube_config_path)
 
         with open(kube_config_path, "r") as f:
             kube_config = yaml.safe_load(f)

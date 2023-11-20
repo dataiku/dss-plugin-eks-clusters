@@ -1,26 +1,44 @@
-import os, sys, json, yaml, logging, random, time
+import os, json, logging
 from .kubectl_command import run_with_timeout
+from dku_utils.access import _is_none_or_blank
+from dku_utils.tools_version import strip_kubernetes_version
+
+AUTOSCALER_IMAGES = {
+    '1.24': 'v1.24.3',
+    '1.25': 'v1.25.3',
+    '1.26': 'v1.26.4',
+    '1.27': 'v1.27.3',
+    '1.28': 'v1.28.0'
+}
 
 def has_autoscaler(kube_config_path):
     env = os.environ.copy()
     env['KUBECONFIG'] = kube_config_path
     cmd = ['kubectl', 'get', 'pods', '--namespace', 'kube-system', '-l', 'app=cluster-autoscaler', '--ignore-not-found']
-    logging.info("Create autoscaler with : %s" % json.dumps(cmd))
+    logging.info("Checking autoscaler presence with : %s" % json.dumps(cmd))
     out, err = run_with_timeout(cmd, env=env, timeout=5)
     return len(out.strip()) > 0
 
-def add_autoscaler_if_needed(cluster_id, kube_config_path):
+def add_autoscaler_if_needed(cluster_id, cluster_config, cluster_def, kube_config_path):
     if not has_autoscaler(kube_config_path):
+        kubernetes_version = cluster_config.get("k8sVersion", None)
+        if _is_none_or_blank(kubernetes_version):
+            kubernetes_version = cluster_def.get("Version")
+        kubernetes_version = strip_kubernetes_version(kubernetes_version)
         autoscaler_file_path = 'autoscaler.yaml'
+        if float(kubernetes_version) < 1.24:
+            autoscaler_image = AUTOSCALER_IMAGES.get('1.24', 'v1.24.3')
+        else:  
+            autoscaler_image = AUTOSCALER_IMAGES.get(kubernetes_version, 'v1.28.0')
         with open(autoscaler_file_path, 'w') as f:
-            f.write(get_autoscaler_def(cluster_id))
+            f.write(get_autoscaler_def(cluster_id, autoscaler_image))
         cmd = ['kubectl', 'create', '-f', os.path.abspath(autoscaler_file_path)]
         logging.info("Create autoscaler with : %s" % json.dumps(cmd))
         env = os.environ.copy()
         env['KUBECONFIG'] = kube_config_path
         run_with_timeout(cmd, env=env, timeout=5)
         
-def get_autoscaler_def(cluster_id):
+def get_autoscaler_def(cluster_id, autoscaler_image_version):
     # the auto-discovery version from https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler/cloudprovider/aws
     # all the necessary roles and tags are handled by eksctl with the --asg-access flag
     yaml = """
@@ -162,7 +180,7 @@ spec:
     spec:
       serviceAccountName: cluster-autoscaler
       containers:
-        - image: k8s.gcr.io/autoscaling/cluster-autoscaler:v1.20.2
+        - image: registry.k8s.io/autoscaling/cluster-autoscaler:%(autoscalerimageversion)s
           name: cluster-autoscaler
           resources:
             limits:
@@ -178,7 +196,7 @@ spec:
             - --cloud-provider=aws
             - --skip-nodes-with-local-storage=false
             - --expander=least-waste
-            - --node-group-auto-discovery=asg:tag=k8s.io/cluster-autoscaler/enabled,k8s.io/cluster-autoscaler/%s
+            - --node-group-auto-discovery=asg:tag=k8s.io/cluster-autoscaler/enabled,k8s.io/cluster-autoscaler/%(clusterid)s
           volumeMounts:
             - name: ssl-certs
               mountPath: /etc/ssl/certs/ca-certificates.crt #/etc/ssl/certs/ca-bundle.crt for Amazon Linux Worker Nodes
@@ -188,5 +206,5 @@ spec:
         - name: ssl-certs
           hostPath:
             path: "/etc/ssl/certs/ca-bundle.crt"
-""" % cluster_id
+""" % {'autoscalerimageversion': autoscaler_image_version, 'clusterid': cluster_id}
     return yaml

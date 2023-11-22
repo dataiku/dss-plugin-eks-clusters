@@ -1,6 +1,7 @@
 # Changelog
 
-## Next release
+## Version 1.2.3 - Feature and bugfix release
+- Choose autoscaler version based on the Kubernetes cluster version. For Kubernetes prior to 1.24, autoscaler version used is `v1.24.3`
 - Increase default disk size for the nodes to 200GB
 
 ## Version 1.2.2 - Bugfix release

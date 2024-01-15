@@ -83,7 +83,7 @@
             "name": "injectedSG",
             "label": "Injected DSS SG",
             "type": "STRING",
-            "description": "Security group id to add as inbound on the cluster's autocreated SGs. Should allow inbound from DSS."
+            "description": "Security group id to add as inbound on the cluster's autocreated SGs. Should allow inbound traffic from DSS."
         },
         {
             "name": "makePrivateOnly",

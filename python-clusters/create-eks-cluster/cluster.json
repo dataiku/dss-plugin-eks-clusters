@@ -67,6 +67,13 @@
              "defaultValue" : true
         },
         {
+            "name": "enableCloudWatchPolicy",
+            "label": "Add CloudWatch policy",
+            "description": "Add CloudWatch IAM policy to cluster instances",
+            "type": "BOOLEAN",
+            "defaultValue": false
+        },
+        {
             "name": "privateCluster",
             "label": "Fully-private",
             "type": "BOOLEAN",

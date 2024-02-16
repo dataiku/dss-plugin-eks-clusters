@@ -12,7 +12,7 @@ from dku_kube.metrics_server import install_metrics_server
 from dku_utils.cluster import make_overrides, get_connection_info
 from dku_utils.access import _is_none_or_blank
 from dku_utils.config_parser import get_security_groups_arg, get_region_arg, get_private_ip_from_metadata
-from dku_utils.node_pool import get_node_pool_args, get_node_pool_yaml
+from dku_utils.node_pool import get_node_pool_yaml
 
 class MyCluster(Cluster):
     def __init__(self, cluster_id, cluster_name, config, plugin_config, global_settings):

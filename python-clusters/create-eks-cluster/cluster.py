@@ -71,7 +71,7 @@ class MyCluster(Cluster):
             args += get_security_groups_arg(networking_settings)
 
             if len(node_pools) > 0:
-                args += ['--without-node-group']
+                args += ['--without-nodegroup']
 
             if not _is_none_or_blank(k8s_version):
                 args = args + ['--version', k8s_version.strip()]

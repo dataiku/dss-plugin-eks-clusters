@@ -20,10 +20,7 @@ def get_node_pool_yaml(node_pool):
         yaml['minSize'] = node_pool.get('minNumNodes', 2)
         yaml['maxSize'] = node_pool.get('maxNumNodes', 2)
 
-    tags = node_pool.get('tags', {})
-    if len(tags) > 0:
-        yaml['tags'] = [ { key: value } for key, value in tags.items()]
-
+    yaml['tags'] = node_pool.get('tags', {})
     yaml['spot'] = node_pool.get('useSpotInstances', False)
 
     sshPublicKeyName = node_pool.get('publicKeyName', '')

@@ -131,7 +131,7 @@ class MyCluster(Cluster):
 
             for node_pool in node_pools[1:]:
                 yaml_node_pool = get_node_pool_yaml(node_pool)
-                yaml['managedNodeGroups'].append(yaml_node_pool)
+                yaml_dict['managedNodeGroups'].append(yaml_node_pool)
 
 
         # whatever the setting, make the cluster from the yaml config

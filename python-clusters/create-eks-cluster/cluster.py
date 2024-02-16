@@ -129,10 +129,27 @@ class MyCluster(Cluster):
                 commands = node_pool.get("preBootstrapCommands", "")
                 add_pre_bootstrap_commands(commands, yaml_dict)
 
-            for node_pool in node_pools[1:]:
-                yaml_node_pool = get_node_pool_yaml(node_pool)
-                yaml_dict['managedNodeGroups'].append(yaml_node_pool)
+            if len(node_pools) > 1:
+                for node_pool in node_pools[1:]:
+                    yaml_node_pool = get_node_pool_yaml(node_pool)
+                    yaml_dict['managedNodeGroups'].append(yaml_node_pool)
 
+                yaml_node_pool_loc = os.path.join(os.getcwd(), self.cluster_id +'_config_with_node_pools.yaml')
+                with open(yaml_loc, 'w') as outfile:
+                    yaml.dump(yaml_dict, outfile, default_flow_style=False)
+
+                args = ['create', 'cluster']
+                args += ['-v', '3'] # not -v 4 otherwise there is a debug line in the beginning of the output
+                args += ['--name', self.cluster_id]
+                args += get_region_arg(connection_info)
+                args += ['--full-ecr-access']
+                args += ['-f', yaml_node_pool_loc]
+
+                c = EksctlCommand(args + ["--dry-run"], connection_info)
+                yaml_spec = c.run_and_get_output()
+                logging.info("Got spec:\n%s" % yaml_spec)
+
+                yaml_dict = yaml.safe_load(yaml_spec)
 
         # whatever the setting, make the cluster from the yaml config
         yaml_loc = os.path.join(os.getcwd(), self.cluster_id +'_config.yaml')

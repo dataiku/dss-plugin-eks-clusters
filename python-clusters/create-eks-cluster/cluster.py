@@ -11,7 +11,7 @@ from dku_kube.gpu_driver import add_gpu_driver_if_needed
 from dku_kube.metrics_server import install_metrics_server
 from dku_utils.cluster import make_overrides, get_connection_info
 from dku_utils.access import _is_none_or_blank
-from dku_utils.config_parser import get_security_groups_arg, get_region_arg, get_private_ip_from_metadata
+from dku_utils.config_parser import get_region_arg, get_private_ip_from_metadata
 from dku_utils.node_pool import get_node_pool_yaml
 
 class MyCluster(Cluster):
@@ -68,8 +68,6 @@ class MyCluster(Cluster):
             if len(subnets) > 0:
                 args = args + ['--vpc-public-subnets', ','.join(subnets)]
 
-            args += get_security_groups_arg(networking_settings)
-
             if len(node_pools) > 0:
                 args += ['--without-nodegroup']
 
@@ -89,6 +87,8 @@ class MyCluster(Cluster):
             if len(node_pools) > 0:
                 yaml_dict['managedNodeGroups'] = yaml_dict.get('managedNodeGroups', [])
                 for idx, node_pool in enumerate(node_pools, 0):
+                    node_pool['securityGroups'] = networking_settings.get('securityGroups', [])
+                    node_pool['privateNetworking'] = networking_settings.get('privateNetworking', False)
                     yaml_node_pool = get_node_pool_yaml(node_pool)
                     yaml_node_pool['name'] = "%s-ng-%s" % (self.cluster_id, idx)
                     yaml_dict['managedNodeGroups'].append(yaml_node_pool)

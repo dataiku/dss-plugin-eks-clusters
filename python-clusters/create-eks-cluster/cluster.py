@@ -75,7 +75,7 @@ class MyCluster(Cluster):
 
             if not _is_none_or_blank(k8s_version):
                 args = args + ['--version', k8s_version.strip()]
-                
+
             c = EksctlCommand(args + ["--dry-run"], connection_info)
             yaml_spec = c.run_and_get_output()
             logging.info("Got spec:\n%s" % yaml_spec)
@@ -94,7 +94,7 @@ class MyCluster(Cluster):
                     yaml_dict['managedNodeGroups'].append(yaml_node_pool)
 
                 yaml_node_pool_loc = os.path.join(os.getcwd(), self.cluster_id +'_config_with_node_pools.yaml')
-                with open(yaml_loc, 'w') as outfile:
+                with open(yaml_node_pool_loc, 'w') as outfile:
                     yaml.dump(yaml_dict, outfile, default_flow_style=False)
 
                 args = ['create', 'cluster']

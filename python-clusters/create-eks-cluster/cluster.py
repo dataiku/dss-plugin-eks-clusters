@@ -43,11 +43,10 @@ class MyCluster(Cluster):
             yaml_dict = yaml.safe_load(self.config.get("advancedYaml"))
 
         else:
-            node_pools = self.config.get('nodePools', {})
-            node_pool = node_pools[0]
+            node_pools = self.config.get('nodePools', [])
 
-            has_autoscaling = node_pool.get('numNodesAutoscaling', False)
-            has_gpu = node_pool.get("enableGPU", False)
+            has_autoscaling = any(node_pool.get('numNodesAutoscaling', False) for node_pool in node_pools)
+            has_gpu = any(node_pool.get("enableGPU", False) for node_pool in node_pools)
 
             # build the yaml def. As a first step we run eksctl with
             # as many command line args as possible to get it to produce
@@ -71,7 +70,8 @@ class MyCluster(Cluster):
 
             args += get_security_groups_arg(networking_settings)
 
-            args += get_node_pool_args(node_pool)
+            if len(node_pools) > 0:
+                args += ['--without-node-group']
 
             if not _is_none_or_blank(k8s_version):
                 args = args + ['--version', k8s_version.strip()]
@@ -81,7 +81,32 @@ class MyCluster(Cluster):
             logging.info("Got spec:\n%s" % yaml_spec)
             
             yaml_dict = yaml.safe_load(yaml_spec)
-            
+
+            # Once we generated the yaml configuration for the cluster, we can add the required specs for all node groups
+            # and do a second dry-run with the initial generated configuration file.
+            # This allows to fill in the configuration for the node groups.
+            # The CLI can only accommodate for a single initial node group on cluster creation, so we have to use the yaml configuration file.
+            if len(node_pools) > 0:
+                yaml_dict['managedNodeGroups'] = yaml_dict.get('managedNodeGroups', [])
+                for idx, node_pool in enumerate(node_pools, 0):
+                    yaml_node_pool = get_node_pool_yaml(node_pool)
+                    yaml_node_pool['name'] = "%s-ng-%s" % self.cluster_id, idx
+                    yaml_dict['managedNodeGroups'].append(yaml_node_pool)
+
+                yaml_node_pool_loc = os.path.join(os.getcwd(), self.cluster_id +'_config_with_node_pools.yaml')
+                with open(yaml_loc, 'w') as outfile:
+                    yaml.dump(yaml_dict, outfile, default_flow_style=False)
+
+                args = ['create', 'cluster']
+                args += ['-v', '3'] # not -v 4 otherwise there is a debug line in the beginning of the output
+                args += ['-f', yaml_node_pool_loc]
+
+                c = EksctlCommand(args + ["--dry-run"], connection_info)
+                yaml_spec = c.run_and_get_output()
+                logging.info("Got spec with node groups:\n%s" % yaml_spec)
+
+                yaml_dict = yaml.safe_load(yaml_spec)
+
             if self.config.get('privateCluster', False):
                 logging.info("Making the cluster fully-private")
                 
@@ -115,41 +140,6 @@ class MyCluster(Cluster):
                 # we'll need to make eksctl able to reach the stuff bearing the 
                 # SG created by eksctl
                 attach_vm_to_security_groups = True
-                
-            def add_pre_bootstrap_commands(commands, yaml_dict):
-                for node_pool_dict in yaml_dict['managedNodeGroups']:
-                    if node_pool_dict.get('preBootstrapCommands') is None:
-                        node_pool_dict['preBootstrapCommands'] = []
-                    for command in commands.split('\n'):
-                        if len(command.strip()) > 0:
-                            node_pool_dict['preBootstrapCommands'].append(command)
-                
-            if node_pool.get('addPreBootstrapCommands', False) and not _is_none_or_blank(node_pool.get("preBootstrapCommands", "")):
-                # has to be added in the yaml, there is no command line flag for that
-                commands = node_pool.get("preBootstrapCommands", "")
-                add_pre_bootstrap_commands(commands, yaml_dict)
-
-            if len(node_pools) > 1:
-                for node_pool in node_pools[1:]:
-                    yaml_node_pool = get_node_pool_yaml(node_pool)
-                    yaml_dict['managedNodeGroups'].append(yaml_node_pool)
-
-                yaml_node_pool_loc = os.path.join(os.getcwd(), self.cluster_id +'_config_with_node_pools.yaml')
-                with open(yaml_loc, 'w') as outfile:
-                    yaml.dump(yaml_dict, outfile, default_flow_style=False)
-
-                args = ['create', 'cluster']
-                args += ['-v', '3'] # not -v 4 otherwise there is a debug line in the beginning of the output
-                args += ['--name', self.cluster_id]
-                args += get_region_arg(connection_info)
-                args += ['--full-ecr-access']
-                args += ['-f', yaml_node_pool_loc]
-
-                c = EksctlCommand(args + ["--dry-run"], connection_info)
-                yaml_spec = c.run_and_get_output()
-                logging.info("Got spec:\n%s" % yaml_spec)
-
-                yaml_dict = yaml.safe_load(yaml_spec)
 
         # whatever the setting, make the cluster from the yaml config
         yaml_loc = os.path.join(os.getcwd(), self.cluster_id +'_config.yaml')

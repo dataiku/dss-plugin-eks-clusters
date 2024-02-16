@@ -1,3 +1,5 @@
+from dku_utils.access import _is_none_or_blank
+
 def get_node_pool_args(node_pool):
     args = []
     if 'machineType' in node_pool:
@@ -62,5 +64,8 @@ def get_node_pool_yaml(node_pool):
             'publicKey': sshPublicKeyName,
             # Should we enable SSM??
         }
-        
+
+    if node_pool.get('addPreBootstrapCommands', False) and not _is_none_or_blank(node_pool.get("preBootstrapCommands", "")):
+        node_pool['preBootstrapCommands'] = [command.strip() for command in node_pool['preBootstrapCommands'].split('\n') if len(command.strip()) > 0]
+
     return yaml

@@ -12,7 +12,7 @@ from dku_kube.metrics_server import install_metrics_server
 from dku_utils.cluster import make_overrides, get_connection_info
 from dku_utils.access import _is_none_or_blank
 from dku_utils.config_parser import get_security_groups_arg, get_region_arg, get_private_ip_from_metadata
-from dku_utils.node_pool import get_node_pool_args
+from dku_utils.node_pool import get_node_pool_args, get_node_pool_yaml
 
 class MyCluster(Cluster):
     def __init__(self, cluster_id, cluster_name, config, plugin_config, global_settings):
@@ -43,7 +43,8 @@ class MyCluster(Cluster):
             yaml_dict = yaml.safe_load(self.config.get("advancedYaml"))
 
         else:
-            node_pool = self.config.get('nodePool', {})
+            node_pools = self.config.get('nodePools', {})
+            node_pool = node_pools[0]
 
             has_autoscaling = node_pool.get('numNodesAutoscaling', False)
             has_gpu = node_pool.get("enableGPU", False)
@@ -127,6 +128,11 @@ class MyCluster(Cluster):
                 # has to be added in the yaml, there is no command line flag for that
                 commands = node_pool.get("preBootstrapCommands", "")
                 add_pre_bootstrap_commands(commands, yaml_dict)
+
+            for node_pool in node_pools[1:]:
+                yaml_node_pool = get_node_pool_yaml(node_pool)
+                yaml['managedNodeGroups'].append(yaml_node_pool)
+
 
         # whatever the setting, make the cluster from the yaml config
         yaml_loc = os.path.join(os.getcwd(), self.cluster_id +'_config.yaml')

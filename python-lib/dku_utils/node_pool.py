@@ -13,7 +13,7 @@ def get_node_pool_yaml(node_pool):
     yaml['desiredCapacity'] = node_pool.get('numNodes', 3)
     if node_pool.get('numNodesAutoscaling', False):
         yaml['iam'] = {
-            'withAddOnPolicies': {
+            'withAddonPolicies': {
                 'autoScaler': True
             }
         }
@@ -24,14 +24,17 @@ def get_node_pool_yaml(node_pool):
     yaml['spot'] = node_pool.get('useSpotInstances', False)
 
     sshPublicKeyName = node_pool.get('publicKeyName', '')
-    if len(sshPublicKeyName) > 0:
+    if not _is_none_or_blank(sshPublicKeyName):
         yaml['ssh'] = {
             'allow': True,
-            'publicKey': sshPublicKeyName,
+            'publicKeyName': sshPublicKeyName,
             # Should we enable SSM??
         }
 
     if node_pool.get('addPreBootstrapCommands', False) and not _is_none_or_blank(node_pool.get("preBootstrapCommands", "")):
-        node_pool['preBootstrapCommands'] = [command.strip() for command in node_pool['preBootstrapCommands'].split('\n') if len(command.strip()) > 0]
+        yaml['preBootstrapCommands'] = yaml.get('preBootstrapCommands', [])
+        yaml['preBootstrapCommands'] += [command.strip()\
+                                          for command in node_pool['preBootstrapCommands'].split('\n')\
+                                              if not _is_none_or_blank(command.strip())]
 
     return yaml

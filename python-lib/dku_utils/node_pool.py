@@ -3,7 +3,7 @@ from dku_utils.access import _is_none_or_blank
 def get_node_pool_yaml(node_pool):
     yaml = {}
     if 'machineType' in node_pool:
-        yaml['instanceType'] = node_pool.get['machineType']
+        yaml['instanceType'] = node_pool['machineType']
     yaml['volumeType'] = node_pool.get('diskType', 'gp2')
     if 'diskSizeGb' in node_pool and node_pool['diskSizeGb'] > 0:
         yaml['volumeSize'] = node_pool['diskSizeGb']

@@ -119,9 +119,9 @@
                     "type": "SELECT",
                     "label": "Effect",
                     "selectChoices": [
-                        { "value": "NO_SCHEDULE", "label": "NoSchedule"},
-                        { "value": "NO_EXECUTE", "label": "NoExecute"},
-                        { "value": "PREFER_NO_SCHEDULE", "label": "PreferNoSchedule"}
+                        { "value": "NoSchedule", "label": "NoSchedule"},
+                        { "value": "NoExecute", "label": "NoExecute"},
+                        { "value": "PreferNoSchedule", "label": "PreferNoSchedule"}
                     ],
                     "mandatory": true
                 }

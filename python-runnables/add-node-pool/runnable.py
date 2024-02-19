@@ -7,7 +7,7 @@ from dku_aws.eksctl_command import EksctlCommand
 from dku_aws.aws_command import AwsCommand
 from dku_utils.cluster import get_cluster_from_dss_cluster, get_connection_info
 from dku_utils.config_parser import get_security_groups_arg, get_region_arg
-from dku_utils.node_pool import get_node_pool_args
+from dku_utils.node_pool import get_node_pool_args, build_node_pool_taints_yaml
 from dku_utils.access import _is_none_or_blank
 
 class MyRunnable(Runnable):
@@ -74,6 +74,9 @@ class MyRunnable(Runnable):
                 for command in commands.split('\n'):
                     if len(command.strip()) > 0:
                         node_pool_dict['preBootstrapCommands'].append(command)
+
+        # Adding node pool taints on the only node pool we create which is managed:
+        yaml_dict['managedNodeGroups'][0]['taints'] = build_node_pool_taints_yaml(node_pool)
         
         yaml_loc = os.path.join(os.getcwd(), cluster_id +'_config.yaml')
         with open(yaml_loc, 'w') as outfile:

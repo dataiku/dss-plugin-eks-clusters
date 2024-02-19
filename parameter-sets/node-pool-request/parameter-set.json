@@ -85,6 +85,49 @@
             "type": "STRING"
         },
         {
+            "name": "labels",
+            "label": "Node Labels",
+            "description": "TODO: Test empty map keys/values | https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/",
+            "type": "MAP",
+            "mandatory": false
+        },
+        {
+            "name": "taints",
+            "label": "Node Taints",
+            "description": "WARNING: MUST CREATE AT LEAST ONE NODE POOL WITHOUT TAINTS. https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/",
+            "mandatory": false,
+            "type": "OBJECT_LIST",
+            "subParams": [
+                {
+                    "type": "SEPARATOR",
+                    "label": "Enter your taints"
+                },
+                {
+                    "name": "key",
+                    "type": "STRING",
+                    "label": "Key",
+                    "mandatory": true
+                },
+                {
+                    "name": "value",
+                    "type": "STRING",
+                    "label": "Value",
+                    "mandatory": false
+                },
+                {
+                    "name": "effect",
+                    "type": "SELECT",
+                    "label": "Effect",
+                    "selectChoices": [
+                        { "value": "NO_SCHEDULE", "label": "NoSchedule"},
+                        { "value": "NO_EXECUTE", "label": "NoExecute"},
+                        { "value": "PREFER_NO_SCHEDULE", "label": "PreferNoSchedule"}
+                    ],
+                    "mandatory": true
+                }
+            ]
+        },
+        {
             "name": "enableGPU",
             "label": "GPU",
             "description": "Enable GPU workloads on the cluster",

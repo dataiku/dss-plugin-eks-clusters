@@ -89,7 +89,7 @@ class MyCluster(Cluster):
                 for idx, node_pool in enumerate(node_pools, 0):
                     node_pool['securityGroups'] = networking_settings.get('securityGroups', [])
                     node_pool['privateNetworking'] = networking_settings.get('privateNetworking', False)
-                    yaml_node_pool = get_node_pool_yaml(node_pool)
+                    yaml_node_pool = get_node_pool_yaml(node_pool, networking_settings)
                     yaml_node_pool['name'] = "%s-ng-%s" % (self.cluster_id, idx)
                     yaml_dict['managedNodeGroups'].append(yaml_node_pool)
 

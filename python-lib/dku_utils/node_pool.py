@@ -29,10 +29,13 @@ def get_node_pool_args(node_pool):
     if len(node_pool.get('publicKeyName', '')) > 0:
         args = args + ["--ssh-access"]
         args = args + ['--ssh-public-key', node_pool.get('publicKeyName', '')]
-        
+
+    if bool(node_pool.get('labels', {})):
+        args += ['--node-labels', ','.join(['%s=%s' % (label_key, label_value) for label_key, label_value in node_pool['labels'].items()])]
+
     return args
 
-def get_node_pool_yaml(node_pool):
+def get_node_pool_yaml(node_pool, networking_settings):
     yaml = {}
     if 'machineType' in node_pool:
         yaml['instanceType'] = node_pool['machineType']
@@ -53,6 +56,8 @@ def get_node_pool_yaml(node_pool):
         yaml['maxSize'] = node_pool.get('maxNumNodes', 2)
 
     yaml['tags'] = node_pool.get('tags', {})
+    yaml['taints'] = build_node_pool_taints_yaml(node_pool)
+    yaml['labels'] = node_pool.get('labels', dict())
     yaml['spot'] = node_pool.get('useSpotInstances', False)
 
     sshPublicKeyName = node_pool.get('publicKeyName', '')
@@ -63,11 +68,11 @@ def get_node_pool_yaml(node_pool):
             # Should we enable SSM??
         }
 
-    if len(node_pool.get('securityGroups', [])) > 0:
+    if len(networking_settings.get('securityGroups', [])) > 0:
         yaml['securityGroups'] = {
-            'attachIDs': node_pool['securityGroups']
+            'attachIDs': networking_settings['securityGroups']
         }
-    yaml['privateNetworking'] = node_pool.get('privateNetworking', False)
+    yaml['privateNetworking'] = networking_settings.get('privateNetworking', False)
 
     if node_pool.get('addPreBootstrapCommands', False) and not _is_none_or_blank(node_pool.get("preBootstrapCommands", "")):
         yaml['preBootstrapCommands'] = yaml.get('preBootstrapCommands', [])
@@ -76,3 +81,16 @@ def get_node_pool_yaml(node_pool):
                                               if not _is_none_or_blank(command.strip())]
 
     return yaml
+
+def build_node_pool_taints_yaml(node_pool):
+    node_pool['taints'] = node_pool.get('taints', [])
+    yaml_taints = []
+    if len(node_pool['taints']) > 0:
+        for taint in node_pool['taints']:
+            if not _is_none_or_blank(taint.key):
+                yaml_taints.append({
+                    'key': taint.key,
+                    'value': taint.value,
+                    'effect': taint.effect
+                })
+    return yaml_taints

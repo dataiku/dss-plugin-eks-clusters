@@ -66,7 +66,7 @@ def get_node_pool_yaml(node_pool, networking_settings):
     yaml['tags'] = node_pool.get('tags', {})
     yaml['taints'] = build_node_pool_taints_yaml(node_pool)
     node_pool['labels'] = node_pool.get('labels', {})
-    if any(node_pool['labels'].items(), lambda label: _is_none_or_blank(label[0])):
+    if any(_is_none_or_blank(label_key) for label_key in node_pool['labels'].keys()):
         raise Exception('At least one node pool label key is not valid, please ensure label keys are not empty. Observed labels: %s' % node_pool['labels'])
     yaml['labels'] = node_pool['labels']
     yaml['spot'] = node_pool.get('useSpotInstances', False)

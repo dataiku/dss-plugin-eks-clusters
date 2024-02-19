@@ -27,11 +27,19 @@ def get_node_pool_args(node_pool):
         args = args + ['--managed', '--spot']
 
     if len(node_pool.get('publicKeyName', '')) > 0:
-        args = args + ["--ssh-access"]
+        args = args + ['--ssh-access']
         args = args + ['--ssh-public-key', node_pool.get('publicKeyName', '')]
 
-    if bool(node_pool.get('labels', {})):
-        args += ['--node-labels', ','.join(['%s=%s' % (label_key, label_value) for label_key, label_value in node_pool['labels'].items()])]
+    node_pool['labels'] = node_pool.get('labels', {})
+    if bool(node_pool['labels']):
+        labels = []
+        for label_key, label_value in node_pool['labels'].items():
+            if not label_key:
+                raise Exception('At least one node pool label key is not valid, please ensure label keys are not empty. Observed labels: %s' % node_pool['labels'])
+            if not label_value:
+                label_value = ''
+            labels.append('%s=%s' % (label_key, label_value))
+        args += ['--node-labels', ','.join(labels)]
 
     return args
 
@@ -57,7 +65,10 @@ def get_node_pool_yaml(node_pool, networking_settings):
 
     yaml['tags'] = node_pool.get('tags', {})
     yaml['taints'] = build_node_pool_taints_yaml(node_pool)
-    yaml['labels'] = node_pool.get('labels', dict())
+    node_pool['labels'] = node_pool.get('labels', {})
+    if any(node_pool['labels'].items(), lambda label: _is_none_or_blank(label[0])):
+        raise Exception('At least one node pool label key is not valid, please ensure label keys are not empty. Observed labels: %s' % node_pool['labels'])
+    yaml['labels'] = node_pool['labels']
     yaml['spot'] = node_pool.get('useSpotInstances', False)
 
     sshPublicKeyName = node_pool.get('publicKeyName', '')
@@ -74,7 +85,7 @@ def get_node_pool_yaml(node_pool, networking_settings):
         }
     yaml['privateNetworking'] = networking_settings.get('privateNetworking', False)
 
-    if node_pool.get('addPreBootstrapCommands', False) and not _is_none_or_blank(node_pool.get("preBootstrapCommands", "")):
+    if node_pool.get('addPreBootstrapCommands', False) and not _is_none_or_blank(node_pool.get('preBootstrapCommands', '')):
         yaml['preBootstrapCommands'] = yaml.get('preBootstrapCommands', [])
         yaml['preBootstrapCommands'] += [command.strip()\
                                           for command in node_pool['preBootstrapCommands'].split('\n')\
@@ -90,7 +101,9 @@ def build_node_pool_taints_yaml(node_pool):
             if not _is_none_or_blank(taint.get('key', '')):
                 yaml_taints.append({
                     'key': taint['key'],
-                    'value': taint['value'],
+                    'value': taint.get('value', ''),
                     'effect': taint['effect']
                 })
+            else:
+                raise Exception('A node pool taint is invalid, please ensure that the key to a taint is not empty. Observed taints: %s' % ('[' + ';'.join(node_pool['taints']) + ']'))
     return yaml_taints

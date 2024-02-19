@@ -87,10 +87,10 @@ def build_node_pool_taints_yaml(node_pool):
     yaml_taints = []
     if len(node_pool['taints']) > 0:
         for taint in node_pool['taints']:
-            if not _is_none_or_blank(taint.key):
+            if not _is_none_or_blank(taint.get('key', '')):
                 yaml_taints.append({
-                    'key': taint.key,
-                    'value': taint.value,
-                    'effect': taint.effect
+                    'key': taint['key'],
+                    'value': taint['value'],
+                    'effect': taint['effect']
                 })
     return yaml_taints

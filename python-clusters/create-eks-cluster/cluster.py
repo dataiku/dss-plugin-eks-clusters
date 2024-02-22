@@ -46,7 +46,7 @@ class MyCluster(Cluster):
             node_pools = self.config.get('nodePools', [])
 
             has_autoscaling = any(node_pool.get('numNodesAutoscaling', False) for node_pool in node_pools)
-            has_gpu = any(node_pool.get("enableGPU", False) for node_pool in node_pools)
+            has_gpu = any(node_pool.get('enableGPU', False) for node_pool in node_pools)
 
             # build the yaml def. As a first step we run eksctl with
             # as many command line args as possible to get it to produce
@@ -61,15 +61,15 @@ class MyCluster(Cluster):
 
             subnets = networking_settings.get('subnets', [])
             if networking_settings.get('privateNetworking', False):
-                args = args + ['--node-private-networking']
                 private_subnets = networking_settings.get('privateSubnets', [])
                 if len(private_subnets) > 0:
                     args = args + ['--vpc-private-subnets', ','.join(private_subnets)]
             if len(subnets) > 0:
                 args = args + ['--vpc-public-subnets', ','.join(subnets)]
 
-            if len(node_pools) > 0:
-                args += ['--without-nodegroup']
+            # EKSCTL does not support creating more than one node group using CLI arguments
+            # So we generate the configuration for the cluster without node groups and we add them later to the yaml config
+            args += ['--without-nodegroup']
 
             if not _is_none_or_blank(k8s_version):
                 args = args + ['--version', k8s_version.strip()]
@@ -87,8 +87,6 @@ class MyCluster(Cluster):
             if len(node_pools) > 0:
                 yaml_dict['managedNodeGroups'] = yaml_dict.get('managedNodeGroups', [])
                 for idx, node_pool in enumerate(node_pools, 0):
-                    node_pool['securityGroups'] = networking_settings.get('securityGroups', [])
-                    node_pool['privateNetworking'] = networking_settings.get('privateNetworking', False)
                     yaml_node_pool = get_node_pool_yaml(node_pool, networking_settings)
                     yaml_node_pool['name'] = "%s-ng-%s" % (self.cluster_id, idx)
                     yaml_dict['managedNodeGroups'].append(yaml_node_pool)
@@ -247,7 +245,7 @@ class MyCluster(Cluster):
         setup_creds_env(kube_config_path, connection_info, self.config)
 
         if has_gpu:
-            logging.info("Nodegroup is GPU-enabled, ensuring NVIDIA GPU Drivers")
+            logging.info("At least one node group is GPU-enabled, ensuring NVIDIA GPU Drivers")
             add_gpu_driver_if_needed(self.cluster_id, kube_config_path, connection_info)
 
         if self.config.get('installMetricsServer'):
@@ -257,7 +255,7 @@ class MyCluster(Cluster):
         cluster_info = json.loads(c.run_and_get_output())[0]
 
         if has_autoscaling:
-            logging.info("Nodegroup is autoscaling, ensuring autoscaler")
+            logging.info("At least one node group is autoscaling, ensuring autoscaler")
             add_autoscaler_if_needed(self.cluster_id, self.config, cluster_info, kube_config_path)
 
         with open(kube_config_path, "r") as f:

@@ -44,7 +44,13 @@ def get_node_pool_args(node_pool):
     return args
 
 def get_node_pool_yaml(node_pool, networking_settings):
-    yaml = {}
+    yaml = {
+        'iam': {
+            'withAddonPolicies': {
+                'imageBuilder': True # Adding full ECR access to the node group
+            }
+        }
+    }
     if 'machineType' in node_pool:
         yaml['instanceType'] = node_pool['machineType']
     yaml['volumeType'] = node_pool.get('diskType', 'gp2')
@@ -55,13 +61,9 @@ def get_node_pool_yaml(node_pool, networking_settings):
 
     yaml['desiredCapacity'] = node_pool.get('numNodes', 3)
     if node_pool.get('numNodesAutoscaling', False):
-        yaml['iam'] = {
-            'withAddonPolicies': {
-                'autoScaler': True
-            }
-        }
+        yaml['iam']['withAddonPolicies']['autoScaler'] = True
         yaml['minSize'] = node_pool.get('minNumNodes', 2)
-        yaml['maxSize'] = node_pool.get('maxNumNodes', 2)
+        yaml['maxSize'] = node_pool.get('maxNumNodes', 5)
 
     yaml['tags'] = node_pool.get('tags', {})
     yaml['taints'] = build_node_pool_taints_yaml(node_pool)
@@ -75,8 +77,7 @@ def get_node_pool_yaml(node_pool, networking_settings):
     if not _is_none_or_blank(sshPublicKeyName):
         yaml['ssh'] = {
             'allow': True,
-            'publicKeyName': sshPublicKeyName,
-            # Should we enable SSM??
+            'publicKeyName': sshPublicKeyName
         }
 
     if len(networking_settings.get('securityGroups', [])) > 0:

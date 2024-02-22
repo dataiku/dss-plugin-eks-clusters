@@ -87,7 +87,7 @@
         {
             "name": "labels",
             "label": "Node Labels",
-            "description": "TODO: Test empty map keys/values | https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/",
+            "description": "https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/",
             "type": "MAP",
             "mandatory": false
         },

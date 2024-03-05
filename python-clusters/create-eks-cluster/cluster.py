@@ -89,7 +89,7 @@ class MyCluster(Cluster):
                 for idx, node_pool in enumerate(node_pools, 0):
                     if node_pool:
                         yaml_node_pool = get_node_pool_yaml(node_pool, networking_settings)
-                        yaml_node_pool['name'] = "%s-ng-%s" % (self.cluster_id, idx)
+                        yaml_node_pool['name'] = node_pool.get('nodeGroupId', "%s-ng-%s" % (self.cluster_id, idx))
                         yaml_dict['managedNodeGroups'].append(yaml_node_pool)
 
                 yaml_node_pool_loc = os.path.join(os.getcwd(), self.cluster_id +'_config_with_node_pools.yaml')

@@ -34,8 +34,9 @@ class MyRunnable(Runnable):
         kube_config_path = dss_cluster_settings.get_raw()['containerSettings']['executionConfigsGenericOverrides']['kubeConfigPath']
 
         connection_info = get_connection_info(dss_cluster_config.get('config'))
-        
-        node_group_id = self.config.get('nodeGroupId', None)
+
+        node_pool = self.config.get('nodePool', {})
+        node_group_id = node_pool.get('nodeGroupId', None)
         
         # first pass: get the yaml config corresponding to the command line args
         args = ['create', 'nodegroup']
@@ -54,7 +55,6 @@ class MyRunnable(Runnable):
             
         args += get_security_groups_arg(dss_cluster_config['config'].get('networkingSettings', {}))
 
-        node_pool = self.config.get('nodePool', {})
         args += get_node_pool_args(node_pool)
 
         c = EksctlCommand(args + ["--dry-run"], connection_info)

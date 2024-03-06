@@ -1,3 +1,4 @@
+import logging
 from dku_utils.access import _is_none_or_blank
 
 def get_node_pool_args(node_pool):
@@ -19,22 +20,23 @@ def get_node_pool_args(node_pool):
         args = args + ['--nodes-max', str(node_pool.get('maxNumNodes', 5))]
 
     tags = node_pool.get('tags', {})
-    if len(tags) > 0:
+    if tags:
         tag_list = [key + '=' + value for key, value in tags.items()]
         args = args + ['--tags', ','.join(tag_list)]
 
     if node_pool.get('useSpotInstances', False):
         args = args + ['--managed', '--spot']
 
-    if len(node_pool.get('publicKeyName', '')) > 0:
+    if node_pool.get('publicKeyName', ''):
         args = args + ['--ssh-access']
         args = args + ['--ssh-public-key', node_pool.get('publicKeyName', '')]
 
     node_pool['labels'] = node_pool.get('labels', {})
-    if bool(node_pool['labels']):
+    if node_pool['labels']:
         labels = []
         for label_key, label_value in node_pool['labels'].items():
             if not label_key:
+                logging.error('At least one node pool label key is not valid, please ensure label keys are not empty. Observed labels: %s' % node_pool['labels'])
                 raise Exception('At least one node pool label key is not valid, please ensure label keys are not empty. Observed labels: %s' % node_pool['labels'])
             if not label_value:
                 label_value = ''
@@ -53,7 +55,10 @@ def get_node_pool_yaml(node_pool, networking_settings):
     }
     if 'machineType' in node_pool:
         yaml['instanceType'] = node_pool['machineType']
-    yaml['volumeType'] = node_pool.get('diskType', 'gp2')
+
+    if 'diskType' in node_pool:
+        yaml['volumeType'] = node_pool['diskType']
+
     if 'diskSizeGb' in node_pool and node_pool['diskSizeGb'] > 0:
         yaml['volumeSize'] = node_pool['diskSizeGb']
     else:
@@ -69,7 +74,8 @@ def get_node_pool_yaml(node_pool, networking_settings):
     yaml['taints'] = build_node_pool_taints_yaml(node_pool)
     node_pool['labels'] = node_pool.get('labels', {})
     if any(_is_none_or_blank(label_key) for label_key in node_pool['labels'].keys()):
-        raise Exception('At least one node pool label key is not valid, please ensure label keys are not empty. Observed labels: %s' % node_pool['labels'])
+        logging.error('At least one node pool label key is not valid, please ensure label keys are not empty. Observed labels: [%s]' % ';'.join(node_pool['labels']))
+        raise Exception('At least one node pool label key is not valid, please ensure label keys are not empty. Observed labels: [%s]' % ';'.join(node_pool['labels']))
     yaml['labels'] = node_pool['labels']
     yaml['spot'] = node_pool.get('useSpotInstances', False)
 
@@ -80,9 +86,9 @@ def get_node_pool_yaml(node_pool, networking_settings):
             'publicKeyName': sshPublicKeyName
         }
 
-    if len(networking_settings.get('securityGroups', [])) > 0:
+    if networking_settings.get('securityGroups', []):
         yaml['securityGroups'] = {
-            'attachIDs': networking_settings['securityGroups']
+            'attachIDs': map(networking_settings['securityGroups'], lambda security_group: security_group.strip())
         }
     yaml['privateNetworking'] = networking_settings.get('privateNetworking', False)
 
@@ -97,14 +103,15 @@ def get_node_pool_yaml(node_pool, networking_settings):
 def build_node_pool_taints_yaml(node_pool):
     node_pool['taints'] = node_pool.get('taints', [])
     yaml_taints = []
-    if len(node_pool['taints']) > 0:
+    if node_pool['taints']:
         for taint in node_pool['taints']:
             if not _is_none_or_blank(taint.get('key', '')):
                 yaml_taints.append({
                     'key': taint['key'],
                     'value': taint.get('value', ''),
-                    'effect': taint['effect']
+                    'effect': taint.get('effect', 'NoSchedule')
                 })
             else:
-                raise Exception('A node pool taint is invalid, please ensure that the key to a taint is not empty. Observed taints: %s' % ('[' + ';'.join(node_pool['taints']) + ']'))
+                logging.error('A node pool taint is invalid, please ensure that the key to a taint is not empty. Observed taints: [%s]' % ';'.join(node_pool['taints']))
+                raise Exception('A node pool taint is invalid, please ensure that the key to a taint is not empty. Observed taints: [%s]' % ';'.join(node_pool['taints']))
     return yaml_taints

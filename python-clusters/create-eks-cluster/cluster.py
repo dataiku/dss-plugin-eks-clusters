@@ -59,9 +59,9 @@ class MyCluster(Cluster):
             args = args + get_region_arg(connection_info)
             args = args + ['--full-ecr-access']
 
-            subnets = networking_settings.get('subnets', [])
+            subnets = map(networking_settings.get('subnets', []), lambda subnet_id: subnet_id.strip())
             if networking_settings.get('privateNetworking', False):
-                private_subnets = networking_settings.get('privateSubnets', [])
+                private_subnets = map(networking_settings.get('privateSubnets', []), lambda private_subnet_id: private_subnet_id.strip())
                 if len(private_subnets) > 0:
                     args = args + ['--vpc-private-subnets', ','.join(private_subnets)]
             if len(subnets) > 0:
@@ -80,11 +80,9 @@ class MyCluster(Cluster):
             
             yaml_dict = yaml.safe_load(yaml_spec)
 
-            # Once we generated the yaml configuration for the cluster, we can add the required specs for all node groups
+            # Once we generated the yaml configuration for the cluster, we can add the required specs for each node group
             # and do a second dry-run with the initial generated configuration file.
-            # This allows to fill in the configuration for the node groups.
-            # The CLI can only accommodate for a single initial node group on cluster creation, so we have to use the yaml configuration file.
-            if len(node_pools) > 0:
+            if node_pools:
                 yaml_dict['managedNodeGroups'] = yaml_dict.get('managedNodeGroups', [])
                 for idx, node_pool in enumerate(node_pools, 0):
                     if node_pool:

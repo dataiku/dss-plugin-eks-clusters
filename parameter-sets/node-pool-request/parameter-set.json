@@ -130,7 +130,8 @@
                         { "value": "NoExecute", "label": "NoExecute"},
                         { "value": "PreferNoSchedule", "label": "PreferNoSchedule"}
                     ],
-                    "mandatory": true
+                    "mandatory": true,
+                    "defaultValue": "NoSchedule"
                 }
             ]
         },

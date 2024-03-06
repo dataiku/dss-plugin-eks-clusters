@@ -42,7 +42,7 @@
         },
         {
             "name": "nodePools",
-            "label": "Node pools to create in the cluster",
+            "label": "Node pools",
             "type": "PRESETS",
             "parameterSetId" : "node-pool-request",
             "mandatory" : false

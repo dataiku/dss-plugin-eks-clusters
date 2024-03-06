@@ -88,7 +88,7 @@ def get_node_pool_yaml(node_pool, networking_settings):
 
     if networking_settings.get('securityGroups', []):
         yaml['securityGroups'] = {
-            'attachIDs': map(networking_settings['securityGroups'], lambda security_group: security_group.strip())
+            'attachIDs': list(map(lambda security_group: security_group.strip(), networking_settings['securityGroups']))
         }
     yaml['privateNetworking'] = networking_settings.get('privateNetworking', False)
 

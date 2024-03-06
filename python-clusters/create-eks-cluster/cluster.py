@@ -59,9 +59,9 @@ class MyCluster(Cluster):
             args = args + get_region_arg(connection_info)
             args = args + ['--full-ecr-access']
 
-            subnets = map(networking_settings.get('subnets', []), lambda subnet_id: subnet_id.strip())
+            subnets = list(map(lambda subnet_id: subnet_id.strip(), networking_settings.get('subnets', [])))
             if networking_settings.get('privateNetworking', False):
-                private_subnets = map(networking_settings.get('privateSubnets', []), lambda private_subnet_id: private_subnet_id.strip())
+                private_subnets = list(map(lambda private_subnet_id: private_subnet_id.strip(), networking_settings.get('privateSubnets', [])))
                 if len(private_subnets) > 0:
                     args = args + ['--vpc-private-subnets', ','.join(private_subnets)]
             if len(subnets) > 0:

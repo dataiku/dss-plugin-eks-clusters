@@ -70,7 +70,7 @@ class MyCluster(Cluster):
             # EKSCTL does not support creating more than one node group using CLI arguments
             # So we generate the configuration for the cluster without node groups and we add them later to the yaml config
             args += ['--without-nodegroup']
-            
+
             if not _is_none_or_blank(k8s_version):
                 args = args + ['--version', k8s_version.strip()]
 

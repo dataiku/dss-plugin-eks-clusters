@@ -70,12 +70,7 @@ class MyCluster(Cluster):
             # EKSCTL does not support creating more than one node group using CLI arguments
             # So we generate the configuration for the cluster without node groups and we add them later to the yaml config
             args += ['--without-nodegroup']
-
-            # According to EKSCTL documentation: https://eksctl.io/usage/gpu-support/
-            # Unless this flag is present, they will automatically install the Nvidia plugin
-            # We add it so that we can control tthe version of the plugin that is installed.
-            args += ['--install-nvidia-plugin', 'false']
-
+            
             if not _is_none_or_blank(k8s_version):
                 args = args + ['--version', k8s_version.strip()]
 
@@ -152,6 +147,11 @@ class MyCluster(Cluster):
         args = ['create', 'cluster']
         args = args + ['-v', '4']
         args = args + ['-f', yaml_loc]
+        
+        # According to EKSCTL documentation: https://eksctl.io/usage/gpu-support/
+        # Unless this flag is present, they will automatically install the Nvidia plugin
+        # We add it so that we can control the version of the plugin that is installed.
+        args += ['--install-nvidia-plugin=false']
 
         # we don't add the context to the main config file, to not end up with an oversized config,
         # and because 2 different clusters could be concurrently editing the config file

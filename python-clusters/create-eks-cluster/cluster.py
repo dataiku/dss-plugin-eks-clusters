@@ -147,6 +147,11 @@ class MyCluster(Cluster):
         args = ['create', 'cluster']
         args = args + ['-v', '4']
         args = args + ['-f', yaml_loc]
+        
+        # According to EKSCTL documentation: https://eksctl.io/usage/gpu-support/
+        # Unless this flag is present, they will automatically install the Nvidia plugin
+        # We add it so that we can control the version of the plugin that is installed.
+        args += ['--install-nvidia-plugin=false']
 
         # we don't add the context to the main config file, to not end up with an oversized config,
         # and because 2 different clusters could be concurrently editing the config file

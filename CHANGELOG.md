@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 1.3.0 - Feature release
+- Allowing for multiple node pool definitions on cluster startup
+- Adding labels and taints support for node pools
+- Update Nvidia driver to always use the latest version
+
 ## Version 1.2.3 - Feature and bugfix release
 - Choose autoscaler version based on the Kubernetes cluster version. For Kubernetes prior to 1.24, autoscaler version used is `v1.24.3`
 - Increase default disk size for the nodes to 200GB

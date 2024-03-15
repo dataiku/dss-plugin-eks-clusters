@@ -41,9 +41,9 @@
             "label": "Cluster nodes"
         },
         {
-            "name": "nodePools",
-            "label": "Node pools",
-            "type": "PRESETS",
+            "name": "nodePool",
+            "label": "Initial node pool",
+            "type": "PRESET",
             "parameterSetId" : "node-pool-request",
             "mandatory" : false
         },

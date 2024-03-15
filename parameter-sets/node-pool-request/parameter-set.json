@@ -12,13 +12,6 @@
 
     "params": [
         {
-            "name": "nodeGroupId",
-            "label": "Node group ID",
-            "description": "Id of node group to create, if not default",
-            "type": "STRING",
-            "mandatory": false
-        },
-        {
             "name": "machineType",
             "label": "Machine type",
             "description": "EC2 instance type for the nodes. See EC2 documentation for available instance types",
@@ -90,50 +83,6 @@
             "label": "Keypair name",
             "description": "Name of a keypair to use on the instances of the node group",
             "type": "STRING"
-        },
-        {
-            "name": "labels",
-            "label": "Node labels",
-            "description": "https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/",
-            "type": "MAP",
-            "mandatory": false
-        },
-        {
-            "name": "taints",
-            "label": "Node taints",
-            "description": "WARNING: MUST CREATE AT LEAST ONE NODE POOL WITHOUT TAINTS. https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/",
-            "mandatory": false,
-            "type": "OBJECT_LIST",
-            "subParams": [
-                {
-                    "type": "SEPARATOR",
-                    "label": "Enter your taints"
-                },
-                {
-                    "name": "key",
-                    "type": "STRING",
-                    "label": "Key",
-                    "mandatory": true
-                },
-                {
-                    "name": "value",
-                    "type": "STRING",
-                    "label": "Value",
-                    "mandatory": false
-                },
-                {
-                    "name": "effect",
-                    "type": "SELECT",
-                    "label": "Effect",
-                    "selectChoices": [
-                        {"value": "NoSchedule", "label": "NoSchedule"},
-                        {"value": "NoExecute", "label": "NoExecute"},
-                        {"value": "PreferNoSchedule", "label": "PreferNoSchedule"}
-                    ],
-                    "mandatory": true,
-                    "defaultValue": "NoSchedule"
-                }
-            ]
         },
         {
             "name": "enableGPU",

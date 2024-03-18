@@ -28,7 +28,6 @@ class MyCluster(Cluster):
         networking_settings = self.config["networkingSettings"]
 
         has_autoscaling = False
-        has_gpu = False
         
         attach_vm_to_security_groups = False
         injected_security_group = self.config.get('injectedSG', '').strip()
@@ -47,7 +46,7 @@ class MyCluster(Cluster):
             node_pool = self.config.get('nodePool', {})
 
             if node_pool:
-                node_pools += node_pool
+                node_pools.append(node_pool)
 
             if not node_pools:
                 raise Exception("At least one node pool must be defined.")

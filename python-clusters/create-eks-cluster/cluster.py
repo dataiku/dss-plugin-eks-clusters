@@ -11,8 +11,8 @@ from dku_kube.gpu_driver import add_gpu_driver_if_needed
 from dku_kube.metrics_server import install_metrics_server
 from dku_utils.cluster import make_overrides, get_connection_info
 from dku_utils.access import _is_none_or_blank
-from dku_utils.config_parser import get_security_groups_arg, get_region_arg, get_private_ip_from_metadata
-from dku_utils.node_pool import get_node_pool_args
+from dku_utils.config_parser import get_region_arg, get_private_ip_from_metadata
+from dku_utils.node_pool import get_node_pool_yaml
 
 class MyCluster(Cluster):
     def __init__(self, cluster_id, cluster_name, config, plugin_config, global_settings):
@@ -43,10 +43,10 @@ class MyCluster(Cluster):
             yaml_dict = yaml.safe_load(self.config.get("advancedYaml"))
 
         else:
-            node_pool = self.config.get('nodePool', {})
+            node_pools = self.config.get('nodePools', [])
 
-            has_autoscaling = node_pool.get('numNodesAutoscaling', False)
-            has_gpu = node_pool.get("enableGPU", False)
+            has_autoscaling = any(node_pool.get('numNodesAutoscaling', False) for node_pool in node_pools)
+            has_gpu = any(node_pool.get('enableGPU', False) for node_pool in node_pools)
 
             # build the yaml def. As a first step we run eksctl with
             # as many command line args as possible to get it to produce
@@ -59,28 +59,51 @@ class MyCluster(Cluster):
             args = args + get_region_arg(connection_info)
             args = args + ['--full-ecr-access']
 
-            subnets = networking_settings.get('subnets', [])
+            subnets = list(map(lambda subnet_id: subnet_id.strip(), networking_settings.get('subnets', [])))
             if networking_settings.get('privateNetworking', False):
-                args = args + ['--node-private-networking']
-                private_subnets = networking_settings.get('privateSubnets', [])
+                private_subnets = list(map(lambda private_subnet_id: private_subnet_id.strip(), networking_settings.get('privateSubnets', [])))
                 if len(private_subnets) > 0:
                     args = args + ['--vpc-private-subnets', ','.join(private_subnets)]
             if len(subnets) > 0:
                 args = args + ['--vpc-public-subnets', ','.join(subnets)]
 
-            args += get_security_groups_arg(networking_settings)
-
-            args += get_node_pool_args(node_pool)
+            # EKSCTL does not support creating more than one node group using CLI arguments
+            # So we generate the configuration for the cluster without node groups and we add them later to the yaml config
+            args += ['--without-nodegroup']
 
             if not _is_none_or_blank(k8s_version):
                 args = args + ['--version', k8s_version.strip()]
-                
+
             c = EksctlCommand(args + ["--dry-run"], connection_info)
             yaml_spec = c.run_and_get_output()
             logging.info("Got spec:\n%s" % yaml_spec)
             
             yaml_dict = yaml.safe_load(yaml_spec)
-            
+
+            # Once we generated the yaml configuration for the cluster, we can add the required specs for each node group
+            # and do a second dry-run with the initial generated configuration file.
+            if node_pools:
+                yaml_dict['managedNodeGroups'] = yaml_dict.get('managedNodeGroups', [])
+                for idx, node_pool in enumerate(node_pools, 0):
+                    if node_pool:
+                        yaml_node_pool = get_node_pool_yaml(node_pool, networking_settings)
+                        yaml_node_pool['name'] = node_pool.get('nodeGroupId', "%s-ng-%s" % (self.cluster_id, idx))
+                        yaml_dict['managedNodeGroups'].append(yaml_node_pool)
+
+                yaml_node_pool_loc = os.path.join(os.getcwd(), self.cluster_id +'_config_with_node_pools.yaml')
+                with open(yaml_node_pool_loc, 'w') as outfile:
+                    yaml.dump(yaml_dict, outfile, default_flow_style=False)
+
+                args = ['create', 'cluster']
+                args += ['-v', '3'] # not -v 4 otherwise there is a debug line in the beginning of the output
+                args += ['-f', yaml_node_pool_loc]
+
+                c = EksctlCommand(args + ["--dry-run"], connection_info)
+                yaml_spec = c.run_and_get_output()
+                logging.info("Got spec with node groups:\n%s" % yaml_spec)
+
+                yaml_dict = yaml.safe_load(yaml_spec)
+
             if self.config.get('privateCluster', False):
                 logging.info("Making the cluster fully-private")
                 
@@ -114,19 +137,6 @@ class MyCluster(Cluster):
                 # we'll need to make eksctl able to reach the stuff bearing the 
                 # SG created by eksctl
                 attach_vm_to_security_groups = True
-                
-            def add_pre_bootstrap_commands(commands, yaml_dict):
-                for node_pool_dict in yaml_dict['managedNodeGroups']:
-                    if node_pool_dict.get('preBootstrapCommands') is None:
-                        node_pool_dict['preBootstrapCommands'] = []
-                    for command in commands.split('\n'):
-                        if len(command.strip()) > 0:
-                            node_pool_dict['preBootstrapCommands'].append(command)
-                
-            if node_pool.get('addPreBootstrapCommands', False) and not _is_none_or_blank(node_pool.get("preBootstrapCommands", "")):
-                # has to be added in the yaml, there is no command line flag for that
-                commands = node_pool.get("preBootstrapCommands", "")
-                add_pre_bootstrap_commands(commands, yaml_dict)
 
         # whatever the setting, make the cluster from the yaml config
         yaml_loc = os.path.join(os.getcwd(), self.cluster_id +'_config.yaml')
@@ -137,6 +147,11 @@ class MyCluster(Cluster):
         args = ['create', 'cluster']
         args = args + ['-v', '4']
         args = args + ['-f', yaml_loc]
+        
+        # According to EKSCTL documentation: https://eksctl.io/usage/gpu-support/
+        # Unless this flag is present, they will automatically install the Nvidia plugin
+        # We add it so that we can control the version of the plugin that is installed.
+        args += ['--install-nvidia-plugin=false']
 
         # we don't add the context to the main config file, to not end up with an oversized config,
         # and because 2 different clusters could be concurrently editing the config file
@@ -234,7 +249,7 @@ class MyCluster(Cluster):
         setup_creds_env(kube_config_path, connection_info, self.config)
 
         if has_gpu:
-            logging.info("Nodegroup is GPU-enabled, ensuring NVIDIA GPU Drivers")
+            logging.info("At least one node group is GPU-enabled, ensuring NVIDIA GPU Drivers")
             add_gpu_driver_if_needed(self.cluster_id, kube_config_path, connection_info)
 
         if self.config.get('installMetricsServer'):
@@ -244,7 +259,7 @@ class MyCluster(Cluster):
         cluster_info = json.loads(c.run_and_get_output())[0]
 
         if has_autoscaling:
-            logging.info("Nodegroup is autoscaling, ensuring autoscaler")
+            logging.info("At least one node group is autoscaling, ensuring autoscaler")
             add_autoscaler_if_needed(self.cluster_id, self.config, cluster_info, kube_config_path)
 
         with open(kube_config_path, "r") as f:

@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.4.0 - Feature release
+## Next version
 - Allowing for multiple node pool definitions on cluster startup
 - Adding labels and taints support for node pools
 - Update Nvidia driver to always use the latest version

@@ -28,13 +28,6 @@
             "mandatory": true
         },
         {
-            "name": "nodeGroupId",
-            "label": "Node group",
-            "description": "Id of node group to create, if not default",
-            "type": "STRING",
-            "mandatory": false
-        },
-        {
             "name": "nodePool",
             "label": "Node group",
             "type": "PRESET",

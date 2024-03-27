@@ -5,7 +5,7 @@
 - Adding labels and taints support for node pools
 - Update Nvidia driver to always use the latest version
 
-## Version 1.3.1 - bugfix release
+## Version 1.3.1 - Bugfix release
 - Fix a bug where node pool configuration is ignored
 
 ## Version 1.2.3 - Feature and bugfix release

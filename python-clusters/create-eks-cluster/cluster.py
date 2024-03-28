@@ -44,6 +44,7 @@ class MyCluster(Cluster):
         else:
             node_pools = self.config.get('nodePools', [])
             node_pool = self.config.get('nodePool', {})
+            gpu_node_pools_taints = set()
 
             if node_pool:
                 node_pools.append(node_pool)
@@ -95,6 +96,13 @@ class MyCluster(Cluster):
                         yaml_node_pool = get_node_pool_yaml(node_pool, networking_settings)
                         yaml_node_pool['name'] = node_pool.get('nodeGroupId', "%s-ng-%s" % (self.cluster_id, idx))
                         yaml_dict['managedNodeGroups'].append(yaml_node_pool)
+
+                        # Keep track of all the GPU enabled node pool taints (without duplicates)
+                        if node_pool.get('enableGPU', False):
+                            current_gpu_node_pool_taints = yaml_node_pool.get('taints', [])
+                            for taint in current_gpu_node_pool_taints:
+                                if taint not in gpu_node_pools_taints:
+                                    gpu_node_pools_taints.add(taint)
 
                 yaml_node_pool_loc = os.path.join(os.getcwd(), self.cluster_id +'_config_with_node_pools.yaml')
                 with open(yaml_node_pool_loc, 'w') as outfile:
@@ -256,7 +264,7 @@ class MyCluster(Cluster):
 
         if has_gpu:
             logging.info("At least one node group is GPU-enabled, ensuring NVIDIA GPU Drivers")
-            add_gpu_driver_if_needed(self.cluster_id, kube_config_path, connection_info)
+            add_gpu_driver_if_needed(self.cluster_id, kube_config_path, connection_info, list(gpu_node_pools_taints))
 
         if self.config.get('installMetricsServer'):
             install_metrics_server(kube_config_path)

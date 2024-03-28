@@ -76,7 +76,8 @@ class MyRunnable(Runnable):
                         node_pool_dict['preBootstrapCommands'].append(command)
 
         # Adding node pool taints on the only node pool we create which is managed:
-        yaml_dict['managedNodeGroups'][0]['taints'] = build_node_pool_taints_yaml(node_pool)
+        node_group_taints = build_node_pool_taints_yaml(node_pool)
+        yaml_dict['managedNodeGroups'][0]['taints'] = node_group_taints
         
         yaml_loc = os.path.join(os.getcwd(), cluster_id +'_config.yaml')
         with open(yaml_loc, 'w') as outfile:
@@ -97,7 +98,7 @@ class MyRunnable(Runnable):
             
         if node_pool.get('enableGPU', False):
             logging.info("Nodegroup is GPU-enabled, ensuring NVIDIA GPU Drivers")
-            add_gpu_driver_if_needed(self.config['clusterId'], kube_config_path, connection_info)
+            add_gpu_driver_if_needed(self.config['clusterId'], kube_config_path, connection_info, node_group_taints)
 
         args = ['get', 'nodegroup']
         #args = args + ['-v', '4']

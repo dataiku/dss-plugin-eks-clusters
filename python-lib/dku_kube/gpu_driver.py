@@ -56,10 +56,3 @@ def add_gpu_driver_if_needed(cluster_id, kube_config_path, connection_info, tain
     env = os.environ.copy()
     env['KUBECONFIG'] = kube_config_path
     run_with_timeout(cmd, env=env, timeout=5)
-        
-def check_eksctl_version(connection_info):
-    args = ['version']
-    c = EksctlCommand(args, connection_info)
-    o = c.run_and_get_output()
-    
-    return o >= '0.32.0'

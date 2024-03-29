@@ -7,7 +7,7 @@ from dku_aws.eksctl_command import EksctlCommand
 from dku_aws.aws_command import AwsCommand
 from dku_kube.kubeconfig import setup_creds_env
 from dku_kube.autoscaler import add_autoscaler_if_needed
-from dku_kube.gpu_driver import add_gpu_driver_if_needed
+from dku_kube.gpu_driver import add_gpu_driver_if_needed, TolerationOrTaint
 from dku_kube.metrics_server import install_metrics_server
 from dku_utils.cluster import make_overrides, get_connection_info
 from dku_utils.access import _is_none_or_blank
@@ -101,8 +101,9 @@ class MyCluster(Cluster):
                         if node_pool.get('enableGPU', False):
                             current_gpu_node_pool_taints = yaml_node_pool.get('taints', [])
                             for taint in current_gpu_node_pool_taints:
-                                if taint not in gpu_node_pools_taints:
-                                    gpu_node_pools_taints.add(taint)
+                                new_taint = TolerationOrTaint(taint)
+                                if new_taint not in gpu_node_pools_taints:
+                                    gpu_node_pools_taints.add(new_taint)
 
                 yaml_node_pool_loc = os.path.join(os.getcwd(), self.cluster_id +'_config_with_node_pools.yaml')
                 with open(yaml_node_pool_loc, 'w') as outfile:

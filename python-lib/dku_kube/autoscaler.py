@@ -2,7 +2,7 @@ import os, json, logging, yaml
 from .kubectl_command import run_with_timeout
 from dku_utils.access import _is_none_or_blank
 from dku_utils.tools_version import strip_kubernetes_version
-from dku_kube.gpu_driver import TolerationOrTaint
+from dku_utils.taints import Toleration
 
 AUTOSCALER_IMAGES = {
     '1.24': 'v1.24.3',
@@ -44,33 +44,23 @@ def add_autoscaler_if_needed(cluster_id, cluster_config, cluster_def, kube_confi
     if has_autoscaler(kube_config_path):
         logging.info("Cluster already contains autoscaler, retrieving current tolerations.")
         cmd = ['kubectl', 'get', 'pods', '--namespace', 'kube-system', '-l', 'app=cluster-autoscaler', '-o', 'jsonpath="{.items[*].spec.tolerations}"']
-        tolerations_raw, err = run_with_timeout(cmd, env=env, timeout=5)
-        logging.info("Cluster tolerations of cluster autoscaler: %s." % tolerations_raw)
+        tolerations_json, err = run_with_timeout(cmd, env=env, timeout=5)
+        logging.info("Cluster tolerations of cluster autoscaler: %s." % tolerations_json)
 
-        if _is_none_or_blank(tolerations_raw):
-            tolerations.update([TolerationOrTaint(tol) for tol in json.loads(tolerations_raw)])
+        if _is_none_or_blank(tolerations_json):
+            tolerations.update(Toleration.from_json(tolerations_json))
 
     # If there are any taints to patch the autoscaler with in the node group(s) to create,
-    # we add them to the GPU plugin configuration before updating with another `kubectl apply`
-    for taint in taints or []:
-        # Add the relevant toleration operator
-        if taint.get('value', ''):
-            taint['operator'] = 'Equal'
-        else:
-            taint['operator'] = 'Exists'
-
-        # If the toleration is not in the set, add it
-        new_toleration = TolerationOrTaint(taint)
-        if not tolerations or new_toleration not in tolerations:
-            tolerations.add(new_toleration)
+    # we add them to the autoscaler configuration before updating with another `kubectl apply`
+    tolerations.update(Toleration.from_dict(taints))
 
     # Patch the autoscaler with the tolerations derived from node group(s) taints if any
     if tolerations:
-        autoscaler_config['spec']['template']['spec']['tolerations'] = [toleration.to_dict() for toleration in tolerations]
-        logging.info('Autoscaler deployment config: %s' % yaml.safe_dump(autoscaler_config, default_flow_style=False))
+        autoscaler_config['spec']['template']['spec']['tolerations'] = Toleration.to_dict(tolerations)
+        logging.debug('Autoscaler deployment config: %s' % yaml.safe_dump(autoscaler_config, default_flow_style=False))
 
     autoscaler_full_config.append(autoscaler_config)
-    logging.info('Autoscaler complete config: %s' % yaml.safe_dump_all(autoscaler_full_config, default_flow_style=False))
+    logging.debug('Autoscaler complete config: %s' % yaml.safe_dump_all(autoscaler_full_config, default_flow_style=False))
 
     with open(autoscaler_file_path, "w") as f:
         yaml.safe_dump_all(autoscaler_full_config, f, explicit_start=True)

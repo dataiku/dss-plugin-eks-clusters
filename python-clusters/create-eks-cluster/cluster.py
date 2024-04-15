@@ -45,6 +45,7 @@ class MyCluster(Cluster):
             node_pools = self.config.get('nodePools', [])
             node_pool = self.config.get('nodePool', {})
             gpu_node_pools_taints = set()
+            autoscaled_node_pools_taints = set()
 
             if node_pool:
                 node_pools.append(node_pool)
@@ -97,13 +98,15 @@ class MyCluster(Cluster):
                         yaml_node_pool['name'] = node_pool.get('nodeGroupId', "%s-ng-%s" % (self.cluster_id, idx))
                         yaml_dict['managedNodeGroups'].append(yaml_node_pool)
 
-                        # Keep track of all the GPU enabled node pool taints (without duplicates)
-                        if node_pool.get('enableGPU', False):
-                            current_gpu_node_pool_taints = yaml_node_pool.get('taints', [])
-                            for taint in current_gpu_node_pool_taints:
+                        # Keep track of all the GPU enabled or autoscaled node pool taints (without duplicates)
+                        if node_pool.get('enableGPU', False) or node_pool.get('numNodesAutoscaling'):
+                            current_node_pool_taints = yaml_node_pool.get('taints', [])
+                            for taint in current_node_pool_taints:
                                 new_taint = TolerationOrTaint(taint)
-                                if new_taint not in gpu_node_pools_taints:
+                                if node_pool.get('enableGPU', False):
                                     gpu_node_pools_taints.add(new_taint)
+                                else:
+                                    autoscaled_node_pools_taints.add(new_taint)
 
                 yaml_node_pool_loc = os.path.join(os.getcwd(), self.cluster_id +'_config_with_node_pools.yaml')
                 with open(yaml_node_pool_loc, 'w') as outfile:
@@ -275,7 +278,7 @@ class MyCluster(Cluster):
 
         if has_autoscaling:
             logging.info("At least one node group is autoscaling, ensuring autoscaler")
-            add_autoscaler_if_needed(self.cluster_id, self.config, cluster_info, kube_config_path)
+            add_autoscaler_if_needed(self.cluster_id, self.config, cluster_info, kube_config_path, list(autoscaled_node_pools_taints))
 
         with open(kube_config_path, "r") as f:
             kube_config = yaml.safe_load(f)

@@ -13,7 +13,7 @@ def has_gpu_driver(kube_config_path):
 
 def add_gpu_driver_if_needed(cluster_id, kube_config_path, connection_info):
     if not has_gpu_driver(kube_config_path) and not check_eksctl_version(connection_info):
-        cmd = ['kubectl', 'apply', '-f', "https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/master/nvidia-device-plugin.yml"]
+        cmd = ['kubectl', 'apply', '-f', "https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/main/deployments/static/nvidia-device-plugin.yml"]
 
         logging.info("Install NVIDIA GPU drivers with : %s" % json.dumps(cmd))
         env = os.environ.copy()

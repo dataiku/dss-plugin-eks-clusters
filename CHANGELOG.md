@@ -3,7 +3,9 @@
 ## Next version
 - Allowing for multiple node pool definitions on cluster startup
 - Adding labels and taints support for node pools
-- Update Nvidia driver to always use the latest version
+
+## Version 1.3.2 - Bugfix release
+- Update Nvidia driver URL to new location
 
 ## Version 1.3.1 - Bugfix release
 - Fix a bug where node pool configuration is ignored

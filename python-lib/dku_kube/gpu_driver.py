@@ -15,7 +15,7 @@ def has_gpu_driver(kube_config_path):
 
 def add_gpu_driver_if_needed(cluster_id, kube_config_path, connection_info, taints):
     # Get the Nvidia driver plugin configuration from the repository
-    nvidia_config_raw = requests.get('https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/main/nvidia-device-plugin.yml').text
+    nvidia_config_raw = requests.get('https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/main/deployments/static/nvidia-device-plugin.yml').text
     nvidia_config = yaml.safe_load(nvidia_config_raw)
     tolerations = set()
 

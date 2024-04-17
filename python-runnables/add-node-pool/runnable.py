@@ -78,7 +78,12 @@ class MyRunnable(Runnable):
         # Adding node pool taints on the only node pool we create which is managed:
         node_group_taints = build_node_pool_taints_yaml(node_pool)
         yaml_dict['managedNodeGroups'][0]['taints'] = node_group_taints
-        
+
+        # Adding propagateASGTags to the node group if it is autoscaled.
+        # This propagates the labels/taints of the node group to the autoscaling group so that new nodes can be properly configured on creation (scaling up)
+        if node_pool.get('numNodesAutoscaling', False):
+            yaml_dict['managedNodeGroups'][0]['propagateASGTags'] = True
+
         yaml_loc = os.path.join(os.getcwd(), cluster_id +'_config.yaml')
         with open(yaml_loc, 'w') as outfile:
             yaml.dump(yaml_dict, outfile, default_flow_style=False)

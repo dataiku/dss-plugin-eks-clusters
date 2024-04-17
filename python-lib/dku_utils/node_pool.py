@@ -69,6 +69,7 @@ def get_node_pool_yaml(node_pool, networking_settings):
         yaml['iam']['withAddonPolicies']['autoScaler'] = True
         yaml['minSize'] = node_pool.get('minNumNodes', 2)
         yaml['maxSize'] = node_pool.get('maxNumNodes', 5)
+        yaml['propagateASGTags'] = True
 
     yaml['tags'] = node_pool.get('tags', {})
     yaml['taints'] = build_node_pool_taints_yaml(node_pool)

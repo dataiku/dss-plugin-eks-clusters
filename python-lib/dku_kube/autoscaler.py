@@ -21,53 +21,43 @@ def has_autoscaler(kube_config_path):
     return len(out.strip()) > 0
 
 def add_autoscaler_if_needed(cluster_id, cluster_config, cluster_def, kube_config_path, taints):
-    env = os.environ.copy()
-    env['KUBECONFIG'] = kube_config_path
+    if not has_autoscaler(kube_config_path):
+      kubernetes_version = cluster_config.get("k8sVersion", None)
+      if _is_none_or_blank(kubernetes_version):
+          kubernetes_version = cluster_def.get("Version")
 
-    kubernetes_version = cluster_config.get("k8sVersion", None)
-    if _is_none_or_blank(kubernetes_version):
-        kubernetes_version = cluster_def.get("Version")
+      kubernetes_version = strip_kubernetes_version(kubernetes_version)
+      autoscaler_file_path = 'autoscaler.yaml'
 
-    kubernetes_version = strip_kubernetes_version(kubernetes_version)
-    autoscaler_file_path = 'autoscaler.yaml'
+      if float(kubernetes_version) < 1.24:
+          autoscaler_image = AUTOSCALER_IMAGES.get('1.24', 'v1.24.3')
+      else:  
+          autoscaler_image = AUTOSCALER_IMAGES.get(kubernetes_version, 'v1.28.0')
 
-    if float(kubernetes_version) < 1.24:
-        autoscaler_image = AUTOSCALER_IMAGES.get('1.24', 'v1.24.3')
-    else:  
-        autoscaler_image = AUTOSCALER_IMAGES.get(kubernetes_version, 'v1.28.0')
+      autoscaler_full_config = list(yaml.safe_load_all(get_autoscaler_roles()))
+      autoscaler_config = yaml.safe_load(get_autoscaler_config(cluster_id, autoscaler_image))
+      tolerations = set()
 
-    autoscaler_full_config = list(yaml.safe_load_all(get_autoscaler_roles()))
-    autoscaler_config = yaml.safe_load(get_autoscaler_config(cluster_id, autoscaler_image))
-    tolerations = set()
+      # If there are any taints to patch the autoscaler with in the node group(s) to create,
+      # we add them to the autoscaler configuration before updating with another `kubectl apply`
+      tolerations.update(Toleration.from_dict(taints))
 
-    # Retrieve the tolerations currently present in the pods in the cluster
-    if has_autoscaler(kube_config_path):
-        logging.info("Cluster already contains autoscaler, retrieving current tolerations.")
-        cmd = ['kubectl', 'get', 'pods', '--namespace', 'kube-system', '-l', 'app=cluster-autoscaler', '-o', 'jsonpath="{.items[*].spec.tolerations}"']
-        tolerations_json, err = run_with_timeout(cmd, env=env, timeout=5)
-        logging.info("Cluster tolerations of cluster autoscaler: %s." % tolerations_json)
+      # Patch the autoscaler with the tolerations derived from node group(s) taints if any
+      if tolerations:
+          autoscaler_config['spec']['template']['spec']['tolerations'] = Toleration.to_list(tolerations)
+          logging.debug('Autoscaler deployment config: %s' % yaml.safe_dump(autoscaler_config, default_flow_style=False))
 
-        if _is_none_or_blank(tolerations_json):
-            tolerations.update(Toleration.from_json(tolerations_json))
+      autoscaler_full_config.append(autoscaler_config)
+      logging.debug('Autoscaler complete config: %s' % yaml.safe_dump_all(autoscaler_full_config, default_flow_style=False))
 
-    # If there are any taints to patch the autoscaler with in the node group(s) to create,
-    # we add them to the autoscaler configuration before updating with another `kubectl apply`
-    tolerations.update(Toleration.from_dict(taints))
+      with open(autoscaler_file_path, "w") as f:
+          yaml.safe_dump_all(autoscaler_full_config, f, explicit_start=True)
 
-    # Patch the autoscaler with the tolerations derived from node group(s) taints if any
-    if tolerations:
-        autoscaler_config['spec']['template']['spec']['tolerations'] = Toleration.to_list(tolerations)
-        logging.debug('Autoscaler deployment config: %s' % yaml.safe_dump(autoscaler_config, default_flow_style=False))
-
-    autoscaler_full_config.append(autoscaler_config)
-    logging.debug('Autoscaler complete config: %s' % yaml.safe_dump_all(autoscaler_full_config, default_flow_style=False))
-
-    with open(autoscaler_file_path, "w") as f:
-        yaml.safe_dump_all(autoscaler_full_config, f, explicit_start=True)
-
-    cmd = ['kubectl', 'apply', '-f', os.path.abspath(autoscaler_file_path)]
-    logging.info("Create autoscaler with : %s" % json.dumps(cmd))
-    run_with_timeout(cmd, env=env, timeout=5)
+      env = os.environ.copy()
+      env['KUBECONFIG'] = kube_config_path
+      cmd = ['kubectl', 'create', '-f', os.path.abspath(autoscaler_file_path)]
+      logging.info("Create autoscaler with : %s" % json.dumps(cmd))
+      run_with_timeout(cmd, env=env, timeout=5)
         
 def get_autoscaler_roles():
     # the auto-discovery version from https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler/cloudprovider/aws
@@ -193,7 +183,7 @@ subjects:
 """
 
 def get_autoscaler_config(cluster_id, autoscaler_image_version):
-    config = """apiVersion: apps/v1
+    return """apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cluster-autoscaler
@@ -239,4 +229,3 @@ spec:
           hostPath:
             path: "/etc/ssl/certs/ca-bundle.crt"
 """ % {'autoscalerimageversion': autoscaler_image_version, 'clusterid': cluster_id}
-    return config

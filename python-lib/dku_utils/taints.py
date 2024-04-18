@@ -49,5 +49,5 @@ class Toleration(Taint):
         return [Toleration(raw) for raw in raw_dicts or []]
 
     @staticmethod
-    def to_dict(tolerations):
+    def to_list(tolerations):
         return [toleration.to_dict() for toleration in tolerations]

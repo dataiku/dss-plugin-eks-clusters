@@ -36,7 +36,7 @@ def add_gpu_driver_if_needed(cluster_id, kube_config_path, connection_info, tain
     
     # Patch the Nvidia driver configuration with the tolerations derived from node group(s) taints,
     # initial Nvidia driver configuration tolerations and Nvidia daemonset tolerations (when applicable)
-    nvidia_config['spec']['template']['spec']['tolerations'] = Toleration.to_dict(tolerations)
+    nvidia_config['spec']['template']['spec']['tolerations'] = Toleration.to_list(tolerations)
 
     # Write the configuration locally
     local_nvidia_plugin_config = os.path.join(os.environ["DIP_HOME"], 'clusters', cluster_id, 'nvidia-device-plugin.yml')

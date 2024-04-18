@@ -56,7 +56,7 @@ def add_autoscaler_if_needed(cluster_id, cluster_config, cluster_def, kube_confi
 
     # Patch the autoscaler with the tolerations derived from node group(s) taints if any
     if tolerations:
-        autoscaler_config['spec']['template']['spec']['tolerations'] = Toleration.to_dict(tolerations)
+        autoscaler_config['spec']['template']['spec']['tolerations'] = Toleration.to_list(tolerations)
         logging.debug('Autoscaler deployment config: %s' % yaml.safe_dump(autoscaler_config, default_flow_style=False))
 
     autoscaler_full_config.append(autoscaler_config)

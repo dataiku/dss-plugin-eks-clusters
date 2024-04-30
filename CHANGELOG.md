@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 1.1.2 - Bugfix release
+- Update Nvidia driver URL to new location
+
 ## Version 1.1.1 - Bugfix release
 - Add support of v1beta1 apiVersion when attaching
 

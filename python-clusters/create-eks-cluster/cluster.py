@@ -53,9 +53,6 @@ class MyCluster(Cluster):
             if node_pool:
                 node_pools.append(node_pool)
 
-            if not node_pools:
-                raise Exception("At least one node pool must be defined.")
-
             has_autoscaling = any(node_pool.get('numNodesAutoscaling', False) for node_pool in node_pools)
             has_gpu = any(node_pool.get('enableGPU', False) for node_pool in node_pools)
 

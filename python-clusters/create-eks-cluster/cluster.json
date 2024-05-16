@@ -45,7 +45,7 @@
             "label": "Initial node pool",
             "type": "PRESET",
             "parameterSetId" : "node-pool-request",
-            "mandatory" : true
+            "mandatory" : false
         },
         {
             "name": "nodePools",

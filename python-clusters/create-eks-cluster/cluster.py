@@ -35,6 +35,7 @@ class MyCluster(Cluster):
 
         k8s_version = self.config.get("k8sVersion", None)
         autoscaled_node_pools_taints = None
+        gpu_node_pools_taints = None
        
         if self.config.get('advanced', False):
             has_autoscaling = self.config.get('clusterAutoScaling')
@@ -270,7 +271,8 @@ class MyCluster(Cluster):
 
         if has_gpu:
             logging.info("At least one node group is GPU-enabled, ensuring NVIDIA GPU Drivers")
-            add_gpu_driver_if_needed(self.cluster_id, kube_config_path, connection_info, list(gpu_node_pools_taints))
+            gpu_taints = list(gpu_node_pools_taints) if gpu_node_pools_taints else []
+            add_gpu_driver_if_needed(self.cluster_id, kube_config_path, connection_info, gpu_taints)
 
         if self.config.get('installMetricsServer'):
             install_metrics_server(kube_config_path)
@@ -280,8 +282,8 @@ class MyCluster(Cluster):
 
         if has_autoscaling:
             logging.info("At least one node group is autoscaling, ensuring autoscaler")
-            taints = list(autoscaled_node_pools_taints) if autoscaled_node_pools_taints else []
-            add_autoscaler_if_needed(self.cluster_id, self.config, cluster_info, kube_config_path, taints)
+            autoscaled_taints = list(autoscaled_node_pools_taints) if autoscaled_node_pools_taints else []
+            add_autoscaler_if_needed(self.cluster_id, self.config, cluster_info, kube_config_path, autoscaled_taints)
 
         with open(kube_config_path, "r") as f:
             kube_config = yaml.safe_load(f)

@@ -69,6 +69,7 @@ class MyCluster(Cluster):
 
             subnets = list(map(lambda subnet_id: subnet_id.strip(), networking_settings.get('subnets', [])))
             if networking_settings.get('privateNetworking', False):
+                args = args + ['--node-private-networking']
                 private_subnets = list(map(lambda private_subnet_id: private_subnet_id.strip(), networking_settings.get('privateSubnets', [])))
                 if len(private_subnets) > 0:
                     args = args + ['--vpc-private-subnets', ','.join(private_subnets)]

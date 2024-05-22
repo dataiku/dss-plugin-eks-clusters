@@ -25,6 +25,11 @@ jobs:
 
     - name: Run Makefile
       run: make plugin
+    
+    - name: Test
+      run: |
+        ls -al
+        ls -al dist
 
     - name: Create GitHub Release
       id: create_release

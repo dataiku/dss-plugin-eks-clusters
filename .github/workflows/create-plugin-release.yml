@@ -34,13 +34,13 @@ jobs:
       with:
         tag_name: "v${{ inputs.version }}"
         release_name: "v${{ inputs.version }}"
-        target_commitish: ${{ inputs.target || 'master' }}
+        commitish: ${{ inputs.target || 'master' }}
         body: |
           This is a pre-release for version of the DSS EKS plugin ${{ inputs.version }}.
-          Please modify the following release notes in this description prior to release.
+          Please add the release notes from the changelog in this description prior to release.
         draft: true
         prerelease: true
-        generate_release_notes: true
+        # generate_release_notes: true
 
     - name: Upload Release Assets
       uses: actions/upload-release-asset@v1

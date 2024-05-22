@@ -1,0 +1,55 @@
+name: Build and create pre-release for the EKS cluster plugin
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version of the release'
+        required: true
+      target:
+        description: 'Commit hash or branch to release (optional, defaults to master)'
+        required: false
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ inputs.target || 'master' }}
+
+    - name: Check for make
+      run: make --version
+
+    - name: Run Makefile
+      run: make plugin
+
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: "v${{ inputs.version }}"
+        release_name: "v${{ inputs.version }}"
+        target_commitish: ${{ inputs.target || 'master' }}
+        body: |
+          This is a pre-release for version of the DSS EKS plugin ${{ inputs.version }}.
+          Please modify the following release notes in this description prior to release.
+        draft: true
+        prerelease: true
+        generate_release_notes: true
+
+    - name: Upload Release Assets
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: /dist/dss-plugin-eks-clusters-${{input.version}}.zip"
+        asset_name: "dss-plugin-eks-clusters-${{input.version}}"
+        asset_content_type: application/zip
+    - name: Archive release assets
+      run: rm -rf /dist

@@ -51,5 +51,5 @@ jobs:
         asset_path: dist/dss-plugin-eks-clusters-${{inputs.version}}.zip"
         asset_name: "dss-plugin-eks-clusters-${{inputs.version}}"
         asset_content_type: application/zip
-    - name: Archive release assets
-      run: rm -rf dist
+    - name: Clean up release assets
+      run: make dist-clean

@@ -3,9 +3,6 @@ name: Build and create pre-release for the EKS cluster plugin
 on:
   workflow_dispatch:
     inputs:
-      version:
-        description: 'Version of the release'
-        required: true
       target:
         description: 'Commit hash or branch to release (optional, defaults to master)'
         required: false
@@ -19,12 +16,27 @@ jobs:
       uses: actions/checkout@v2
       with:
         ref: ${{ inputs.target || 'master' }}
+    
+    - name: Retrieve plugin version
+      id: version_parse
+      run: |
+        # Read the plugin version from the configuration
+        version=$(jq -r '.version' plugin.json)
+        
+        # Print the variable to verify
+        echo "Version: $version"
+        echo "::set-output name=result::$version"
 
     - name: Check for make
       run: make --version
 
-    - name: Run Makefile
+    - name: Compile plugin into archive
       run: make plugin
+    
+    - name: Test
+      run: |
+        ls -al
+        ls -al dist
 
     - name: Create GitHub Release
       id: create_release
@@ -32,15 +44,14 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: "v${{ inputs.version }}"
-        release_name: "v${{ inputs.version }}"
-        target_commitish: ${{ inputs.target || 'master' }}
+        tag_name: "v${{ steps.version_parse.outputs.result }}"
+        release_name: "v${{ steps.version_parse.outputs.result }}"
+        commitish: ${{ inputs.target || 'master' }}
         body: |
-          This is a pre-release for version of the DSS EKS plugin ${{ inputs.version }}.
-          Please modify the following release notes in this description prior to release.
+          This is a pre-release for version of the DSS EKS plugin ${{ steps.version_parse.outputs.result }}.
+          Please add the release notes from the changelog in this description prior to release.
         draft: true
         prerelease: true
-        generate_release_notes: true
 
     - name: Upload Release Assets
       uses: actions/upload-release-asset@v1
@@ -48,8 +59,9 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: /dist/dss-plugin-eks-clusters-${{input.version}}.zip"
-        asset_name: "dss-plugin-eks-clusters-${{input.version}}"
+        asset_path: dist/dss-plugin-eks-clusters-${{ steps.version_parse.outputs.result }}.zip"
+        asset_name: "dss-plugin-eks-clusters-${{ steps.version_parse.outputs.result }}"
         asset_content_type: application/zip
-    - name: Archive release assets
-      run: rm -rf /dist
+
+    - name: Clean up release assets
+      run: make dist-clean

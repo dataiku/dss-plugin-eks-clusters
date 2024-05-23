@@ -59,7 +59,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./dist/dss-plugin-eks-clusters-${{ steps.version_parse.outputs.result }}.zip"
+        asset_path: ./dist/dss-plugin-eks-clusters-${{ steps.version_parse.outputs.result }}.zip
         asset_name: "dss-plugin-eks-clusters-${{ steps.version_parse.outputs.result }}"
         asset_content_type: application/zip
 

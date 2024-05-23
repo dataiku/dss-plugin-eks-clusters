@@ -20,23 +20,17 @@ jobs:
     - name: Retrieve plugin version
       id: version_parse
       run: |
-        # Read the plugin version from the configuration
         version=$(jq -r '.version' plugin.json)
-        
-        # Print the variable to verify
-        echo "Version: $version"
+        echo "Creating release for version '$version'"
         echo "::set-output name=result::$version"
 
-    - name: Check for make
-      run: make --version
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y make
 
     - name: Compile plugin into archive
       run: make plugin
-    
-    - name: Test
-      run: |
-        ls -al
-        ls -al dist
 
     - name: Create GitHub Release
       id: create_release
@@ -50,7 +44,7 @@ jobs:
         body: |
           This is a pre-release for version of the DSS EKS plugin ${{ steps.version_parse.outputs.result }}.
           Please add the release notes from the changelog in this description prior to release.
-        draft: true
+        draft: true # Ensures the tag is not created with the action, but only when manually publishing
         prerelease: true
 
     - name: Upload Release Assets

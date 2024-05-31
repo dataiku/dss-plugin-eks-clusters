@@ -23,7 +23,7 @@ class Taint(dict):
 
 class Toleration(Taint):
     def __init__(self, taint):
-        super().__init__(taint)
+        super(Toleration, self).__init__(taint)
 
         if self.get('value', ''):
             self['operator'] = 'Equal'
@@ -31,11 +31,11 @@ class Toleration(Taint):
             self['operator'] = 'Exists'
 
     def __eq__(self, other):
-        return super().__eq__(other) and self.get('operator', '') == other.get('operator', '')
+        return super(Toleration, self).__eq__(other) and self.get('operator', '') == other.get('operator', '')
 
 
     def __hash__(self):
-        return hash((super().__hash__(), self.get('operator', '')))
+        return hash((super(Toleration, self).__hash__(), self.get('operator', '')))
 
     def to_dict(self):
         return {k: v for k, v in self.items()}

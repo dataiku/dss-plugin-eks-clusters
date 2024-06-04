@@ -80,8 +80,8 @@ def get_node_pool_yaml(node_pool, networking_settings):
     yaml['labels'] = node_pool['labels']
     yaml['spot'] = node_pool.get('useSpotInstances', False)
 
-    sshPublicKeyName = node_pool.get('publicKeyName', '')
-    if not _is_none_or_blank(sshPublicKeyName):
+    sshPublicKeyName = node_pool.get('publicKeyName', '').strip()
+    if sshPublicKeyName:
         yaml['ssh'] = {
             'allow': True,
             'publicKeyName': sshPublicKeyName

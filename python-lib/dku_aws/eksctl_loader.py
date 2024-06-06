@@ -9,7 +9,7 @@ def get_eksctl_or_fetch():
         machine_eksctl = subprocess.check_output(["which", "eksctl"]).strip().decode('utf8')
         logging.info("Found eksctl on the machine")
         return machine_eksctl
-    except:
+    except Exception:
         local_eksctl_folder = os.path.join(os.environ["DIP_HOME"], 'tmp', 'local_eksctl')
         logging.info("Using eksctl from %s" % local_eksctl_folder)
         local_eksctl = os.path.join(local_eksctl_folder, 'eksctl')

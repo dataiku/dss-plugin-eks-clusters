@@ -1,8 +1,7 @@
 from dataiku.runnables import Runnable
-import dataiku
-import os, json, logging
+import json
+import logging
 from dku_aws.eksctl_command import EksctlCommand
-from dku_aws.aws_command import AwsCommand
 from dku_utils.cluster import get_cluster_from_dss_cluster, get_connection_info
 from dku_utils.config_parser import get_region_arg
 

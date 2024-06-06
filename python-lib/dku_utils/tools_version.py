@@ -1,7 +1,6 @@
-import json, re
-from dku_kube.kubectl_command import run_with_timeout, KubeCommandException
-from dku_aws.eksctl_command import EksctlCommand
-from dku_utils.cluster import get_connection_info
+import json
+import re
+from dku_kube.kubectl_command import run_with_timeout
 
 def get_kubectl_version():
     cmd = ['kubectl', 'version', '--client', '-o', 'json']

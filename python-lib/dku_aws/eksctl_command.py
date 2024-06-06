@@ -1,4 +1,6 @@
-import sys, os, subprocess, logging, json, requests, shutil
+import os
+import subprocess
+import logging
 from .eksctl_loader import get_eksctl_or_fetch
 from dku_utils.access import _has_not_blank_property, _convert_to_string
 

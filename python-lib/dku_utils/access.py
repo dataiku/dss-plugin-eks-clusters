@@ -3,13 +3,12 @@ try:
     from collections.abc import Mapping, Iterable
 except ImportError:
     from collections import Mapping, Iterable
-from io import StringIO, BytesIO
 import sys
 
 if sys.version_info > (3,):
     dku_basestring_type = str
 else:
-    dku_basestring_type = basestring
+    dku_basestring_type = basestring  # noqa: F821
 
 def _convert_to_string(data):
     for i in range(0,len(data)):
@@ -47,7 +46,7 @@ def _default_if_blank(x, d):
         return x
 
 def _default_if_property_blank(d, k, v):
-    if not k in d:
+    if k not in d:
         return v
     x = d[k]
     return _default_if_blank(x, v)

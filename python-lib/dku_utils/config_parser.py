@@ -1,7 +1,10 @@
 # Provide some utility methods to parse the saved configuration, clean it,
 # normalize it and return in a predefined format (ex: command line args)
 
-import os, logging, requests, json
+import os
+import logging
+import requests
+import json
 from dku_utils.access import _has_not_blank_property
 
 SECURITY_GROUPS = 'securityGroups'

@@ -1,9 +1,10 @@
-from dku_utils.access import _default_if_blank, _default_if_property_blank
+from dku_utils.access import _default_if_property_blank
 import dataiku
 from dataiku.core.intercom import backend_json_call
 from dku_utils.access import _has_not_blank_property
 from dku_aws.boto3_sts_assumerole import Boto3STSService
-import json, logging
+import json
+import logging
 
 def make_overrides(config, kube_config, kube_config_path):
     # alter the spark configurations to put the cluster master and image repo in the properties

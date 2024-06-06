@@ -1,4 +1,9 @@
-import os, sys, json, subprocess, time, logging, yaml, threading
+import os
+import json
+import time
+import logging
+import yaml
+import threading
 
 import dku_utils.tools_version
 from dataiku.cluster import Cluster
@@ -134,7 +139,7 @@ class MyCluster(Cluster):
                     private_cluster['skipEndpointCreation'] = False
                     if has_autoscaling:
                         private_cluster["additionalEndpointServices"] = private_cluster.get('additionalEndpointServices', [])
-                        if not 'autoscaling' in private_cluster["additionalEndpointServices"]:
+                        if 'autoscaling' not in private_cluster["additionalEndpointServices"]:
                             private_cluster["additionalEndpointServices"].append('autoscaling')
                         
                 # clear the vpc.clusterEndpoints 
@@ -199,7 +204,7 @@ class MyCluster(Cluster):
                         stack_name_c = EksctlCommand(stack_name_args, connection_info)
                         stack_spec = stack_name_c.run_and_get_output()
                         stack_name = json.loads(stack_spec)[0]["StackName"]
-                    except:
+                    except Exception:
                         logging.info("Not yet able to get stack name")
                 logging.info("Stack name is %s" % stack_name)
                 # then describe the stack resources to get the shared sg. It should be ready
@@ -218,7 +223,7 @@ class MyCluster(Cluster):
                         logging.info("%s SG is %s" % (resource_id, sg_id))
                         if sg_id is not None and sg_id != injected_security_group:
                             sg_ids.append(sg_id)
-                    except:
+                    except Exception:
                         logging.warn("Not able to get SG id for %s" % resource_id)
                         
                 # attach a rule to the shared SG so that the DSS VM can access it (and the VPC endpoints that use it)

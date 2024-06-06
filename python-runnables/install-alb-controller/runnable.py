@@ -1,6 +1,8 @@
 from dataiku.runnables import Runnable
-import dataiku
-import json, logging, os, re, tempfile, time
+import json
+import logging
+import os
+import re
 import requests 
 from dku_aws.eksctl_command import EksctlCommand
 from dku_aws.aws_command import AwsCommand

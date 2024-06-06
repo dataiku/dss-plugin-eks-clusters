@@ -1,4 +1,7 @@
-import os, json, logging, traceback
+import os
+import json
+import logging
+import traceback
 from .kubectl_command import run_with_timeout, KubeCommandException
 
 def install_metrics_server(kube_config_path):

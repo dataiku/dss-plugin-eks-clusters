@@ -1,4 +1,5 @@
-import os, sys, json, yaml, logging, subprocess, time
+import subprocess
+import time
 
 class KubeCommandException(Exception):
     def __init__(self, message, out, err, rv):

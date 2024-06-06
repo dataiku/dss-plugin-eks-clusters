@@ -1,4 +1,8 @@
-import sys, os, subprocess, logging, json, requests, shutil
+import os
+import subprocess
+import logging
+import requests
+import shutil
 
 def get_eksctl_or_fetch():
     try:

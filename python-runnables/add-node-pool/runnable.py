@@ -1,10 +1,10 @@
 from dataiku.runnables import Runnable
-import dataiku
-import os, json, logging, yaml
+import os
+import logging
+import yaml
 from dku_kube.autoscaler import add_autoscaler_if_needed
 from dku_kube.gpu_driver import add_gpu_driver_if_needed
 from dku_aws.eksctl_command import EksctlCommand
-from dku_aws.aws_command import AwsCommand
 from dku_utils.cluster import get_cluster_from_dss_cluster, get_connection_info
 from dku_utils.config_parser import get_security_groups_arg, get_region_arg
 from dku_utils.node_pool import get_node_pool_args, build_node_pool_taints_yaml

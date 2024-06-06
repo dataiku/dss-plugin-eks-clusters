@@ -1,6 +1,4 @@
 from dataiku.runnables import Runnable
-import dataiku
-import os, json, logging
 from dku_kube.autoscaler import add_autoscaler_if_needed, has_autoscaler
 from dku_utils.cluster import get_cluster_from_dss_cluster
 

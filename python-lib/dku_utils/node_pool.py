@@ -93,11 +93,11 @@ def get_node_pool_yaml(node_pool, networking_settings):
         }
     yaml['privateNetworking'] = networking_settings.get('privateNetworking', False)
 
-    if node_pool.get('addPreBootstrapCommands', False) and not _is_none_or_blank(node_pool.get('preBootstrapCommands', '')):
+    if node_pool.get('addPreBootstrapCommands', False) and not _is_none_or_blank(node_pool.get('preBootstrapCommands', None)):
         yaml['preBootstrapCommands'] = yaml.get('preBootstrapCommands', [])
         yaml['preBootstrapCommands'] += [command.strip()\
                                           for command in node_pool['preBootstrapCommands'].split('\n')\
-                                              if not _is_none_or_blank(command.strip())]
+                                              if not _is_none_or_blank(command)]
 
     return yaml
 
@@ -106,7 +106,7 @@ def build_node_pool_taints_yaml(node_pool):
     yaml_taints = []
     if node_pool['taints']:
         for taint in node_pool['taints']:
-            if not _is_none_or_blank(taint.get('key', '')):
+            if not _is_none_or_blank(taint.get('key', None)):
                 yaml_taints.append({
                     'key': taint['key'],
                     'value': taint.get('value', ''),

@@ -54,8 +54,6 @@ class MyRunnable(Runnable):
         if len(node_group_batch) == 0:
             raise Exception("Unable to retrieve info of node group %s" % node_group_id)
 
-        node_group = node_group_batch[0]
-            
         desired_count = self.config['numNodes']
         logging.info("Resize to %s" % desired_count)
         if desired_count == 0:

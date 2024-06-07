@@ -3,13 +3,13 @@ from dku_utils.access import _is_none_or_blank
 
 class Taint(dict):
     def __init__(self, taint):
-        if not _is_none_or_blank(taint.get('key', '')):
+        if not _is_none_or_blank(taint.get('key', None)):
             self['key'] = taint.get('key', '')
 
-        if not _is_none_or_blank(taint.get('value', '')):
+        if not _is_none_or_blank(taint.get('value', None)):
             self['value'] = taint.get('value', '')
 
-        if not _is_none_or_blank(taint.get('effect', '')):
+        if not _is_none_or_blank(taint.get('effect', None)):
             self['effect'] = taint.get('effect', '')
 
     def __eq__(self, other):

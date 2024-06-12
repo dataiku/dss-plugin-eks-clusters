@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 1.4.2 - Bugfix release
+- Fix clusters creation with GPU driver with Python 2 code environments
+
 ## Version 1.4.1 - Bugfix release
 - Fix an issue when using the action to add a node pool with GPU
 

@@ -32,8 +32,9 @@ def add_gpu_driver_if_needed(cluster_id, kube_config_path, connection_info, tain
     # Retrieve the tolerations on the daemonset currently deployed to the cluster.
     if has_gpu_driver(kube_config_path):
         cmd = ['kubectl', 'get', 'daemonset', 'nvidia-device-plugin-daemonset', '-n', 'kube-system', '-o', 'jsonpath="{.spec.template.spec.tolerations}"']
-        tolerations_json, err = run_with_timeout(cmd, env=env, timeout=5)
-        if _is_none_or_blank(tolerations_json):
+        cmd_result, err = run_with_timeout(cmd, env=env, timeout=5)
+        tolerations_json = cmd_result[1:-1]
+        if not _is_none_or_blank(tolerations_json):
             tolerations.update(Toleration.from_json(tolerations_json))
 
     # If there are any taints to patch the daemonset with in the node group(s) to create,

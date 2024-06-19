@@ -49,7 +49,7 @@ jobs:
     - name: Ensure S3 prefix exists
       run: |
         echo "Ensuring that prefix '${{ steps.plugin_info.outputs.id }}/releases/latest' exists on '${{ env.AWS_PLUGINBUCKET_NAME }}'"
-        aws s3api put-object --bucket ${{ env.AWS_PLUGINBUCKET_NAME }} --key "${{ steps.plugin_info.outputs.id }}/releases/latest"
+        aws s3api put-object --bucket ${{ env.AWS_PLUGINBUCKET_NAME }} --key "${{ steps.plugin_info.outputs.id }}/releases/latest/"
 
     - name: Upload to S3
       run: |

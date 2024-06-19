@@ -23,8 +23,8 @@ jobs:
         id=$(jq -r '.id' plugin.json)
         version=$(jq -r '.version' plugin.json)
         echo "Creating release for plugin '$id' and version '$version'"
-        echo "::set-output name=id::$id"
-        echo "::set-output name=version::$version"
+        echo "id=$id" >> $GITHUB_OUTPUT
+        echo "version=$version" >> $GITHUB_OUTPUT
 
     - name: Install dependencies
       run: |

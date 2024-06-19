@@ -6,6 +6,10 @@ on:
       target:
         description: 'Commit hash or branch to release (optional, defaults to master)'
         required: false
+      skip_linter:
+        description: 'Whether the linter should be skipped'
+        required: false
+        default: 'false'
 
 jobs:
   build-and-release:
@@ -16,6 +20,9 @@ jobs:
       uses: actions/checkout@v2
       with:
         ref: ${{ inputs.target || 'master' }}
+
+    - uses: chartboost/ruff-action@v1
+      if: ${{ inputs.skip_linter != 'true' }}
 
     - name: Retrieve plugin info
       id: plugin_info
@@ -44,7 +51,7 @@ jobs:
         release_name: "v${{ steps.plugin_info.outputs.version }}"
         commitish: ${{ inputs.target || 'master' }}
         body: |
-          This is a pre-release for version of the DSS EKS plugin ${{ steps.plugin_info.outputs.id }} ${{ steps.plugin_info.outputs.version }}.
+          This is a pre-release for version of the plugin '${{ steps.plugin_info.outputs.id }}' with version '${{ steps.plugin_info.outputs.version }}'.
           Please add the release notes from the changelog in this description prior to release.
         draft: true # Ensures the tag is not created with the action, but only when manually publishing
         prerelease: true

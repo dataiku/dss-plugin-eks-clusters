@@ -1,0 +1,56 @@
+name: Upload latest plugin to S3
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+env:
+  AWS_PLUGINBUCKET_NAME: dss-plugins
+  AWS_PLUGINBUCKET_IAM_ROLE: arn:aws:iam::236706865914:role/dss-plugin-eks-clusters-github
+  AWS_REGION: eu-west-1
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Retrieve plugin info
+      id: plugin_info
+      run: |
+        id=$(jq -r '.id' plugin.json)
+        version=$(jq -r '.version' plugin.json)
+        echo "Creating release for plugin '$id' and version '$version'"
+        echo "id=$id" >> $GITHUB_OUTPUT
+        echo "version=$version" >> $GITHUB_OUTPUT
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y make
+
+    - name: Compile plugin into archive
+      run: make plugin
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        role-to-assume: ${{ env.AWS_PLUGINBUCKET_IAM_ROLE }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Ensure S3 prefix exists
+      run: |
+        echo "Ensuring that prefix '${{ steps.plugin_info.outputs.id }}/releases/latest' exists on '${{ env.AWS_PLUGINBUCKET_NAME }}'"
+        aws s3api put-object --bucket ${{ env.AWS_PLUGINBUCKET_NAME }} --key "${{ steps.plugin_info.outputs.id }}/releases/latest"
+
+    - name: Upload to S3
+      run: |
+        echo "Uploading './dist/dss-plugin-${{ steps.plugin_info.outputs.id }}-${{ steps.plugin_info.outputs.version }}.zip' to 's3://${{ env.AWS_PLUGINBUCKET_NAME }}/${{ steps.plugin_info.outputs.id }}/releases/latest/dss-plugin-${{ steps.plugin_info.outputs.id }}-latest.zip'"
+        aws s3 cp ./dist/dss-plugin-${{ steps.plugin_info.outputs.id }}-${{ steps.plugin_info.outputs.version }}.zip s3://${{ env.AWS_PLUGINBUCKET_NAME }}/${{ steps.plugin_info.outputs.id }}/releases/latest/dss-plugin-${{ steps.plugin_info.outputs.id }}-latest.zip
+
+    - name: Clean up release assets
+      run: make dist-clean

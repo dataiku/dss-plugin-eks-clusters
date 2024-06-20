@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
 
 env:
-  AWS_PLUGINBUCKET_NAME: dss-plugins
-  AWS_PLUGINBUCKET_IAM_ROLE: arn:aws:iam::236706865914:role/dss-plugin-eks-clusters-github
+  AWS_BUCKET_NAME: ${{ vars.DKU_PLUGINS_S3_BUCKET }}
+  AWS_BUCKET_IAM_ROLE: ${{ vars.DKU_PLUGINS_AWS_IAM_ROLE }}
   AWS_REGION: eu-west-1
 
 permissions:
@@ -43,18 +43,18 @@ jobs:
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4.0.2
       with:
-        role-to-assume: ${{ env.AWS_PLUGINBUCKET_IAM_ROLE }}
+        role-to-assume: ${{ env.AWS_BUCKET_IAM_ROLE }}
         aws-region: ${{ env.AWS_REGION }}
 
     - name: Ensure S3 prefix exists
       run: |
-        echo "Ensuring that prefix '${{ steps.plugin_info.outputs.id }}/releases/latest' exists on '${{ env.AWS_PLUGINBUCKET_NAME }}'"
-        aws s3api put-object --bucket ${{ env.AWS_PLUGINBUCKET_NAME }} --key "${{ steps.plugin_info.outputs.id }}/releases/latest/"
+        echo "Ensuring that prefix '${{ steps.plugin_info.outputs.id }}/releases/latest' exists on '${{ env.AWS_BUCKET_NAME }}'"
+        aws s3api put-object --bucket ${{ env.AWS_BUCKET_NAME }} --key "${{ steps.plugin_info.outputs.id }}/releases/latest/"
 
     - name: Upload to S3
       run: |
-        echo "Uploading './dist/dss-plugin-${{ steps.plugin_info.outputs.id }}-${{ steps.plugin_info.outputs.version }}.zip' to 's3://${{ env.AWS_PLUGINBUCKET_NAME }}/${{ steps.plugin_info.outputs.id }}/releases/latest/dss-plugin-${{ steps.plugin_info.outputs.id }}-latest.zip'"
-        aws s3 cp ./dist/dss-plugin-${{ steps.plugin_info.outputs.id }}-${{ steps.plugin_info.outputs.version }}.zip s3://${{ env.AWS_PLUGINBUCKET_NAME }}/${{ steps.plugin_info.outputs.id }}/releases/latest/dss-plugin-${{ steps.plugin_info.outputs.id }}-latest.zip
+        echo "Uploading './dist/dss-plugin-${{ steps.plugin_info.outputs.id }}-${{ steps.plugin_info.outputs.version }}.zip' to 's3://${{ env.AWS_BUCKET_NAME }}/${{ steps.plugin_info.outputs.id }}/releases/latest/dss-plugin-${{ steps.plugin_info.outputs.id }}-latest.zip'"
+        aws s3 cp ./dist/dss-plugin-${{ steps.plugin_info.outputs.id }}-${{ steps.plugin_info.outputs.version }}.zip s3://${{ env.AWS_BUCKET_NAME }}/${{ steps.plugin_info.outputs.id }}/releases/latest/dss-plugin-${{ steps.plugin_info.outputs.id }}-latest.zip
 
     - name: Clean up release assets
       run: make dist-clean

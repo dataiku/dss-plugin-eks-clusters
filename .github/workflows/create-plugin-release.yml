@@ -4,25 +4,33 @@ on:
   workflow_dispatch:
     inputs:
       target:
-        description: 'Commit hash or branch to release (optional, defaults to master)'
+        description: 'Commit hash or branch to release (optional, defaults to the current branch)'
         required: false
       skip_linter:
-        description: 'Whether the linter should be skipped'
+        description: 'Skip the linter? (use true to skip)'
         required: false
         default: 'false'
 
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
-        ref: ${{ inputs.target || 'master' }}
+        ref: ${{ inputs.target || github.ref }}
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y make
+        sudo apt-get install -y jq
 
     - uses: chartboost/ruff-action@v1
-      if: ${{ inputs.skip_linter != 'true' }}
+      if: ${{ inputs.skip_linter != 'true' || inputs.skip_linter !=  'True' || inputs.skip_linter != 'TRUE' }}
 
     - name: Retrieve plugin info
       id: plugin_info
@@ -33,38 +41,22 @@ jobs:
         echo "id=$id" >> $GITHUB_OUTPUT
         echo "version=$version" >> $GITHUB_OUTPUT
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y make
-
     - name: Compile plugin into archive
       run: make plugin
 
-    - name: Create GitHub Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Create GitHub pre-release and include the plugin archive as asset
+      uses: ncipollo/release-action@v1
       with:
-        tag_name: "v${{ steps.plugin_info.outputs.version }}"
-        release_name: "v${{ steps.plugin_info.outputs.version }}"
-        commitish: ${{ inputs.target || 'master' }}
-        body: |
-          This is a pre-release for version of the plugin '${{ steps.plugin_info.outputs.id }}' with version '${{ steps.plugin_info.outputs.version }}'.
-          Please add the release notes from the changelog in this description prior to release.
-        draft: true # Ensures the tag is not created with the action, but only when manually publishing
+        tag: "v${{ steps.plugin_info.outputs.version }}"
+        commit: ${{ inputs.target || github.ref }}
+        artifacts: "./dist/dss-plugin-${{ steps.plugin_info.outputs.id }}-${{ steps.plugin_info.outputs.version }}.zip"
+        artifactContentType: application/zip
+        token: ${{ secrets.GITHUB_TOKEN }}
+        makeLatest: false
         prerelease: true
-
-    - name: Upload Release Assets
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./dist/dss-plugin-${{ steps.plugin_info.outputs.id }}-${{ steps.plugin_info.outputs.version }}.zip
-        asset_name: "dss-plugin-${{ steps.plugin_info.outputs.id }}-${{ steps.plugin_info.outputs.version }}"
-        asset_content_type: application/zip
-
-    - name: Clean up release assets
-      run: make dist-clean
+        draft: true
+        generateReleaseNotes: true
+        allowUpdates: true
+        updateOnlyUnreleased: true
+        artifactErrorsFailBuild: true
+        replacesArtifacts: true

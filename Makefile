@@ -10,7 +10,7 @@ plugin:
 	@rm -rf dist
 	@mkdir dist
 	@echo "{\"remote_url\":\"${remote_url}\",\"last_commit_id\":\"${last_commit_id}\"}" > release_info.json
-	@git archive -v -9 --format zip -o dist/${archive_file_name} HEAD
+	@git archive -v -9 --format zip --worktree-attributes -o dist/${archive_file_name} HEAD
 	@zip -u dist/${archive_file_name} release_info.json
 	@rm release_info.json
 	@echo "[SUCCESS] Archiving plugin to dist/ folder: Done!"

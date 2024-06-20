@@ -23,6 +23,12 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y make
+        sudo apt-get install -y jq
+
     - name: Retrieve plugin info
       id: plugin_info
       run: |
@@ -32,16 +38,11 @@ jobs:
         echo "id=$id" >> $GITHUB_OUTPUT
         echo "version=$version" >> $GITHUB_OUTPUT
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y make
-
     - name: Compile plugin into archive
       run: make plugin
 
     - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4.0.2
+      uses: aws-actions/configure-aws-credentials@v4
       with:
         role-to-assume: ${{ env.AWS_BUCKET_IAM_ROLE }}
         aws-region: ${{ env.AWS_REGION }}

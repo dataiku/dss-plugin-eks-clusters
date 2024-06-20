@@ -16,15 +16,27 @@ class BusyboxPod(object):
 
     def __enter__(self):
         # create pod
+        # fmt: off
         pod_yaml = {
             "apiVersion": "v1",
             "kind": "Pod",
-            "metadata": {"name": self.pod_name, "namespace": "default"},
-            "spec": {
-                "containers": [{"name": self.pod_name, "image": "busybox:1.28", "command": ["sleep", "3600"], "imagePullPolicy": "IfNotPresent"}],
-                "restartPolicy": "Always",
+            "metadata": {
+                "name": self.pod_name,
+                "namespace": "default"
             },
+            "spec": {
+                "containers": [
+                    {
+                        "name": self.pod_name,
+                        "image": "busybox:1.28",
+                        "command": ["sleep", "3600"],
+                        "imagePullPolicy": "IfNotPresent"
+                    }
+                ],
+                "restartPolicy": "Always"
+            }
         }
+        # fmt: on
         pod_file_path = "busybox_pod.yaml"
         with open(pod_file_path, "w") as f:
             yaml.safe_dump(pod_yaml, f)

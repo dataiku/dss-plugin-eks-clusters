@@ -7,7 +7,15 @@ from dku_utils.access import _is_none_or_blank
 from dku_utils.tools_version import strip_kubernetes_version
 from dku_utils.taints import Toleration
 
-AUTOSCALER_IMAGES = {"1.24": "v1.24.3", "1.25": "v1.25.3", "1.26": "v1.26.4", "1.27": "v1.27.3", "1.28": "v1.28.0"}
+# fmt: off
+AUTOSCALER_IMAGES = {
+  "1.24": "v1.24.3",
+  "1.25": "v1.25.3",
+  "1.26": "v1.26.4",
+  "1.27": "v1.27.3",
+  "1.28": "v1.28.0"
+}
+# fmt: on
 
 
 def has_autoscaler(kube_config_path):

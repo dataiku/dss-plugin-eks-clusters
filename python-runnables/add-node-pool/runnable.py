@@ -81,7 +81,8 @@ class MyRunnable(Runnable):
         yaml_dict["managedNodeGroups"][0]["taints"] = node_group_taints
 
         # Adding propagateASGTags to the node group if it is autoscaled.
-        # This propagates the labels/taints of the node group to the autoscaling group so that new nodes can be properly configured on creation (scaling up)
+        # This propagates the labels/taints of the node group to the autoscaling group
+        # so that new nodes can be properly configured on creation (scaling up)
         if node_pool.get("numNodesAutoscaling", False):
             yaml_dict["managedNodeGroups"][0]["propagateASGTags"] = True
 

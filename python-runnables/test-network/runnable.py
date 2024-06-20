@@ -42,7 +42,7 @@ class MyRunnable(Runnable):
         def add_to_result(result, op, cmd, out, err):
             return (
                 result
-                + '<h5>%s</h5><div style="margin-left: 20px;"><div>Command</div><pre class="debug">%s</pre><div>Output</div><pre class="debug">%s</pre><div>Error</div><pre class="debug">%s</pre></div>'
+                + '<h5>%s</h5><div style="margin-left: 20px;"><div>Command</div><pre class="debug">%s</pre><div>Output</div><pre class="debug">%s</pre><div>Error</div><pre class="debug">%s</pre></div>' # noqa E501
                 % (op, json.dumps(cmd), out, err)
             )
 
@@ -62,7 +62,7 @@ class MyRunnable(Runnable):
                     out, err = b.exec_cmd(cmd)
                     result = (
                         result
-                        + '<h5>Resolve host</h5><div style="margin-left: 20px;"><div>Command</div><pre class="debug">%s</pre><div>Output</div><pre class="debug">%s</pre><div>Error</div><pre class="debug">%s</pre></div>'
+                        + '<h5>Resolve host</h5><div style="margin-left: 20px;"><div>Command</div><pre class="debug">%s</pre><div>Output</div><pre class="debug">%s</pre><div>Error</div><pre class="debug">%s</pre></div>'  # noqa E501
                         % (json.dumps(cmd), out, err)
                     )
                     for line in out.split("\n"):
@@ -84,7 +84,7 @@ class MyRunnable(Runnable):
                 out, err = b.exec_cmd(cmd, timeout=10)
                 result = (
                     result
-                    + '<h5>Test connection to port</h5><div style="margin-left: 20px;"><div>Command</div><pre class="debug">%s</pre><div>Debug (stderr)</div><pre class="debug">%s</pre></div>'
+                    + '<h5>Test connection to port</h5><div style="margin-left: 20px;"><div>Command</div><pre class="debug">%s</pre><div>Debug (stderr)</div><pre class="debug">%s</pre></div>' # noqa E501
                     % (json.dumps(cmd), err)
                 )
                 if "no route to host" in err.lower():

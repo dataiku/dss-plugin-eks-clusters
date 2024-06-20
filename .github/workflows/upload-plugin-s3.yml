@@ -28,7 +28,7 @@ jobs:
       run: |
         id=$(jq -r '.id' plugin.json)
         version=$(jq -r '.version' plugin.json)
-        echo "Creating release for plugin '$id' and version '$version'"
+        echo "Upload plugin '$id' and version '$version'"
         echo "id=$id" >> $GITHUB_OUTPUT
         echo "version=$version" >> $GITHUB_OUTPUT
 

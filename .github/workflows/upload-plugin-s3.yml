@@ -1,0 +1,61 @@
+name: Upload latest plugin to S3
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+env:
+  AWS_BUCKET_NAME: ${{ vars.DKU_PLUGINS_S3_BUCKET }}
+  AWS_BUCKET_IAM_ROLE: ${{ vars.DKU_PLUGINS_AWS_IAM_ROLE }}
+  AWS_REGION: eu-west-1
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y make
+        sudo apt-get install -y jq
+
+    - name: Retrieve plugin info
+      id: plugin_info
+      run: |
+        id=$(jq -r '.id' plugin.json)
+        version=$(jq -r '.version' plugin.json)
+        echo "Upload plugin '$id' and version '$version'"
+        echo "id=$id" >> $GITHUB_OUTPUT
+        echo "version=$version" >> $GITHUB_OUTPUT
+
+    - name: Compile plugin into archive
+      run: make plugin
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ env.AWS_BUCKET_IAM_ROLE }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Ensure S3 prefix exists
+      run: |
+        echo "Ensuring that prefix '${{ steps.plugin_info.outputs.id }}/releases/latest' exists on '${{ env.AWS_BUCKET_NAME }}'"
+        aws s3api put-object --bucket ${{ env.AWS_BUCKET_NAME }} --key "${{ steps.plugin_info.outputs.id }}/releases/latest/"
+
+    - name: Upload to S3
+      run: |
+        echo "Uploading './dist/dss-plugin-${{ steps.plugin_info.outputs.id }}-${{ steps.plugin_info.outputs.version }}.zip' to 's3://${{ env.AWS_BUCKET_NAME }}/${{ steps.plugin_info.outputs.id }}/releases/latest/dss-plugin-${{ steps.plugin_info.outputs.id }}-latest.zip'"
+        aws s3 cp ./dist/dss-plugin-${{ steps.plugin_info.outputs.id }}-${{ steps.plugin_info.outputs.version }}.zip s3://${{ env.AWS_BUCKET_NAME }}/${{ steps.plugin_info.outputs.id }}/releases/latest/dss-plugin-${{ steps.plugin_info.outputs.id }}-latest.zip
+
+    - name: Clean up release assets
+      run: make dist-clean

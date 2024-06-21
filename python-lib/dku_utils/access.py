@@ -1,23 +1,25 @@
 from six import text_type
+
 try:
     from collections.abc import Mapping, Iterable
 except ImportError:
     from collections import Mapping, Iterable
-from io import StringIO, BytesIO
 import sys
 
 if sys.version_info > (3,):
     dku_basestring_type = str
 else:
-    dku_basestring_type = basestring
+    dku_basestring_type = basestring  # noqa: F821
+
 
 def _convert_to_string(data):
-    for i in range(0,len(data)):
+    for i in range(0, len(data)):
         try:
             data[i] = data[i].decode()
         except (UnicodeDecodeError, AttributeError):
             pass
     return data
+
 
 def _get_in_object_or_array(o, chunk, d):
     if isinstance(chunk, int):
@@ -28,17 +30,21 @@ def _get_in_object_or_array(o, chunk, d):
     else:
         return o.get(chunk, d)
 
+
 def _safe_get_value(o, chunks, default_value=None):
     if len(chunks) == 1:
         return _get_in_object_or_array(o, chunks[0], default_value)
     else:
         return _safe_get_value(_get_in_object_or_array(o, chunks[0], {}), chunks[1:], default_value)
 
+
 def _is_none_or_blank(x):
     return x is None or (isinstance(x, text_type) and len(x.strip()) == 0)
 
+
 def _has_not_blank_property(d, k):
     return k in d and not _is_none_or_blank(d[k])
+
 
 def _default_if_blank(x, d):
     if _is_none_or_blank(x):
@@ -46,11 +52,13 @@ def _default_if_blank(x, d):
     else:
         return x
 
+
 def _default_if_property_blank(d, k, v):
-    if not k in d:
+    if k not in d:
         return v
     x = d[k]
     return _default_if_blank(x, v)
+
 
 def _merge_objects(a, b):
     if isinstance(a, Mapping) and isinstance(b, Mapping):

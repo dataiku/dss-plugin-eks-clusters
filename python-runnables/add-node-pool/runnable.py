@@ -39,6 +39,11 @@ class MyRunnable(Runnable):
         node_pool = self.config.get("nodePool", {})
         node_group_id = node_pool.get("nodeGroupId", None)
 
+        # Inherit cluster tags in new node pool
+        node_pool_tags = dict(dss_cluster_config.get("config", {}).get("clusterTags", {}))
+        node_pool_tags.update(node_pool.get("tags", {}))
+        node_pool["tags"] = node_pool_tags
+
         # first pass: get the yaml config corresponding to the command line args
         args = ["create", "nodegroup"]
         args = args + ["-v", "3"]  # not -v 4 otherwise there is a debug line in the beginning of the output

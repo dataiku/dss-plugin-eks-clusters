@@ -55,6 +55,12 @@
             "mandatory" : false
         },
         {
+            "name": "clusterTags",
+            "label": "Tags",
+            "type": "MAP",
+            "description": "Annotate the cluster's related EKS resources"
+        },
+        {
             "name": "s-advanced",
             "type":"SEPARATOR",
             "label": "Advanced"

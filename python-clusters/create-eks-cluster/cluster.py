@@ -71,6 +71,7 @@ class MyCluster(Cluster):
             args = args + ["-v", "3"]  # not -v 4 otherwise there is a debug line in the beginning of the output
             args = args + ["--name", self.cluster_id]
             args = args + get_region_arg(connection_info)
+            args = args + ["--tags", ",".join(["%s=%s" % (tag_key, tag_value) for tag_key, tag_value in self.config.get("clusterTags", {}).items()])]
             args = args + ["--full-ecr-access"]
 
             subnets = list(map(lambda subnet_id: subnet_id.strip(), networking_settings.get("subnets", [])))
@@ -100,6 +101,11 @@ class MyCluster(Cluster):
                 yaml_dict["managedNodeGroups"] = yaml_dict.get("managedNodeGroups", [])
                 for idx, node_pool in enumerate(node_pools, 0):
                     if node_pool:
+                        # Inherit cluster tags in each node pool
+                        node_pool_tags = dict(self.config.get("clusterTags", {}))
+                        node_pool_tags.update(node_pool.get("tags", {}))
+                        node_pool["tags"] = node_pool_tags
+
                         yaml_node_pool = get_node_pool_yaml(node_pool, networking_settings)
                         yaml_node_pool["name"] = node_pool.get("nodeGroupId", "%s-ng-%s" % (self.cluster_id, idx))
                         yaml_dict["managedNodeGroups"].append(yaml_node_pool)

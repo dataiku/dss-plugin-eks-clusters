@@ -71,8 +71,10 @@ class MyCluster(Cluster):
             args = args + ["-v", "3"]  # not -v 4 otherwise there is a debug line in the beginning of the output
             args = args + ["--name", self.cluster_id]
             args = args + get_region_arg(connection_info)
-            args = args + ["--tags", ",".join(["%s=%s" % (tag_key, tag_value) for tag_key, tag_value in self.config.get("clusterTags", {}).items()])]
             args = args + ["--full-ecr-access"]
+            
+            if self.config.get("clusterTags", {}):
+                args = args + ["--tags", ",".join(["%s=%s" % (tag_key, tag_value) for tag_key, tag_value in self.config.get("clusterTags", {}).items()])]
 
             subnets = list(map(lambda subnet_id: subnet_id.strip(), networking_settings.get("subnets", [])))
             if networking_settings.get("privateNetworking", False):

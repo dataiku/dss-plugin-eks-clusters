@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 1.4.3 - Feature release
+- Adding tagging support for EKS clusters. Cluster tags also get inherited by node pools.
+
 ## Version 1.4.2 - Bugfix release
 - Fix clusters creation with GPU driver with Python 2 code environments
 

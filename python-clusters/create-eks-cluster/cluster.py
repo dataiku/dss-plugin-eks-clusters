@@ -35,6 +35,8 @@ class MyCluster(Cluster):
         networking_settings = self.config["networkingSettings"]
 
         has_autoscaling = False
+        has_managed_gpu = False
+        has_advanced_gpu = False
 
         attach_vm_to_security_groups = False
         injected_security_group = self.config.get("injectedSG", "").strip()
@@ -45,7 +47,7 @@ class MyCluster(Cluster):
 
         if self.config.get("advanced", False):
             has_autoscaling = self.config.get("clusterAutoScaling")
-            has_gpu = self.config.get("advancedGPU")
+            has_advanced_gpu = self.config.get("advancedGPU")
 
             # create the cluster directly from a yaml def
             yaml_dict = yaml.safe_load(self.config.get("advancedYaml"))
@@ -60,7 +62,7 @@ class MyCluster(Cluster):
                 node_pools.append(node_pool)
 
             has_autoscaling = any(node_pool.get("numNodesAutoscaling", False) for node_pool in node_pools)
-            has_gpu = any(node_pool.get("enableGPU", False) for node_pool in node_pools)
+            has_managed_gpu = any(node_pool.get("enableGPU", False) for node_pool in node_pools)
 
             # build the yaml def. As a first step we run eksctl with
             # as many command line args as possible to get it to produce
@@ -180,10 +182,16 @@ class MyCluster(Cluster):
         args = args + ["-v", "4"]
         args = args + ["-f", yaml_loc]
 
-        # According to EKSCTL documentation: https://eksctl.io/usage/gpu-support/
-        # Unless this flag is present, they will automatically install the Nvidia plugin
-        # We add it so that we can control the version of the plugin that is installed.
-        args += ["--install-nvidia-plugin=false"]
+        if not has_advanced_gpu and has_managed_gpu:
+            # According to EKSCTL documentation: https://eksctl.io/usage/gpu-support/
+            # Unless this flag is present, they will automatically install the Nvidia plugin
+            # We add it so that we can control the version of the plugin that is installed.
+            args += ["--install-nvidia-plugin=false"]
+        elif has_advanced_gpu and not has_managed_gpu:
+            # For advanced configs, we prefer if EKS installs the nvidia driver because
+            # they will read the config and patch the daemonset with the appropriate tolerations.
+            logging.info("GPU support is requested for advanced configuration. Using eksctl to install the Nvidia daemonset.")
+            args += ["--install-nvidia-plugin=true"]
 
         # we don't add the context to the main config file, to not end up with an oversized config,
         # and because 2 different clusters could be concurrently editing the config file
@@ -280,8 +288,8 @@ class MyCluster(Cluster):
 
         setup_creds_env(kube_config_path, connection_info, self.config)
 
-        if has_gpu:
-            logging.info("At least one node group is GPU-enabled, ensuring NVIDIA GPU Drivers")
+        if has_managed_gpu and not has_advanced_gpu:
+            logging.info("At least one managed nodepool is GPU-enabled, ensuring NVIDIA GPU Drivers")
             gpu_taints = list(gpu_node_pools_taints) if gpu_node_pools_taints else []
             add_gpu_driver_if_needed(self.cluster_id, kube_config_path, connection_info, gpu_taints)
 

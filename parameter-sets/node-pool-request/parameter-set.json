@@ -12,6 +12,11 @@
 
     "params": [
         {
+            "type": "SEPARATOR",
+            "label": "Node pool definition",
+            "description": "<hr>"
+        },
+        {
             "name": "nodeGroupId",
             "label": "Node group ID",
             "description": "Id of node group to create, if not default",
@@ -101,7 +106,6 @@
         {
             "name": "taints",
             "label": "Node taints",
-            "description": "WARNING: MUST CREATE AT LEAST ONE NODE POOL WITHOUT TAINTS. https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/",
             "mandatory": false,
             "type": "OBJECT_LIST",
             "subParams": [
@@ -134,6 +138,11 @@
                     "defaultValue": "NoSchedule"
                 }
             ]
+        },
+        {
+            "type": "SEPARATOR",
+            "description": "<div class=\"alert alert-warning\"><i class=\"icon-dku-warning\"/><span>WARNING: MUST CREATE AT LEAST ONE NODE POOL WITHOUT TAINTS. <a href=\"https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/\">See documentation</a></span></div>",
+            "visibilityCondition": "model.taints && (model.taints.length > 0)"
         },
         {
             "name": "enableGPU",

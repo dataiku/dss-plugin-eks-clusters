@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 1.4.4 - Bugfix release
+- Fix gpu support for advanced configurations with tainted nodepools.
+- Miscellaneous UI improvements
+
 ## Version 1.4.3 - Feature release
 - Adding tagging support for EKS clusters. Cluster tags also get inherited by node pools.
 

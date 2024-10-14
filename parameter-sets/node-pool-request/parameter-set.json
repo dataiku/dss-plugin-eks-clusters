@@ -28,7 +28,7 @@
             "label": "Machine type",
             "description": "EC2 instance type for the nodes. See EC2 documentation for available instance types",
             "type": "STRING",
-            "defaultValue": "m5.2xlarge",
+            "defaultValue": "m7i.4xlarge",
             "mandatory" : false
         },
         {

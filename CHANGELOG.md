@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 1.4.4 - Bugfix and improvements release
+- Fix GPU support for advanced configurations with tainted nodepools.
+- Make `m7i.4xlarge` the default machine type for nodepools.
+- Miscellaneous UI improvements.
+
 ## Version 1.4.3 - Feature release
 - Adding tagging support for EKS clusters. Cluster tags also get inherited by node pools.
 

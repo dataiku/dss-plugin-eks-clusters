@@ -1,7 +1,7 @@
 # Changelog
 
 ## Version 1.4.4 - Bugfix and improvements release
-- Fix gpu support for advanced configurations with tainted nodepools.
+- Fix GPU support for advanced configurations with tainted nodepools.
 - Make `m7i.4xlarge` the default machine type for nodepools.
 - Miscellaneous UI improvements.
 

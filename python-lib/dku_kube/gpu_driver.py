@@ -87,17 +87,11 @@ def add_gpu_driver_if_needed(cluster_id, kube_config_path, connection_info, tain
 def get_nvidia_configuration_fallback():
     logging.warning("Using bundled Nvidia GPU configuration as fallback.")
     # Check both paths in case the plugin is in development mode
-    nvidia_config_cache_path = os.path.join(os.environ["DIP_HOME"], "plugins", "installed", "eks-clusters", "cache", "nvidia-device-plugin.yml")
-    nvidia_config_cache_altpath = os.path.join(os.environ["DIP_HOME"], "plugins", "dev", "eks-clusters", "cache", "nvidia-device-plugin.yml")
+    nvidia_config_cache_path = os.path.join(os.environ["DKU_CUSTOM_RESOURCE_FOLDER"], "nvidia-device-plugin.yml")
 
     if os.path.exists(nvidia_config_cache_path):
         logging.info("Found Nvidia GPU configuration at path: %s" % nvidia_config_cache_path)
         with open(nvidia_config_cache_path, "r") as f:
-            nvidia_config_raw = f.read()
-            return yaml.safe_load(nvidia_config_raw)
-    elif os.path.exists(nvidia_config_cache_altpath):
-        logging.info("Found Nvidia GPU configuration at path: %s" % nvidia_config_cache_altpath)
-        with open(nvidia_config_cache_altpath, "r") as f:
             nvidia_config_raw = f.read()
             return yaml.safe_load(nvidia_config_raw)
     else:

@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 1.4.5 - Bugfix and improvements release
+- Fix Nvidia driver download issue.
+- Package Nvidia driver as fallback for creating GPU nodepools.
+
 ## Version 1.4.4 - Bugfix and improvements release
 - Fix GPU support for advanced configurations with tainted nodepools.
 - Make `m7i.4xlarge` the default machine type for nodepools.

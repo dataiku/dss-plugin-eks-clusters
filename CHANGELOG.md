@@ -1,8 +1,9 @@
 # Changelog
 
 ## Version 1.4.5 - Bugfix and improvements release
-- Fix Nvidia driver download issue.
+- Fix Nvidia driver and ALB controller download issue.
 - Package Nvidia driver as fallback for creating GPU nodepools.
+- Package ALB controller resources as fallback.
 
 ## Version 1.4.4 - Bugfix and improvements release
 - Fix GPU support for advanced configurations with tainted nodepools.

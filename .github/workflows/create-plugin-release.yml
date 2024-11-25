@@ -28,6 +28,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y make
         sudo apt-get install -y jq
+        sudo apt-get install -y wget
 
     - uses: chartboost/ruff-action@v1
       if: ${{ inputs.skip_linter != 'true' || inputs.skip_linter !=  'True' || inputs.skip_linter != 'TRUE' }}

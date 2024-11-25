@@ -23,10 +23,24 @@ def add_gpu_driver_if_needed(cluster_id, kube_config_path, connection_info, tain
     env["KUBECONFIG"] = kube_config_path
 
     # Get the Nvidia driver plugin configuration from the repository
-    nvidia_config_raw = requests.get(
-        "https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/main/deployments/static/nvidia-device-plugin.yml"
-    ).text
-    nvidia_config = yaml.safe_load(nvidia_config_raw)
+    nvidia_config_response = requests.get(
+        "https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/main/deployments/static/nvidia-device-plugin.yml",
+        headers={"User-Agent": "DSS EKS Plugin"}
+    )
+
+    if nvidia_config_response.ok:
+        nvidia_config = yaml.safe_load(nvidia_config_response.text)
+    else:
+        # Get the bundled nvidia config file as a fallback.
+        logging.warning(
+            "Retrieving the Nvidia GPU driver failed with status: %s %s" % (nvidia_config_response.status_code, nvidia_config_response.reason)
+        )
+        logging.warning("Content of failed request: %s" % nvidia_config_response.content)
+        nvidia_config = get_nvidia_configuration_fallback()
+
+    if not nvidia_config:
+        logging.error("Unable to install the Nvidia driver")
+
     tolerations = set()
 
     # Get any tolerations from the plugin configuration
@@ -69,3 +83,16 @@ def add_gpu_driver_if_needed(cluster_id, kube_config_path, connection_info, tain
     logging.info("NVIDIA GPU driver config: %s" % yaml.safe_dump(nvidia_config, default_flow_style=False))
 
     run_with_timeout(cmd, env=env, timeout=5)
+
+def get_nvidia_configuration_fallback():
+    logging.warning("Using bundled Nvidia GPU configuration as fallback.")
+    # Check both paths in case the plugin is in development mode
+    nvidia_config_cache_path = os.path.join(os.environ["DKU_CUSTOM_RESOURCE_FOLDER"], "nvidia-device-plugin.yml")
+
+    if os.path.exists(nvidia_config_cache_path):
+        logging.info("Found Nvidia GPU configuration at path: %s" % nvidia_config_cache_path)
+        with open(nvidia_config_cache_path, "r") as f:
+            nvidia_config_raw = f.read()
+            return yaml.safe_load(nvidia_config_raw)
+    else:
+        logging.warning("Unable to locate the cached Nvidia GPU configuration at path: %s" % nvidia_config_cache_path)

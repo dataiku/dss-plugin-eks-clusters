@@ -105,7 +105,7 @@ class InstallAlb(Runnable):
                 raise Exception("Policy %s doesn't exist and the macro isn't allowed to create it" % policy_name)
             # create the policy
             policy_document_url = "https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.8/docs/examples/iam-policy.json"
-            policy_document = requests.get(policy_document_url).text
+            policy_document = requests.get(policy_document_url, headers={"User-Agent": "DSS EKS Plugin"}).text
             with open("policy.json", "w") as p:
                 p.write(policy_document)
 
@@ -155,7 +155,8 @@ class InstallAlb(Runnable):
             return make_html(command_outputs)
 
         r = requests.get(
-            "https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.4/docs/examples/alb-ingress-controller.yaml"
+            "https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.4/docs/examples/alb-ingress-controller.yaml",
+            headers={"User-Agent": "DSS EKS Plugin"},
         )
         service_data = r.text
         cluster_flag_pattern = "#.*cluster\\-name=.*"

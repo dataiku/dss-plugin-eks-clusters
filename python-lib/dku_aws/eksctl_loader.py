@@ -19,7 +19,11 @@ def get_eksctl_or_fetch():
         if not os.path.exists(local_eksctl):
             arch = subprocess.check_output(["uname", "-s"]).strip().decode("utf8")
             logging.info("Downloading eksctl for %s" % arch)
-            r = requests.get("https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_%s_amd64.tar.gz" % arch, stream=True)
+            r = requests.get(
+                "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_%s_amd64.tar.gz" % arch,
+                stream=True,
+                headers={"User-Agent": "DSS EKS Plugin"}
+            )
             local_eksctl_archive = os.path.join(local_eksctl_folder, "eksctl.tar.gz")
             with open(local_eksctl_archive, "wb") as f:
                 shutil.copyfileobj(r.raw, f)

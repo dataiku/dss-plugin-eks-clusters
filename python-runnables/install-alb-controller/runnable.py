@@ -3,13 +3,13 @@ import json
 import logging
 import os
 import re
-import requests
 from dku_aws.eksctl_command import EksctlCommand
 from dku_aws.aws_command import AwsCommand
 from dku_utils.cluster import get_cluster_from_dss_cluster, get_cluster_generic_property, set_cluster_generic_property, get_connection_info
 from dku_kube.kubectl_command import run_with_timeout, KubeCommandException
 from dku_utils.access import _is_none_or_blank
 from dku_utils.config_parser import get_region_arg
+from dku_utils.static_resources import get_url_or_fallback
 
 
 def make_html(command_outputs):
@@ -105,7 +105,7 @@ class InstallAlb(Runnable):
                 raise Exception("Policy %s doesn't exist and the macro isn't allowed to create it" % policy_name)
             # create the policy
             policy_document_url = "https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.8/docs/examples/iam-policy.json"
-            policy_document = requests.get(policy_document_url).text
+            policy_document = get_url_or_fallback(policy_document_url, "iam-policy.json")
             with open("policy.json", "w") as p:
                 p.write(policy_document)
 
@@ -154,10 +154,8 @@ class InstallAlb(Runnable):
         if command_outputs[-1][1] != 0:
             return make_html(command_outputs)
 
-        r = requests.get(
-            "https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.4/docs/examples/alb-ingress-controller.yaml"
-        )
-        service_data = r.text
+        alb_controller_url = "https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.4/docs/examples/alb-ingress-controller.yaml"
+        service_data = get_url_or_fallback(alb_controller_url, "alb-ingress-controller.yaml")
         cluster_flag_pattern = "#.*cluster\\-name=.*"
         cluster_flag_replacement = "- --cluster-name=%s" % cluster_id
         service_data = re.sub(cluster_flag_pattern, cluster_flag_replacement, service_data)

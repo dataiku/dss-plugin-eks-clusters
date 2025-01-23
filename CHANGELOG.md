@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 1.4.6 - Bugfix release
+- Fix metrics API on eksctl v0.201.0 and later
+
 ## Version 1.4.5 - Bugfix and improvements release
 - Fix Nvidia driver and ALB controller download issue.
 - Package Nvidia driver as fallback for creating GPU nodepools.

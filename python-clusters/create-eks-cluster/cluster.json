@@ -73,11 +73,12 @@
             "description" : "Leave empty for current default of eksctl"
         },
         {
-             "name": "installMetricsServer",
-             "label": "Install metrics server",
-             "type": "BOOLEAN",
-             "mandatory" : true,
-             "defaultValue" : true
+            "name": "installMetricsServer",
+            "label": "Ensure metrics server installation",
+            "type": "BOOLEAN",
+            "mandatory" : true,
+            "defaultValue" : true,
+            "description": "Some versions of eksctl may install the metrics server with the default add-ons."
         },
         {
             "name": "privateCluster",

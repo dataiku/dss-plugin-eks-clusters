@@ -13,7 +13,7 @@ from dku_aws.aws_command import AwsCommand
 from dku_kube.kubeconfig import setup_creds_env
 from dku_kube.autoscaler import add_autoscaler_if_needed
 from dku_kube.gpu_driver import add_gpu_driver_if_needed
-from dku_kube.metrics_server import install_metrics_server
+from dku_kube.metrics_server import install_metrics_server_if_needed
 from dku_utils.cluster import make_overrides, get_connection_info
 from dku_utils.access import _is_none_or_blank
 from dku_utils.config_parser import get_region_arg, get_private_ip_from_metadata
@@ -297,7 +297,7 @@ class MyCluster(Cluster):
             add_gpu_driver_if_needed(self.cluster_id, kube_config_path, connection_info, gpu_taints)
 
         if self.config.get("installMetricsServer"):
-            install_metrics_server(kube_config_path)
+            install_metrics_server_if_needed(kube_config_path)
 
         c = EksctlCommand(args, connection_info)
         cluster_info = json.loads(c.run_and_get_output())[0]

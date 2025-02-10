@@ -305,7 +305,10 @@ class MyCluster(Cluster):
         if has_autoscaling:
             logging.info("At least one node group is autoscaling, ensuring autoscaler")
             autoscaled_taints = list(autoscaled_node_pools_taints) if autoscaled_node_pools_taints else []
-            add_autoscaler_if_needed(self.cluster_id, self.config, cluster_info, kube_config_path, autoscaled_taints)
+            autoscaler_registry_url = self.config.get("autoscaler_registry_url", "registry.k8s.io"))
+            add_autoscaler_if_needed(
+                self.cluster_id, self.config, cluster_info, kube_config_path, autoscaled_taints, autoscaler_registry_url
+            )
 
         with open(kube_config_path, "r") as f:
             kube_config = yaml.safe_load(f)

@@ -18,7 +18,6 @@
     "macroRoles": [
         { "type":"CLUSTER", "targetParamsKey":"clusterId", "limitToSamePlugin":true }
     ],
-
     "params": [
         {
             "name": "clusterId",

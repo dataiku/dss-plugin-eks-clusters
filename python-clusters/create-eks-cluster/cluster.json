@@ -81,6 +81,13 @@
             "description": "Some versions of eksctl may install the metrics server with the default add-ons."
         },
         {
+            "name": "enableCloudWatchPolicy",
+            "label": "Add CloudWatch policy",
+            "description": "Add CloudWatch IAM policy to cluster instances",
+            "type": "BOOLEAN",
+            "defaultValue": false
+        },
+        {
             "name": "privateCluster",
             "label": "Fully-private",
             "type": "BOOLEAN",

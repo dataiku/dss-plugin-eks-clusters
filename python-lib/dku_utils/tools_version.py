@@ -5,7 +5,7 @@ from dku_kube.kubectl_command import run_with_timeout
 
 def get_kubectl_version():
     cmd = ["kubectl", "version", "--client", "-o", "json"]
-    out, err = run_with_timeout(cmd)
+    out, err = run_with_timeout(cmd, timeout=30)
     return json.loads(out)["clientVersion"]
 
 
@@ -48,7 +48,7 @@ def strip_kubernetes_version(k8s_version_input):
 
 def get_authenticator_version():
     cmd = ["aws-iam-authenticator", "version", "-o", "json"]
-    out, err = run_with_timeout(cmd)
+    out, err = run_with_timeout(cmd, timeout=30)
     return json.loads(out)["Version"].lstrip("v")
 
 

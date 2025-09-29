@@ -70,6 +70,8 @@ def get_node_pool_yaml(node_pool, networking_settings):
     else:
         yaml["volumeSize"] = 200  # also defined as default value in parameter-sets/node-pool-request/parameter-set.json
 
+    yaml["volumeEncrypted"] = True
+
     yaml["desiredCapacity"] = node_pool.get("numNodes", 3)
     if node_pool.get("numNodesAutoscaling", False):
         yaml["iam"]["withAddonPolicies"]["autoScaler"] = True

@@ -156,7 +156,7 @@ class MyCluster(Cluster):
                         if "autoscaling" not in private_cluster["additionalEndpointServices"]:
                             private_cluster["additionalEndpointServices"].append("autoscaling")
 
-                # clear the vpc.clusterEndpoints
+                # clear the vpc.clusterEndpoints (https://docs.aws.amazon.com/eks/latest/eksctl/eks-private-cluster.html#_configuring_private_access_to_additional_aws_services)
                 yaml_dict["vpc"] = yaml_dict.get("vpc", {})
                 yaml_dict["vpc"]["clusterEndpoints"] = None
 
@@ -272,17 +272,6 @@ class MyCluster(Cluster):
         c = EksctlCommand(args, connection_info)
         if c.run_and_log() != 0:
             raise Exception("Failed to start cluster")
-
-        # if you leave eksctl work, you have a public/private EKS endpoint, so we can tighten it even more
-        if self.config.get("makePrivateOnly", False):
-            privatize_args = ["utils", "update-cluster-endpoints"]
-            privatize_args = privatize_args + ["--name", self.cluster_id]
-            privatize_args = privatize_args + ["--private-access=true", "--public-access=false"]
-            privatize_args = privatize_args + ["--approve"]
-            privatize_args = privatize_args + get_region_arg(connection_info)
-            privatize_c = EksctlCommand(privatize_args, connection_info)
-            if privatize_c.run_and_log() != 0:
-                raise Exception("Failed to make cluster fully private")
 
         args = ["get", "cluster"]
         args = args + ["--name", self.cluster_id]

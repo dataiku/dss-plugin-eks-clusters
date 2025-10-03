@@ -213,7 +213,7 @@ spec:
     spec:
       serviceAccountName: cluster-autoscaler
       containers:
-        - image: %(autoscalerregistryurl)/autoscaling/cluster-autoscaler:%(autoscalerimageversion)s
+        - image: %(autoscalerregistryurl)s/autoscaling/cluster-autoscaler:%(autoscalerimageversion)s
           name: cluster-autoscaler
           resources:
             limits:

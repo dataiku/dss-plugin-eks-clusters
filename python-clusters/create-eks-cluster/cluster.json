@@ -106,7 +106,7 @@
             "description": "If true, the EKS endpoint is made private-only (otherwise it will remain both public and private)"
         },
         {
-            "name": "autoscaler_registry_url",
+            "name": "autoscalerRegistryURL",
             "label": "Custom autoscaler registry URL",
             "type": "STRING",
             "description": "If registry.k8s.io isn't reachable",

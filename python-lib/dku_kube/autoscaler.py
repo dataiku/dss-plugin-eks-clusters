@@ -27,7 +27,7 @@ def has_autoscaler(kube_config_path):
     return len(out.strip()) > 0
 
 
-def add_autoscaler_if_needed(cluster_id, cluster_config, cluster_def, kube_config_path, taints):
+def add_autoscaler_if_needed(cluster_id, cluster_config, cluster_def, kube_config_path, taints, autoscaler_registry_url):
     if not has_autoscaler(kube_config_path):
         kubernetes_version = cluster_config.get("k8sVersion", None)
         if _is_none_or_blank(kubernetes_version):
@@ -42,7 +42,7 @@ def add_autoscaler_if_needed(cluster_id, cluster_config, cluster_def, kube_confi
             autoscaler_image = AUTOSCALER_IMAGES.get(kubernetes_version, "v1.28.0")
 
         autoscaler_full_config = list(yaml.safe_load_all(get_autoscaler_roles()))
-        autoscaler_config = yaml.safe_load(get_autoscaler_config(cluster_id, autoscaler_image))
+        autoscaler_config = yaml.safe_load(get_autoscaler_config(cluster_id, autoscaler_image, autoscaler_registry_url))
         tolerations = set()
 
         # If there are any taints to patch the autoscaler with in the node group(s) to create,
@@ -191,7 +191,9 @@ subjects:
 """
 
 
-def get_autoscaler_config(cluster_id, autoscaler_image_version):
+def get_autoscaler_config(cluster_id, autoscaler_image_version, autoscaler_registry_url):
+    # Remove trailing slash if it exists
+    autoscaler_registry_url = autoscaler_registry_url.rstrip("/")
     return """apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -211,7 +213,7 @@ spec:
     spec:
       serviceAccountName: cluster-autoscaler
       containers:
-        - image: registry.k8s.io/autoscaling/cluster-autoscaler:%(autoscalerimageversion)s
+        - image: %(autoscalerregistryurl)s/autoscaling/cluster-autoscaler:%(autoscalerimageversion)s
           name: cluster-autoscaler
           resources:
             limits:
@@ -237,4 +239,5 @@ spec:
         - name: ssl-certs
           hostPath:
             path: "/etc/ssl/certs/ca-bundle.crt"
-""" % {"autoscalerimageversion": autoscaler_image_version, "clusterid": cluster_id}
+""" % {"autoscalerimageversion": autoscaler_image_version, "clusterid": cluster_id, "autoscalerregistryurl": autoscaler_registry_url}
+

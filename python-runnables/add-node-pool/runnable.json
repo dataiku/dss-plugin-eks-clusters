@@ -18,7 +18,7 @@
     "macroRoles": [
         { "type":"CLUSTER", "targetParamsKey":"clusterId", "limitToSamePlugin":true }
     ],
-    
+
     "params": [
         {
             "name": "clusterId",
@@ -39,6 +39,13 @@
             "label": "Private Nodes",
             "description": "Use this option when using the advanced YAML configuration for the EKS cluster and private networking",
             "type": "BOOLEAN"
+        },
+        {
+            "name": "autoscalerRegistryURL",
+            "label": "Custom autoscaler registry URL",
+            "type": "STRING",
+            "description": "If registry.k8s.io isn't reachable",
+            "defaultValue" : "registry.k8s.io"
         }
     ]
 }

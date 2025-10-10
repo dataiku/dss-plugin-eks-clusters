@@ -100,6 +100,13 @@
             "description": "Security group id to add as inbound on the cluster's autocreated SGs. Should allow inbound traffic from DSS."
         },
         {
+            "name": "autoscalerRegistryURL",
+            "label": "Custom autoscaler registry URL",
+            "type": "STRING",
+            "description": "If registry.k8s.io isn't reachable",
+            "defaultValue" : "registry.k8s.io"
+        },
+        {
             "name": "advanced",
             "label": "Use Advanced Configuration",
             "type": "BOOLEAN"

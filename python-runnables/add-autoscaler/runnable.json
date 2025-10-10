@@ -18,7 +18,6 @@
     "macroRoles": [
         { "type":"CLUSTER", "targetParamsKey":"clusterId", "limitToSamePlugin":true }
     ],
-    
     "params": [
         {
             "name": "clusterId",
@@ -26,6 +25,13 @@
             "type": "CLUSTER",
             "description": "Cluster (in DSS)",
             "mandatory": true
+        },
+        {
+            "name": "autoscalerRegistryURL",
+            "label": "Custom autoscaler registry URL",
+            "type": "STRING",
+            "description": "If registry.k8s.io isn't reachable",
+            "defaultValue" : "registry.k8s.io"
         }
     ]
 }

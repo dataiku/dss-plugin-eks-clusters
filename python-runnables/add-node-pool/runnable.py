@@ -84,6 +84,7 @@ class MyRunnable(Runnable):
         # Adding node pool taints on the only node pool we create which is managed:
         node_group_taints = build_node_pool_taints_yaml(node_pool)
         yaml_dict["managedNodeGroups"][0]["taints"] = node_group_taints
+        yaml_dict["managedNodeGroups"][0]["volumeEncrypted"] = True
 
         # Adding propagateASGTags to the node group if it is autoscaled.
         # This propagates the labels/taints of the node group to the autoscaling group
@@ -106,7 +107,8 @@ class MyRunnable(Runnable):
 
         if node_pool.get("numNodesAutoscaling", False):
             logging.info("Nodegroup is autoscaling, ensuring autoscaler")
-            add_autoscaler_if_needed(cluster_id, self.config, cluster_data.get("cluster"), kube_config_path, node_group_taints)
+            autoscaler_registry_url = self.config.get("autoscalerRegistryURL", "registry.k8s.io")
+            add_autoscaler_if_needed(cluster_id, self.config, cluster_data.get("cluster"), kube_config_path, node_group_taints, autoscaler_registry_url)
 
         if node_pool.get("enableGPU", False):
             logging.info("Nodegroup is GPU-enabled, ensuring NVIDIA GPU Drivers")

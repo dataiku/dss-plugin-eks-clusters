@@ -21,7 +21,7 @@ def run_with_timeout(cmd, env=None, timeout=3, nokill=False):
             return None, None
         else:
             p.kill()
-            raise Exception("Process did not finish after %s" % timeout)
+            raise Exception("Process did not finish after %s seconds" % timeout)
     out, err = p.communicate()
     rv = p.wait()
     if rv != 0:

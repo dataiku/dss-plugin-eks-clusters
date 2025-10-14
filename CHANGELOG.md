@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 1.5.0 - Feature and improvements release
+- Enable EBS volume encryption by default
+- Remove "Revoke public access" option as it clashes with "Fully private" option in configuration
+- Allow for custom registry for autoscaler image
+- Increase timeout for AWS authenticator
+
 ## Version 1.4.6 - Bugfix release
 - Fix metrics API on eksctl v0.201.0 and later
 

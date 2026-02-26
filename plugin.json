@@ -6,7 +6,7 @@
         "description": "Interact with Amazon Elastic Kubernetes Service clusters",
         "author": "Dataiku",
         "icon": "icon-amazon-elastic-kubernetes icon-cloud",
-        "tags": ["Cloud", "AWS"],
+        "tags": ["Infra", "AWS"],
         "url": "https://www.dataiku.com/dss/plugins/info/eks-clusters.html",
         "licenseInfo": "Apache Software License",
         "supportLevel": "TIER2_SUPPORT"

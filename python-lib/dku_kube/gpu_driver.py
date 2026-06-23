@@ -64,6 +64,23 @@ def add_gpu_driver_if_needed(cluster_id, kube_config_path, connection_info, tain
     # initial Nvidia driver configuration tolerations and Nvidia daemonset tolerations (when applicable)
     nvidia_config["spec"]["template"]["spec"]["tolerations"] = Toleration.to_list(tolerations)
 
+    # Restrict the DaemonSet to nodes that have a GPU, so it doesn't try to
+    # run on every CPU node in the cluster (which is the upstream manifest's
+    # broken default).
+    nvidia_config["spec"]["template"]["spec"]["affinity"] = {
+        "nodeAffinity": {
+            "requiredDuringSchedulingIgnoredDuringExecution": {
+                "nodeSelectorTerms": [{
+                    "matchExpressions": [{
+                        "key": "nvidia.com/gpu.present",
+                        "operator": "In",
+                        "values": ["true"],
+                    }]
+                }]
+            }
+        }
+    }
+
     # Write the configuration locally
     local_nvidia_plugin_config = os.path.join(os.environ["DIP_HOME"], "clusters", cluster_id, "nvidia-device-plugin.yml")
     with open(local_nvidia_plugin_config, "w") as f:

@@ -2,6 +2,10 @@ import logging
 from dku_utils.access import _is_none_or_blank
 
 
+GPU_PRESENT_NODE_LABEL = "nvidia.com/gpu.present"
+GPU_PRESENT_NODE_LABEL_VALUE = "true"
+
+
 def get_node_pool_args(node_pool):
     args = []
     if "machineType" in node_pool:
@@ -32,7 +36,7 @@ def get_node_pool_args(node_pool):
         args = args + ["--ssh-access"]
         args = args + ["--ssh-public-key", node_pool.get("publicKeyName", "")]
 
-    node_pool["labels"] = node_pool.get("labels", {})
+    node_pool["labels"] = get_node_pool_labels(node_pool)
     if node_pool["labels"]:
         labels = []
         for label_key, label_value in node_pool["labels"].items():
@@ -81,7 +85,7 @@ def get_node_pool_yaml(node_pool, networking_settings):
 
     yaml["tags"] = node_pool.get("tags", {})
     yaml["taints"] = build_node_pool_taints_yaml(node_pool)
-    node_pool["labels"] = node_pool.get("labels", {})
+    node_pool["labels"] = get_node_pool_labels(node_pool)
     if any(_is_none_or_blank(label_key) for label_key in node_pool["labels"].keys()):
         logging.error(
             "At least one node pool label key is not valid, please ensure label keys are not empty. Observed labels: [%s]"
@@ -109,6 +113,13 @@ def get_node_pool_yaml(node_pool, networking_settings):
         ]
 
     return yaml
+
+
+def get_node_pool_labels(node_pool):
+    labels = dict(node_pool.get("labels", {}))
+    if node_pool.get("enableGPU", False):
+        labels[GPU_PRESENT_NODE_LABEL] = GPU_PRESENT_NODE_LABEL_VALUE
+    return labels
 
 
 def build_node_pool_taints_yaml(node_pool):

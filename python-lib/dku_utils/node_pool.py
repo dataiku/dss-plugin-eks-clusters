@@ -2,8 +2,8 @@ import logging
 from dku_utils.access import _is_none_or_blank
 
 
-GPU_PRESENT_NODE_LABEL = "nvidia.com/gpu.present"
-GPU_PRESENT_NODE_LABEL_VALUE = "true"
+GPU_ENABLED_NODEPOOL_LABEL = "dataiku.com/gpu-enabled"
+GPU_ENABLED_NODEPOOL_LABEL_VALUE = "true"
 
 
 def get_node_pool_args(node_pool):
@@ -118,7 +118,7 @@ def get_node_pool_yaml(node_pool, networking_settings):
 def get_node_pool_labels(node_pool):
     labels = dict(node_pool.get("labels", {}))
     if node_pool.get("enableGPU", False):
-        labels[GPU_PRESENT_NODE_LABEL] = GPU_PRESENT_NODE_LABEL_VALUE
+        labels[GPU_ENABLED_NODEPOOL_LABEL] = GPU_ENABLED_NODEPOOL_LABEL_VALUE
     return labels
 
 

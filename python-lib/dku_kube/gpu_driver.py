@@ -7,6 +7,7 @@ from dku_utils.access import _is_none_or_blank
 from .kubectl_command import run_with_timeout
 from dku_utils.taints import Toleration
 from dku_utils.static_resources import get_url_or_fallback
+from dku_utils.node_pool import GPU_ENABLED_NODEPOOL_LABEL, GPU_ENABLED_NODEPOOL_LABEL_VALUE
 
 
 def has_gpu_driver(kube_config_path):
@@ -72,9 +73,9 @@ def add_gpu_driver_if_needed(cluster_id, kube_config_path, connection_info, tain
             "requiredDuringSchedulingIgnoredDuringExecution": {
                 "nodeSelectorTerms": [{
                     "matchExpressions": [{
-                        "key": "nvidia.com/gpu.present",
+                        "key": GPU_ENABLED_NODEPOOL_LABEL,
                         "operator": "In",
-                        "values": ["true"],
+                        "values": [GPU_ENABLED_NODEPOOL_LABEL_VALUE],
                     }]
                 }]
             }

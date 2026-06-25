@@ -13,7 +13,14 @@ AUTOSCALER_IMAGES = {
   "1.25": "v1.25.3",
   "1.26": "v1.26.4",
   "1.27": "v1.27.3",
-  "1.28": "v1.28.0"
+  "1.28": "v1.28.0",
+  "1.29": "v1.29.5",
+  "1.30": "v1.30.7",
+  "1.31": "v1.31.5",
+  "1.32": "v1.32.7",
+  "1.33": "v1.33.4",
+  "1.34": "v1.34.3",
+  "1.35": "v1.35.1"
 }
 # fmt: on
 
@@ -30,7 +37,7 @@ def has_autoscaler(kube_config_path):
 def add_autoscaler_if_needed(cluster_id, cluster_config, cluster_def, kube_config_path, taints, autoscaler_registry_url):
     if not has_autoscaler(kube_config_path):
         kubernetes_version = cluster_config.get("k8sVersion", None)
-        if _is_none_or_blank(kubernetes_version):
+        if _is_none_or_blank(kubernetes_version) or kubernetes_version == "latest":
             kubernetes_version = cluster_def.get("Version")
 
         kubernetes_version = strip_kubernetes_version(kubernetes_version)
@@ -39,7 +46,7 @@ def add_autoscaler_if_needed(cluster_id, cluster_config, cluster_def, kube_confi
         if float(kubernetes_version) < 1.24:
             autoscaler_image = AUTOSCALER_IMAGES.get("1.24", "v1.24.3")
         else:
-            autoscaler_image = AUTOSCALER_IMAGES.get(kubernetes_version, "v1.28.0")
+            autoscaler_image = AUTOSCALER_IMAGES.get(kubernetes_version, "v1.35.1")
 
         autoscaler_full_config = list(yaml.safe_load_all(get_autoscaler_roles()))
         autoscaler_config = yaml.safe_load(get_autoscaler_config(cluster_id, autoscaler_image, autoscaler_registry_url))

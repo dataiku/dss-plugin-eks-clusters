@@ -7,6 +7,7 @@ from dku_utils.access import _is_none_or_blank
 from .kubectl_command import run_with_timeout
 from dku_utils.taints import Toleration
 from dku_utils.static_resources import get_url_or_fallback
+from dku_utils.node_pool import GPU_ENABLED_NODEPOOL_LABEL, GPU_ENABLED_NODEPOOL_LABEL_VALUE
 
 
 def has_gpu_driver(kube_config_path):
@@ -63,6 +64,11 @@ def add_gpu_driver_if_needed(cluster_id, kube_config_path, connection_info, tain
     # Patch the Nvidia driver configuration with the tolerations derived from node group(s) taints,
     # initial Nvidia driver configuration tolerations and Nvidia daemonset tolerations (when applicable)
     nvidia_config["spec"]["template"]["spec"]["tolerations"] = Toleration.to_list(tolerations)
+
+    # Restrict the DaemonSet to nodes that request a GPU, so it doesn't try to run on every CPU node in the cluster
+    nvidia_config["spec"]["template"]["spec"]["nodeSelector"] = {
+        GPU_ENABLED_NODEPOOL_LABEL: GPU_ENABLED_NODEPOOL_LABEL_VALUE
+    }
 
     # Write the configuration locally
     local_nvidia_plugin_config = os.path.join(os.environ["DIP_HOME"], "clusters", cluster_id, "nvidia-device-plugin.yml")

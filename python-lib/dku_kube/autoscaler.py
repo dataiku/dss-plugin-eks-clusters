@@ -17,11 +17,25 @@ AUTOSCALER_TAG_RE = re.compile(r"^v([0-9]+)\.([0-9]+)\.([0-9]+)$")
 AUTOSCALER_MATCHING_VERSION_CUTOFF = (1, 12)
 AUTOSCALER_MATCHING_VERSION_CUTOFF_MINOR = "1.12"
 
-
-class AutoscalerImageSelection(object):
-    def __init__(self, image_tag, warning=None):
-        self.image_tag = image_tag
-        self.warning = warning
+# Used only when registry tag discovery is unavailable, which preserves the
+# existing custom-registry workflow for registries that do not expose tags/list.
+# Keep values pinned to tags known to exist in registry.k8s.io.
+# fmt: off
+AUTOSCALER_IMAGE_FALLBACKS = {
+    "1.24": "v1.24.3",
+    "1.25": "v1.25.3",
+    "1.26": "v1.26.4",
+    "1.27": "v1.27.3",
+    "1.28": "v1.28.0",
+    "1.29": "v1.29.5",
+    "1.30": "v1.30.7",
+    "1.31": "v1.31.5",
+    "1.32": "v1.32.7",
+    "1.33": "v1.33.4",
+    "1.34": "v1.34.3",
+    "1.35": "v1.35.0",
+}
+# fmt: on
 
 
 def has_autoscaler(kube_config_path):
@@ -67,71 +81,95 @@ def _discover_published_autoscaler_tags(autoscaler_registry_url):
     return [tag for tag in tags if _parse_autoscaler_tag(tag) is not None]
 
 
-def _latest_autoscaler_tag_for_minor(tags, kubernetes_minor=None):
+def _select_matching_autoscaler_tag_from_tags(tags, parsed_kubernetes_minor):
+    if parsed_kubernetes_minor >= AUTOSCALER_MATCHING_VERSION_CUTOFF:
+        # From Kubernetes 1.12 onward, upstream expects the autoscaler major/minor
+        # to match the Kubernetes major/minor; choose the latest patch for that minor.
+        matching_minor = parsed_kubernetes_minor
+    else:
+        # Before Kubernetes 1.12 there is no same-minor compatibility rule to apply.
+        # Use the first version where that rule exists, rather than jumping to latest.
+        matching_minor = AUTOSCALER_MATCHING_VERSION_CUTOFF
+
     matching_tags = []
     for tag in tags:
         parsed_tag = _parse_autoscaler_tag(tag)
-        if parsed_tag is None:
-            continue
-        if kubernetes_minor is not None and "%s.%s" % (parsed_tag[0], parsed_tag[1]) != kubernetes_minor:
-            continue
-        matching_tags.append((parsed_tag, tag))
+        if parsed_tag is not None and parsed_tag[:2] == matching_minor:
+            matching_tags.append((parsed_tag, tag))
 
-    if not matching_tags:
-        return None
-
-    matching_tags.sort()
-    return matching_tags[-1][1]
+    if matching_tags:
+        matching_tags.sort()
+        return matching_tags[-1][1]
 
 
 def select_autoscaler_image(kubernetes_version, autoscaler_registry_url, autoscaler_image_tag_override=None):
-    kubernetes_major, kubernetes_minor, kubernetes_minor_string = parse_kubernetes_version(kubernetes_version)
+    kubernetes_major, kubernetes_minor, kubernetes_version_string = parse_kubernetes_version(kubernetes_version)
     parsed_kubernetes_minor = (kubernetes_major, kubernetes_minor)
 
     if not _is_none_or_blank(autoscaler_image_tag_override):
         autoscaler_image_tag_override = autoscaler_image_tag_override.strip()
         logging.info(
-            "Using configured cluster autoscaler image tag override %s for Kubernetes %s" % (autoscaler_image_tag_override, kubernetes_minor_string)
+            "Using configured cluster autoscaler image tag override %s for Kubernetes %s" % (autoscaler_image_tag_override, kubernetes_version_string)
         )
-        return AutoscalerImageSelection(autoscaler_image_tag_override)
+        return autoscaler_image_tag_override
 
     try:
         published_tags = _discover_published_autoscaler_tags(autoscaler_registry_url)
-        if parsed_kubernetes_minor >= AUTOSCALER_MATCHING_VERSION_CUTOFF:
-            # From Kubernetes 1.12 onward, upstream expects the autoscaler major/minor
-            # to match the Kubernetes major/minor; choose the latest patch for that minor.
-            matching_tag = _latest_autoscaler_tag_for_minor(published_tags, kubernetes_minor_string)
-            if matching_tag is not None:
-                return AutoscalerImageSelection(matching_tag)
+        selected_tag = _select_matching_autoscaler_tag_from_tags(published_tags, parsed_kubernetes_minor)
+
+        if selected_tag is None:
+            logging.warning(
+                "No published cluster autoscaler image tag matches Kubernetes %s in registry %s. Fallback will be used."
+                % (
+                    kubernetes_version_string,
+                    autoscaler_registry_url,
+                )
+            )
+        elif parsed_kubernetes_minor < AUTOSCALER_MATCHING_VERSION_CUTOFF:
+            logging.warning(
+                "Kubernetes %s is below the cluster autoscaler version-matching cutoff %s. Using tag %s from registry %s."
+                % (
+                    kubernetes_version_string,
+                    AUTOSCALER_MATCHING_VERSION_CUTOFF_MINOR,
+                    selected_tag,
+                    autoscaler_registry_url,
+                )
+            )
+            return selected_tag
         else:
-            # Before Kubernetes 1.12 there is no same-minor compatibility rule to apply.
-            # Use the first version where that rule exists, rather than jumping to latest.
-            matching_tag = _latest_autoscaler_tag_for_minor(published_tags, AUTOSCALER_MATCHING_VERSION_CUTOFF_MINOR)
-            if matching_tag is not None:
-                warning = (
-                    "Kubernetes %s is below the cluster autoscaler version-matching cutoff 1.12. Using latest published %s tag %s from registry %s."
-                ) % (kubernetes_minor_string, AUTOSCALER_MATCHING_VERSION_CUTOFF_MINOR, matching_tag, autoscaler_registry_url)
-                logging.warning(warning)
-                return AutoscalerImageSelection(matching_tag, warning)
-
-        latest_tag = _latest_autoscaler_tag_for_minor(published_tags)
-        if latest_tag is not None:
-            if parsed_kubernetes_minor < AUTOSCALER_MATCHING_VERSION_CUTOFF:
-                warning = (
-                    "Kubernetes %s is below the cluster autoscaler version-matching cutoff 1.12, "
-                    "but no published %s tag exists in registry %s. Using latest published tag %s instead."
-                ) % (kubernetes_minor_string, AUTOSCALER_MATCHING_VERSION_CUTOFF_MINOR, autoscaler_registry_url, latest_tag)
-            else:
-                warning = (
-                    "No published cluster autoscaler image tag matches Kubernetes %s in registry %s. "
-                    "Using latest published tag %s instead; this may be unsupported by Kubernetes/AWS compatibility guidance."
-                ) % (kubernetes_minor_string, autoscaler_registry_url, latest_tag)
-            logging.warning(warning)
-            return AutoscalerImageSelection(latest_tag, warning)
+            logging.info("Using cluster autoscaler image tag %s for Kubernetes %s" % (selected_tag, kubernetes_version_string))
+            return selected_tag
     except (requests.RequestException, ValueError, KeyError) as e:
-        raise Exception("Unable to retrieve published cluster autoscaler image tags from registry %s: %s" % (autoscaler_registry_url, e))
+        logging.warning(
+            "Unable to retrieve published cluster autoscaler image tags from registry %s. Fallback will be used.\n %s." % (autoscaler_registry_url, e)
+        )
 
-    raise Exception("No published cluster autoscaler image tags found in registry %s" % autoscaler_registry_url)
+    fallback_tags = list(AUTOSCALER_IMAGE_FALLBACKS.values())
+    fallback_tag = _select_matching_autoscaler_tag_from_tags(fallback_tags, parsed_kubernetes_minor)
+    if fallback_tag is not None:
+        if parsed_kubernetes_minor < AUTOSCALER_MATCHING_VERSION_CUTOFF:
+            logging.warning(
+                "Kubernetes %s is below the cluster autoscaler version-matching cutoff %s. Using bundled fallback tag %s."
+                % (
+                    kubernetes_version_string,
+                    AUTOSCALER_MATCHING_VERSION_CUTOFF_MINOR,
+                    fallback_tag,
+                )
+            )
+        else:
+            logging.info("Using bundled fallback tag %s for Kubernetes %s." % (fallback_tag, kubernetes_version_string))
+        return fallback_tag
+
+    latest_supported_version = sorted(AUTOSCALER_IMAGE_FALLBACKS.keys(), key=lambda version: tuple(int(part) for part in version.split(".")))[-1]
+    latest_fallback_tag = AUTOSCALER_IMAGE_FALLBACKS[latest_supported_version]
+    logging.info(
+        "No bundled fallback matches Kubernetes %s. Using latest bundled fallback tag %s instead."
+        % (
+            kubernetes_version_string,
+            latest_fallback_tag,
+        )
+    )
+    return latest_fallback_tag
 
 
 def add_autoscaler_if_needed(cluster_id, cluster_config, cluster_def, kube_config_path, taints, autoscaler_registry_url):
@@ -146,11 +184,10 @@ def add_autoscaler_if_needed(cluster_id, cluster_config, cluster_def, kube_confi
         autoscaler_file_path = "autoscaler.yaml"
 
         autoscaler_image_tag_override = cluster_config.get("autoscalerImageTagOverride", None)
-        autoscaler_image_selection = select_autoscaler_image(kubernetes_version, autoscaler_registry_url, autoscaler_image_tag_override)
-        autoscaler_image = autoscaler_image_selection.image_tag
+        autoscaler_image_tag = select_autoscaler_image(kubernetes_version, autoscaler_registry_url, autoscaler_image_tag_override)
 
         autoscaler_full_config = list(yaml.safe_load_all(get_autoscaler_roles()))
-        autoscaler_config = yaml.safe_load(get_autoscaler_config(cluster_id, autoscaler_image, autoscaler_registry_url))
+        autoscaler_config = yaml.safe_load(get_autoscaler_config(cluster_id, autoscaler_image_tag, autoscaler_registry_url))
         tolerations = set()
 
         # If there are any taints to patch the autoscaler with in the node group(s) to create,
@@ -173,9 +210,6 @@ def add_autoscaler_if_needed(cluster_id, cluster_config, cluster_def, kube_confi
         cmd = ["kubectl", "create", "-f", os.path.abspath(autoscaler_file_path)]
         logging.info("Create autoscaler with : %s" % json.dumps(cmd))
         run_with_timeout(cmd, env=env, timeout=5)
-        return autoscaler_image_selection
-
-    return None
 
 
 def get_autoscaler_roles():

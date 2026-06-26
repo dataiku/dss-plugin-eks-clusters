@@ -1,5 +1,3 @@
-import html
-
 from dataiku.runnables import Runnable
 from dku_kube.autoscaler import add_autoscaler_if_needed, has_autoscaler
 from dku_utils.cluster import get_cluster_from_dss_cluster
@@ -32,7 +30,5 @@ class MyRunnable(Runnable):
             return "<h5>An autoscaler pod already runs<h5>"
         else:
             autoscaler_registry_url = self.config.get("autoscalerRegistryURL", "registry.k8s.io")
-            autoscaler_image_selection = add_autoscaler_if_needed(cluster_id, self.config, cluster_def, kube_config_path, [], autoscaler_registry_url)
-            if autoscaler_image_selection is not None and autoscaler_image_selection.warning is not None:
-                return '<h5>Created an autoscaler pod</h5><div class="alert alert-warning">%s</div>' % html.escape(autoscaler_image_selection.warning)
+            add_autoscaler_if_needed(cluster_id, self.config, cluster_def, kube_config_path, [], autoscaler_registry_url)
             return "<h5>Created an autoscaler pod</h5>"

@@ -107,6 +107,13 @@
             "defaultValue" : "registry.k8s.io"
         },
         {
+            "name": "autoscalerImageTagOverride",
+            "label": "Autoscaler image tag override",
+            "type": "STRING",
+            "description": "For airgapped registries or registries that block tag listing. Leave empty to discover a public-style version tag.",
+            "mandatory": false
+        },
+        {
             "name": "advanced",
             "label": "Use Advanced Configuration",
             "type": "BOOLEAN"

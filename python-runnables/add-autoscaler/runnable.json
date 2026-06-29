@@ -28,9 +28,9 @@
         },
         {
             "name": "autoscalerRegistryURL",
-            "label": "Custom autoscaler registry URL",
+            "label": "Custom autoscaler registry",
             "type": "STRING",
-            "description": "If registry.k8s.io isn't reachable",
+            "description": "Registry host or namespace to use if registry.k8s.io isn't reachable.",
             "defaultValue" : "registry.k8s.io"
         },
         {

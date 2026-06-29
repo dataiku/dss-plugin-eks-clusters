@@ -2,13 +2,14 @@ import os
 import json
 import logging
 import re
-import urllib.parse
 import requests
 import yaml
 from .kubectl_command import run_with_timeout
 from dku_utils.access import _is_none_or_blank
 from dku_utils.tools_version import parse_kubernetes_version, strip_kubernetes_version
 from dku_utils.taints import Toleration
+from oras.provider import Registry
+
 
 AUTOSCALER_IMAGE_REPOSITORY = "autoscaling/cluster-autoscaler"
 AUTOSCALER_TAG_RE = re.compile(r"^v([0-9]+)\.([0-9]+)\.([0-9]+)$")
@@ -36,6 +37,7 @@ AUTOSCALER_IMAGE_FALLBACKS = {
     "1.35": "v1.35.0",
 }
 # fmt: on
+k8s_image_client = Registry()
 
 
 def has_autoscaler(kube_config_path):
@@ -54,31 +56,11 @@ def _parse_autoscaler_tag(tag):
     return tuple(int(part) for part in match.groups())
 
 
-def _get_registry_tags_url(autoscaler_registry_url):
-    registry_url = autoscaler_registry_url.rstrip("/")
-    parsed_registry_url = urllib.parse.urlparse(registry_url)
-    if parsed_registry_url.scheme == "":
-        parsed_registry_url = urllib.parse.urlparse("https://%s" % registry_url)
-
-    repository_path = "/".join(path_part.strip("/") for path_part in [parsed_registry_url.path, AUTOSCALER_IMAGE_REPOSITORY] if path_part.strip("/"))
-    return "%s://%s/v2/%s/tags/list" % (parsed_registry_url.scheme, parsed_registry_url.netloc, repository_path)
-
-
 def _discover_published_autoscaler_tags(autoscaler_registry_url):
-    tags_url = _get_registry_tags_url(autoscaler_registry_url)
-    logging.info("Retrieving published cluster autoscaler image tags from %s" % tags_url)
+    repository_url = "/".join(path_part.strip("/") for path_part in [autoscaler_registry_url, AUTOSCALER_IMAGE_REPOSITORY])
+    logging.info("Retrieving published cluster autoscaler image tags from %s" % repository_url)
 
-    response = requests.get(tags_url, headers={"Accept": "application/json", "User-Agent": "DSS EKS Plugin"}, timeout=10)
-    if not response.ok:
-        logging.warning(
-            "Retrieving the cluster autoscaler image tags from URL '%s' failed with status: %s %s" % (tags_url, response.status_code, response.reason)
-        )
-        logging.warning("Content of failed request: %s" % response.content)
-        response.raise_for_status()
-
-    tags_response = response.json()
-    tags = tags_response.get("tags", [])
-    return [tag for tag in tags if _parse_autoscaler_tag(tag) is not None]
+    return [tag for tag in k8s_image_client.get_tags(repository_url) if _parse_autoscaler_tag(tag) is not None]
 
 
 def _select_matching_autoscaler_tag_from_tags(tags, parsed_kubernetes_minor):
@@ -139,7 +121,7 @@ def select_autoscaler_image(kubernetes_version, autoscaler_registry_url, autosca
         else:
             logging.info("Using cluster autoscaler image tag %s for Kubernetes %s" % (selected_tag, kubernetes_version_string))
             return selected_tag
-    except (requests.RequestException, ValueError, KeyError) as e:
+    except (requests.RequestException, ValueError) as e:
         logging.warning(
             "Unable to retrieve published cluster autoscaler image tags from registry %s. Fallback will be used.\n %s." % (autoscaler_registry_url, e)
         )

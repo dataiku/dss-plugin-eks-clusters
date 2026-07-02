@@ -13,10 +13,6 @@ from oras.provider import Registry
 
 AUTOSCALER_IMAGE_REPOSITORY = "autoscaling/cluster-autoscaler"
 AUTOSCALER_TAG_RE = re.compile(r"^v([0-9]+)\.([0-9]+)\.([0-9]+)$")
-# Upstream Cluster Autoscaler compatibility guidance says autoscaler and
-# Kubernetes major/minor versions match from Kubernetes 1.12 onward.
-AUTOSCALER_MATCHING_VERSION_CUTOFF = (1, 12)
-AUTOSCALER_MATCHING_VERSION_CUTOFF_MINOR = "1.12"
 
 # Used only when registry tag discovery is unavailable, which preserves the
 # existing custom-registry workflow for registries that do not expose tags/list.
@@ -64,19 +60,10 @@ def _discover_published_autoscaler_tags(autoscaler_registry_url):
 
 
 def _select_matching_autoscaler_tag_from_tags(tags, parsed_kubernetes_minor):
-    if parsed_kubernetes_minor >= AUTOSCALER_MATCHING_VERSION_CUTOFF:
-        # From Kubernetes 1.12 onward, upstream expects the autoscaler major/minor
-        # to match the Kubernetes major/minor; choose the latest patch for that minor.
-        matching_minor = parsed_kubernetes_minor
-    else:
-        # Before Kubernetes 1.12 there is no same-minor compatibility rule to apply.
-        # Use the first version where that rule exists, rather than jumping to latest.
-        matching_minor = AUTOSCALER_MATCHING_VERSION_CUTOFF
-
     matching_tags = []
     for tag in tags:
         parsed_tag = _parse_autoscaler_tag(tag)
-        if parsed_tag is not None and parsed_tag[:2] == matching_minor:
+        if parsed_tag is not None and parsed_tag[:2] == parsed_kubernetes_minor:
             matching_tags.append((parsed_tag, tag))
 
     if matching_tags:
@@ -97,8 +84,12 @@ def select_autoscaler_image(kubernetes_version, autoscaler_registry_url, autosca
 
     try:
         published_tags = _discover_published_autoscaler_tags(autoscaler_registry_url)
+    except (requests.RequestException, ValueError) as e:
+        logging.warning(
+            "Unable to retrieve published cluster autoscaler image tags from registry %s. Fallback will be used.\n %s." % (autoscaler_registry_url, e)
+        )
+    else:
         selected_tag = _select_matching_autoscaler_tag_from_tags(published_tags, parsed_kubernetes_minor)
-
         if selected_tag is None:
             logging.warning(
                 "No published cluster autoscaler image tag matches Kubernetes %s in registry %s. Fallback will be used."
@@ -107,39 +98,14 @@ def select_autoscaler_image(kubernetes_version, autoscaler_registry_url, autosca
                     autoscaler_registry_url,
                 )
             )
-        elif parsed_kubernetes_minor < AUTOSCALER_MATCHING_VERSION_CUTOFF:
-            logging.warning(
-                "Kubernetes %s is below the cluster autoscaler version-matching cutoff %s. Using tag %s from registry %s."
-                % (
-                    kubernetes_version_string,
-                    AUTOSCALER_MATCHING_VERSION_CUTOFF_MINOR,
-                    selected_tag,
-                    autoscaler_registry_url,
-                )
-            )
-            return selected_tag
         else:
             logging.info("Using cluster autoscaler image tag %s for Kubernetes %s" % (selected_tag, kubernetes_version_string))
             return selected_tag
-    except (requests.RequestException, ValueError) as e:
-        logging.warning(
-            "Unable to retrieve published cluster autoscaler image tags from registry %s. Fallback will be used.\n %s." % (autoscaler_registry_url, e)
-        )
 
     fallback_tags = list(AUTOSCALER_IMAGE_FALLBACKS.values())
     fallback_tag = _select_matching_autoscaler_tag_from_tags(fallback_tags, parsed_kubernetes_minor)
     if fallback_tag is not None:
-        if parsed_kubernetes_minor < AUTOSCALER_MATCHING_VERSION_CUTOFF:
-            logging.warning(
-                "Kubernetes %s is below the cluster autoscaler version-matching cutoff %s. Using bundled fallback tag %s."
-                % (
-                    kubernetes_version_string,
-                    AUTOSCALER_MATCHING_VERSION_CUTOFF_MINOR,
-                    fallback_tag,
-                )
-            )
-        else:
-            logging.info("Using bundled fallback tag %s for Kubernetes %s." % (fallback_tag, kubernetes_version_string))
+        logging.info("Using bundled fallback tag %s for Kubernetes %s." % (fallback_tag, kubernetes_version_string))
         return fallback_tag
 
     latest_supported_version = sorted(AUTOSCALER_IMAGE_FALLBACKS.keys(), key=lambda version: tuple(int(part) for part in version.split(".")))[-1]

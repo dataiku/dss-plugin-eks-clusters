@@ -154,7 +154,9 @@ class InstallAlb(Runnable):
         if command_outputs[-1][1] != 0:
             return make_html(command_outputs)
 
-        alb_controller_url = "https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.4/docs/examples/alb-ingress-controller.yaml"
+        alb_controller_url = (
+            "https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.4/docs/examples/alb-ingress-controller.yaml"
+        )
         service_data = get_url_or_fallback(alb_controller_url, "alb-ingress-controller.yaml")
         cluster_flag_pattern = "#.*cluster\\-name=.*"
         cluster_flag_replacement = "- --cluster-name=%s" % cluster_id

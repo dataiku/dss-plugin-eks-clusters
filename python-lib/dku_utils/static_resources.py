@@ -2,6 +2,7 @@ import logging
 import os
 import requests
 
+
 def get_url_or_fallback(url, static_resource_filename):
     r = requests.get(url, headers={"User-Agent": "DSS EKS Plugin"})
 
@@ -16,6 +17,7 @@ def get_url_or_fallback(url, static_resource_filename):
         return get_static_resource(static_resource_filename)
     else:
         logging.error("No static resource fallback was defined.")
+
 
 def get_static_resource(static_resource_filename):
     static_resource_path = os.path.join(os.environ["DKU_CUSTOM_RESOURCE_FOLDER"], static_resource_filename)

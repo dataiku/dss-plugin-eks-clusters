@@ -87,7 +87,7 @@
             "description": "Disk size for the nodes, in GB. Can use 0 for default (200 GB)",
             "type": "INT",
             "mandatory" : false,
-            "defaultValue": 200, /* Repeated in the code in node-pool.py */
+            "defaultValue": 200,
             "minI": 0
         },
         {

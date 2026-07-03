@@ -108,7 +108,9 @@ class MyRunnable(Runnable):
         if node_pool.get("numNodesAutoscaling", False):
             logging.info("Nodegroup is autoscaling, ensuring autoscaler")
             autoscaler_registry_url = self.config.get("autoscalerRegistryURL", "registry.k8s.io")
-            add_autoscaler_if_needed(cluster_id, self.config, cluster_data.get("cluster"), kube_config_path, node_group_taints, autoscaler_registry_url)
+            add_autoscaler_if_needed(
+                cluster_id, self.config, cluster_data.get("cluster"), kube_config_path, node_group_taints, autoscaler_registry_url
+            )
 
         if node_pool.get("enableGPU", False):
             logging.info("Nodegroup is GPU-enabled, ensuring NVIDIA GPU Drivers")

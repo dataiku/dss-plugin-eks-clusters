@@ -1,21 +1,39 @@
 import os
 import json
 import logging
+import re
+import requests
 import yaml
 from .kubectl_command import run_with_timeout
 from dku_utils.access import _is_none_or_blank
-from dku_utils.tools_version import strip_kubernetes_version
+from dku_utils.tools_version import parse_kubernetes_version, strip_kubernetes_version
 from dku_utils.taints import Toleration
+from oras.provider import Registry
 
+
+AUTOSCALER_IMAGE_REPOSITORY = "autoscaling/cluster-autoscaler"
+AUTOSCALER_TAG_RE = re.compile(r"^v([0-9]+)\.([0-9]+)\.([0-9]+)$")
+
+# Used only when registry tag discovery is unavailable, which preserves the
+# existing custom-registry workflow for registries that do not expose tags/list.
+# Keep values pinned to tags known to exist in registry.k8s.io.
 # fmt: off
-AUTOSCALER_IMAGES = {
-  "1.24": "v1.24.3",
-  "1.25": "v1.25.3",
-  "1.26": "v1.26.4",
-  "1.27": "v1.27.3",
-  "1.28": "v1.28.0"
+AUTOSCALER_IMAGE_FALLBACKS = {
+    "1.24": "v1.24.3",
+    "1.25": "v1.25.3",
+    "1.26": "v1.26.4",
+    "1.27": "v1.27.3",
+    "1.28": "v1.28.0",
+    "1.29": "v1.29.5",
+    "1.30": "v1.30.7",
+    "1.31": "v1.31.5",
+    "1.32": "v1.32.7",
+    "1.33": "v1.33.4",
+    "1.34": "v1.34.3",
+    "1.35": "v1.35.0",
 }
 # fmt: on
+k8s_image_client = Registry()
 
 
 def has_autoscaler(kube_config_path):
@@ -27,22 +45,97 @@ def has_autoscaler(kube_config_path):
     return len(out.strip()) > 0
 
 
+def _parse_autoscaler_tag(tag):
+    match = AUTOSCALER_TAG_RE.match(tag)
+    if match is None:
+        return None
+    return tuple(int(part) for part in match.groups())
+
+
+def _discover_published_autoscaler_tags(autoscaler_registry_url):
+    repository_url = "/".join(path_part.strip("/") for path_part in [autoscaler_registry_url, AUTOSCALER_IMAGE_REPOSITORY])
+    logging.info("Retrieving published cluster autoscaler image tags from %s" % repository_url)
+
+    return [tag for tag in k8s_image_client.get_tags(repository_url) if _parse_autoscaler_tag(tag) is not None]
+
+
+def _select_matching_autoscaler_tag_from_tags(tags, parsed_kubernetes_minor):
+    matching_tags = []
+    for tag in tags:
+        parsed_tag = _parse_autoscaler_tag(tag)
+        if parsed_tag is not None and parsed_tag[:2] == parsed_kubernetes_minor:
+            matching_tags.append((parsed_tag, tag))
+
+    if matching_tags:
+        matching_tags.sort()
+        return matching_tags[-1][1]
+
+
+def select_autoscaler_image(kubernetes_version, autoscaler_registry_url, autoscaler_image_tag_override=None):
+    kubernetes_major, kubernetes_minor, kubernetes_version_string = parse_kubernetes_version(kubernetes_version)
+    parsed_kubernetes_minor = (kubernetes_major, kubernetes_minor)
+
+    if not _is_none_or_blank(autoscaler_image_tag_override):
+        autoscaler_image_tag_override = autoscaler_image_tag_override.strip()
+        logging.info(
+            "Using configured cluster autoscaler image tag override %s for Kubernetes %s" % (autoscaler_image_tag_override, kubernetes_version_string)
+        )
+        return autoscaler_image_tag_override
+
+    try:
+        published_tags = _discover_published_autoscaler_tags(autoscaler_registry_url)
+    except (requests.RequestException, ValueError) as e:
+        logging.warning(
+            "Unable to retrieve published cluster autoscaler image tags from registry %s. Fallback will be used.\n %s." % (autoscaler_registry_url, e)
+        )
+    else:
+        selected_tag = _select_matching_autoscaler_tag_from_tags(published_tags, parsed_kubernetes_minor)
+        if selected_tag is None:
+            logging.warning(
+                "No published cluster autoscaler image tag matches Kubernetes %s in registry %s. Fallback will be used."
+                % (
+                    kubernetes_version_string,
+                    autoscaler_registry_url,
+                )
+            )
+        else:
+            logging.info("Using cluster autoscaler image tag %s for Kubernetes %s" % (selected_tag, kubernetes_version_string))
+            return selected_tag
+
+    fallback_tags = list(AUTOSCALER_IMAGE_FALLBACKS.values())
+    fallback_tag = _select_matching_autoscaler_tag_from_tags(fallback_tags, parsed_kubernetes_minor)
+    if fallback_tag is not None:
+        logging.info("Using bundled fallback tag %s for Kubernetes %s." % (fallback_tag, kubernetes_version_string))
+        return fallback_tag
+
+    latest_supported_version = sorted(AUTOSCALER_IMAGE_FALLBACKS.keys(), key=lambda version: tuple(int(part) for part in version.split(".")))[-1]
+    latest_fallback_tag = AUTOSCALER_IMAGE_FALLBACKS[latest_supported_version]
+    logging.info(
+        "No bundled fallback matches Kubernetes %s. Using latest bundled fallback tag %s instead."
+        % (
+            kubernetes_version_string,
+            latest_fallback_tag,
+        )
+    )
+    return latest_fallback_tag
+
+
 def add_autoscaler_if_needed(cluster_id, cluster_config, cluster_def, kube_config_path, taints, autoscaler_registry_url):
     if not has_autoscaler(kube_config_path):
         kubernetes_version = cluster_config.get("k8sVersion", None)
-        if _is_none_or_blank(kubernetes_version):
+        if _is_none_or_blank(kubernetes_version) or kubernetes_version.strip().lower() == "latest":
             kubernetes_version = cluster_def.get("Version")
+        if _is_none_or_blank(kubernetes_version):
+            raise Exception("No Kubernetes version found in cluster config or EKS cluster definition")
 
         kubernetes_version = strip_kubernetes_version(kubernetes_version)
         autoscaler_file_path = "autoscaler.yaml"
 
-        if float(kubernetes_version) < 1.24:
-            autoscaler_image = AUTOSCALER_IMAGES.get("1.24", "v1.24.3")
-        else:
-            autoscaler_image = AUTOSCALER_IMAGES.get(kubernetes_version, "v1.28.0")
+        autoscaler_image_tag_override = cluster_config.get("autoscalerImageTagOverride", None)
+        autoscaler_image_tag = select_autoscaler_image(kubernetes_version, autoscaler_registry_url, autoscaler_image_tag_override)
 
         autoscaler_full_config = list(yaml.safe_load_all(get_autoscaler_roles()))
-        autoscaler_config = yaml.safe_load(get_autoscaler_config(cluster_id, autoscaler_image, autoscaler_registry_url))
+        autoscaler_config = yaml.safe_load(get_autoscaler_config(cluster_id, autoscaler_image_tag, autoscaler_registry_url))
         tolerations = set()
 
         # If there are any taints to patch the autoscaler with in the node group(s) to create,
@@ -240,4 +333,3 @@ spec:
           hostPath:
             path: "/etc/ssl/certs/ca-bundle.crt"
 """ % {"autoscalerimageversion": autoscaler_image_version, "clusterid": cluster_id, "autoscalerregistryurl": autoscaler_registry_url}
-

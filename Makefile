@@ -27,3 +27,6 @@ plugin:
 
 dist-clean:
 	rm -rf dist
+
+test:
+	python3 -m unittest discover -s tests -v

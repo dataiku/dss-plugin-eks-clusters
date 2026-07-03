@@ -31,4 +31,4 @@ class MyRunnable(Runnable):
         else:
             autoscaler_registry_url = self.config.get("autoscalerRegistryURL", "registry.k8s.io")
             add_autoscaler_if_needed(cluster_id, self.config, cluster_def, kube_config_path, [], autoscaler_registry_url)
-            return "<h5>Created an autoscaler pod<h5>"
+            return "<h5>Created an autoscaler pod</h5>"

@@ -1,5 +1,8 @@
 # Changelog
 
+## Next version
+- Improve autoscaler image version selection
+
 ## Version 1.5.0 - Feature and improvements release
 - Enable EBS volume encryption by default
 - Remove "Revoke public access" option as it clashes with "Fully private" option in configuration

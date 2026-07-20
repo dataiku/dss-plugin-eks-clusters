@@ -56,9 +56,9 @@ check-generated-files:
 
 validate: compile-python validate-json check-generated-files
 
-test:
+unit-tests:
 	$(PYTHON) -m unittest discover -s tests -v
 
-tests: test
+tests: unit-tests
 
 ci: lint compile-python validate-json check-generated-files tests plugin

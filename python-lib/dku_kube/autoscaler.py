@@ -120,7 +120,7 @@ def select_autoscaler_image(kubernetes_version, autoscaler_registry_url, autosca
     return latest_fallback_tag
 
 
-def add_autoscaler_if_needed(cluster_id, cluster_config, cluster_def, kube_config_path, taints, autoscaler_registry_url):
+def add_autoscaler_if_needed(cluster_id, cluster_config, cluster_def, kube_config_path, taints, autoscaler_registry_url, aws_region):
     if not has_autoscaler(kube_config_path):
         kubernetes_version = cluster_config.get("k8sVersion", None)
         if _is_none_or_blank(kubernetes_version) or kubernetes_version.strip().lower() == "latest":
@@ -135,7 +135,7 @@ def add_autoscaler_if_needed(cluster_id, cluster_config, cluster_def, kube_confi
         autoscaler_image_tag = select_autoscaler_image(kubernetes_version, autoscaler_registry_url, autoscaler_image_tag_override)
 
         autoscaler_full_config = list(yaml.safe_load_all(get_autoscaler_roles()))
-        autoscaler_config = yaml.safe_load(get_autoscaler_config(cluster_id, autoscaler_image_tag, autoscaler_registry_url))
+        autoscaler_config = yaml.safe_load(get_autoscaler_config(cluster_id, autoscaler_image_tag, autoscaler_registry_url, aws_region))
         tolerations = set()
 
         # If there are any taints to patch the autoscaler with in the node group(s) to create,
@@ -284,7 +284,7 @@ subjects:
 """
 
 
-def get_autoscaler_config(cluster_id, autoscaler_image_version, autoscaler_registry_url):
+def get_autoscaler_config(cluster_id, autoscaler_image_version, autoscaler_registry_url, aws_region):
     # Remove trailing slash if it exists
     autoscaler_registry_url = autoscaler_registry_url.rstrip("/")
     return """apiVersion: apps/v1
@@ -308,6 +308,9 @@ spec:
       containers:
         - image: %(autoscalerregistryurl)s/autoscaling/cluster-autoscaler:%(autoscalerimageversion)s
           name: cluster-autoscaler
+          env:
+            - name: AWS_REGION
+              value: %(aws_region)s
           resources:
             limits:
               cpu: 100m
@@ -332,4 +335,4 @@ spec:
         - name: ssl-certs
           hostPath:
             path: "/etc/ssl/certs/ca-bundle.crt"
-""" % {"autoscalerimageversion": autoscaler_image_version, "clusterid": cluster_id, "autoscalerregistryurl": autoscaler_registry_url}
+""" % {"autoscalerimageversion": autoscaler_image_version, "clusterid": cluster_id, "autoscalerregistryurl": autoscaler_registry_url, "aws_region": aws_region}

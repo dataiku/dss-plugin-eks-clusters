@@ -1,14 +1,17 @@
 {
-    "id": "eks-clusters",
-    "version": "1.5.0",
-    "meta": {
-        "label": "EKS clusters",
-        "description": "Interact with Amazon Elastic Kubernetes Service clusters",
-        "author": "Dataiku",
-        "icon": "icon-amazon-elastic-kubernetes icon-cloud",
-        "tags": ["Infra", "AWS"],
-        "url": "https://www.dataiku.com/dss/plugins/info/eks-clusters.html",
-        "licenseInfo": "Apache Software License",
-        "supportLevel": "TIER2_SUPPORT"
-    }
+  "id": "eks-clusters",
+  "version": "1.6.0",
+  "meta": {
+    "label": "EKS clusters",
+    "description": "Interact with Amazon Elastic Kubernetes Service clusters",
+    "author": "Dataiku",
+    "icon": "icon-amazon-elastic-kubernetes icon-cloud",
+    "tags": [
+      "Infra",
+      "AWS"
+    ],
+    "url": "https://www.dataiku.com/dss/plugins/info/eks-clusters.html",
+    "licenseInfo": "Apache Software License",
+    "supportLevel": "TIER2_SUPPORT"
+  }
 }

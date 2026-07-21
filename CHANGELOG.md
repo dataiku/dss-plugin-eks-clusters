@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 1.6.0 - Enhancement release - 2026-07-20
+
+- Added supported Python versions: 3.13, 3.14
+
 ## Next version
 - Improve autoscaler image version selection
 

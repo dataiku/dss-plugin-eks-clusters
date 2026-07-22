@@ -286,7 +286,7 @@ class MyCluster(Cluster):
             add_gpu_driver_if_needed(self.cluster_id, kube_config_path, connection_info, gpu_taints)
 
         if self.config.get("installMetricsServer"):
-            install_metrics_server_if_needed(kube_config_path)
+            install_metrics_server_if_needed(self.cluster_id, connection_info, kube_config_path)
 
         c = EksctlCommand(args, connection_info)
         cluster_info = json.loads(c.run_and_get_output())[0]

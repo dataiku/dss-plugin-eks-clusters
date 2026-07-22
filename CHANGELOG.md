@@ -4,6 +4,7 @@
 - Improve autoscaler image version selection
 - Fix newer autoscaler images support
 - Restrict GPU DaemonSet configuration deployment to GPU nodes only
+- Fix metrics server installation
 
 ## Version 1.5.0 - Feature and improvements release
 - Enable EBS volume encryption by default

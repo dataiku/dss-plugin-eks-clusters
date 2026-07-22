@@ -1,6 +1,8 @@
 from dataiku.runnables import Runnable
 from dku_kube.autoscaler import add_autoscaler_if_needed, has_autoscaler
-from dku_utils.cluster import get_cluster_from_dss_cluster
+from dku_utils.cluster import get_cluster_from_dss_cluster, get_connection_info
+from dku_utils.config_parser import get_region_fallback_to_metadata
+
 
 
 class MyRunnable(Runnable):
@@ -30,5 +32,7 @@ class MyRunnable(Runnable):
             return "<h5>An autoscaler pod already runs<h5>"
         else:
             autoscaler_registry_url = self.config.get("autoscalerRegistryURL", "registry.k8s.io")
-            add_autoscaler_if_needed(cluster_id, self.config, cluster_def, kube_config_path, [], autoscaler_registry_url)
+            connection_info = get_connection_info(self.config)
+            aws_region = get_region_fallback_to_metadata(connection_info)
+            add_autoscaler_if_needed(cluster_id, self.config, cluster_def, kube_config_path, [], autoscaler_registry_url, aws_region)
             return "<h5>Created an autoscaler pod</h5>"

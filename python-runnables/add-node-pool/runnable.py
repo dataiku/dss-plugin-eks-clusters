@@ -6,7 +6,7 @@ from dku_kube.autoscaler import add_autoscaler_if_needed
 from dku_kube.gpu_driver import add_gpu_driver_if_needed
 from dku_aws.eksctl_command import EksctlCommand
 from dku_utils.cluster import get_cluster_from_dss_cluster, get_connection_info
-from dku_utils.config_parser import get_security_groups_arg, get_region_arg
+from dku_utils.config_parser import get_security_groups_arg, get_region_arg, get_region_fallback_to_metadata
 from dku_utils.node_pool import get_node_pool_args, build_node_pool_taints_yaml
 from dku_utils.access import _is_none_or_blank
 
@@ -108,8 +108,9 @@ class MyRunnable(Runnable):
         if node_pool.get("numNodesAutoscaling", False):
             logging.info("Nodegroup is autoscaling, ensuring autoscaler")
             autoscaler_registry_url = self.config.get("autoscalerRegistryURL", "registry.k8s.io")
+            aws_region = get_region_fallback_to_metadata(connection_info)
             add_autoscaler_if_needed(
-                cluster_id, self.config, cluster_data.get("cluster"), kube_config_path, node_group_taints, autoscaler_registry_url
+                cluster_id, self.config, cluster_data.get("cluster"), kube_config_path, node_group_taints, autoscaler_registry_url, aws_region
             )
 
         if node_pool.get("enableGPU", False):

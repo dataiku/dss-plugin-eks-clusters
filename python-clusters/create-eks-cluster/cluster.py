@@ -16,7 +16,7 @@ from dku_kube.gpu_driver import add_gpu_driver_if_needed
 from dku_kube.metrics_server import install_metrics_server_if_needed
 from dku_utils.cluster import make_overrides, get_connection_info
 from dku_utils.access import _is_none_or_blank
-from dku_utils.config_parser import get_region_arg, get_private_ip_from_metadata
+from dku_utils.config_parser import get_region_arg, get_private_ip_from_metadata, get_region_fallback_to_metadata
 from dku_utils.node_pool import get_node_pool_yaml
 from dku_utils.taints import Taint
 
@@ -295,7 +295,10 @@ class MyCluster(Cluster):
             logging.info("At least one node group is autoscaling, ensuring autoscaler")
             autoscaled_taints = list(autoscaled_node_pools_taints) if autoscaled_node_pools_taints else []
             autoscaler_registry_url = self.config.get("autoscalerRegistryURL", "registry.k8s.io")
-            add_autoscaler_if_needed(self.cluster_id, self.config, cluster_info, kube_config_path, autoscaled_taints, autoscaler_registry_url)
+            aws_region = get_region_fallback_to_metadata(connection_info)
+            add_autoscaler_if_needed(
+                self.cluster_id, self.config, cluster_info, kube_config_path, autoscaled_taints, autoscaler_registry_url, aws_region
+            )
 
         with open(kube_config_path, "r") as f:
             kube_config = yaml.safe_load(f)

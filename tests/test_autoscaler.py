@@ -109,10 +109,11 @@ class AutoscalerImageSelectionTest(unittest.TestCase):
         self.assertEqual("v1.35.0", autoscaler.select_autoscaler_image("1.36", "registry.k8s.io"))
 
     def test_get_autoscaler_config_uses_selected_registry_and_tag(self):
-        config = autoscaler.get_autoscaler_config("cluster-1", "v1.35.0", "registry.example.com/prefix/")
+        config = autoscaler.get_autoscaler_config("cluster-1", "v1.35.0", "registry.example.com/prefix/", "eu-west-1")
 
         self.assertIn("image: registry.example.com/prefix/autoscaling/cluster-autoscaler:v1.35.0", config)
         self.assertIn("k8s.io/cluster-autoscaler/cluster-1", config)
+        self.assertIn("name: AWS_REGION\n              value: eu-west-1", config)
 
 
 if __name__ == "__main__":

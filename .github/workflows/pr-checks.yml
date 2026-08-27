@@ -1,0 +1,48 @@
+name: PR checks
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y make wget zip
+
+    - name: Lint
+      run: make lint
+
+    - name: Compile Python
+      run: make compile-python
+
+    - name: Validate JSON descriptors
+      run: make validate-json
+
+    - name: Check generated files
+      run: make check-generated-files
+
+    - name: Run unit tests
+      run: make tests
+
+    - name: Build plugin
+      run: make plugin
+
+    - name: Upload plugin archive
+      uses: actions/upload-artifact@v4
+      with:
+        name: plugin-archive
+        path: dist/*.zip
+        if-no-files-found: error

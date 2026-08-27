@@ -1,5 +1,5 @@
-plugin_id=`cat plugin.json | python -c "import sys, json; print(str(json.load(sys.stdin)['id']).replace('/',''))"`
-plugin_version=`cat plugin.json | python -c "import sys, json; print(str(json.load(sys.stdin)['version']).replace('/',''))"`
+plugin_id=`cat plugin.json | python3 -c "import sys, json; print(str(json.load(sys.stdin)['id']).replace('/',''))"`
+plugin_version=`cat plugin.json | python3 -c "import sys, json; print(str(json.load(sys.stdin)['version']).replace('/',''))"`
 archive_file_name="dss-plugin-${plugin_id}-${plugin_version}.zip"
 remote_url=`git config --get remote.origin.url`
 last_commit_id=`git rev-parse HEAD`
@@ -9,7 +9,7 @@ RUFF := $(VENV)/bin/ruff
 
 plugin:
 	@echo "[START] Archiving plugin to dist/ folder..."
-	@cat plugin.json | json_pp > /dev/null
+	@python3 -m json.tool plugin.json > /dev/null
 	@rm -rf dist
 	@mkdir -p resource
 	@wget https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/main/deployments/static/nvidia-device-plugin.yml -P resource

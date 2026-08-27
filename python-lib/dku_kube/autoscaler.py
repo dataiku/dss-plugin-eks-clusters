@@ -332,4 +332,8 @@ spec:
         - name: ssl-certs
           hostPath:
             path: "/etc/ssl/certs/ca-bundle.crt"
-""" % {"autoscalerimageversion": autoscaler_image_version, "clusterid": cluster_id, "autoscalerregistryurl": autoscaler_registry_url}
+""" % {
+        "autoscalerimageversion": autoscaler_image_version,
+        "clusterid": cluster_id,
+        "autoscalerregistryurl": autoscaler_registry_url,
+    }

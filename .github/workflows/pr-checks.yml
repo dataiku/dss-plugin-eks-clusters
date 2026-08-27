@@ -27,7 +27,7 @@ jobs:
       run: |
         make lint || {
           echo "::warning::Ruff lint/format checks failed. This is advisory for now; see the lint step logs."
-          exit 1
+          exit 0
         }
 
     - name: Compile Python

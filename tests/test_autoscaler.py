@@ -114,6 +114,10 @@ class AutoscalerImageSelectionTest(unittest.TestCase):
         self.assertIn("image: registry.example.com/prefix/autoscaling/cluster-autoscaler:v1.35.0", config)
         self.assertIn("k8s.io/cluster-autoscaler/cluster-1", config)
 
+    def test_failure_on_purpose(self):
+        with self.assertRaises(ValueError):
+            autoscaler.select_autoscaler_image("1.33", "registry.k8s.io", "nonexistent-tag")
+
 
 if __name__ == "__main__":
     unittest.main()

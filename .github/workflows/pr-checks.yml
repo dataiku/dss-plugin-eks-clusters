@@ -23,12 +23,7 @@ jobs:
         sudo apt-get install -y make wget zip
 
     - name: Lint
-      continue-on-error: true
-      run: |
-        make lint || {
-          echo "::warning::Ruff lint/format checks failed. This is advisory for now; see the lint step logs."
-          exit 0
-        }
+      run: make lint
 
     - name: Compile Python
       run: make compile-python

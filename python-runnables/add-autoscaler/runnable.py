@@ -4,7 +4,6 @@ from dku_utils.cluster import get_cluster_from_dss_cluster, get_connection_info
 from dku_utils.config_parser import get_region_fallback_to_metadata
 
 
-
 class MyRunnable(Runnable):
     def __init__(self, project_key, config, plugin_config):
         self.project_key = project_key

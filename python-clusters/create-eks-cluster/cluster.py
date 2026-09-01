@@ -175,6 +175,10 @@ class MyCluster(Cluster):
                 # SG created by eksctl
                 attach_vm_to_security_groups = True
 
+            if self.config.get('enableCloudWatchPolicy', True):
+                for node_pool_dict in yaml_dict['managedNodeGroups']:
+                    node_pool_dict['iam']['withAddonPolicies']['cloudWatch'] = True
+
         # whatever the setting, make the cluster from the yaml config
         yaml_loc = os.path.join(os.getcwd(), self.cluster_id + "_config.yaml")
         with open(yaml_loc, "w") as outfile:

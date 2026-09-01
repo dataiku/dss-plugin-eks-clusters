@@ -3,7 +3,10 @@
 .wlock
 .ts
 .git
+.venv/
+__pycache__/
 *.pyc
+dist/
 .coverage
 .htmlcov
 .DS_Store

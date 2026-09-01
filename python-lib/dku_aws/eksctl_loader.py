@@ -22,7 +22,7 @@ def get_eksctl_or_fetch():
             r = requests.get(
                 "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_%s_amd64.tar.gz" % arch,
                 stream=True,
-                headers={"User-Agent": "DSS EKS Plugin"}
+                headers={"User-Agent": "DSS EKS Plugin"},
             )
             local_eksctl_archive = os.path.join(local_eksctl_folder, "eksctl.tar.gz")
             with open(local_eksctl_archive, "wb") as f:

@@ -1,12 +1,15 @@
-plugin_id=`cat plugin.json | python -c "import sys, json; print(str(json.load(sys.stdin)['id']).replace('/',''))"`
-plugin_version=`cat plugin.json | python -c "import sys, json; print(str(json.load(sys.stdin)['version']).replace('/',''))"`
+plugin_id=`cat plugin.json | python3 -c "import sys, json; print(str(json.load(sys.stdin)['id']).replace('/',''))"`
+plugin_version=`cat plugin.json | python3 -c "import sys, json; print(str(json.load(sys.stdin)['version']).replace('/',''))"`
 archive_file_name="dss-plugin-${plugin_id}-${plugin_version}.zip"
 remote_url=`git config --get remote.origin.url`
 last_commit_id=`git rev-parse HEAD`
+PYTHON ?= python3
+VENV ?= .venv
+RUFF := $(VENV)/bin/ruff
 
 plugin:
 	@echo "[START] Archiving plugin to dist/ folder..."
-	@cat plugin.json | json_pp > /dev/null
+	@python3 -m json.tool plugin.json > /dev/null
 	@rm -rf dist
 	@mkdir -p resource
 	@wget https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/main/deployments/static/nvidia-device-plugin.yml -P resource
@@ -28,5 +31,34 @@ plugin:
 dist-clean:
 	rm -rf dist
 
-test:
-	python3 -m unittest discover -s tests -v
+$(RUFF):
+	$(PYTHON) -m venv $(VENV)
+	$(VENV)/bin/python -m pip install --upgrade pip
+	$(VENV)/bin/python -m pip install ruff
+
+lint: $(RUFF)
+	$(RUFF) check .
+	$(RUFF) format --check .
+
+compile-python:
+	$(PYTHON) -m compileall -q python-lib python-runnables python-clusters tests
+
+validate-json:
+	@find . -maxdepth 3 -type f -name '*.json' -print0 | xargs -0 -n1 $(PYTHON) -m json.tool >/dev/null
+
+check-generated-files:
+	@tracked=$$(git ls-files | grep -E '(__pycache__/|\.pyc$$|^dist/)' || true); \
+	if [ -n "$$tracked" ]; then \
+		echo "Generated files are tracked and should be removed:"; \
+		echo "$$tracked"; \
+		exit 1; \
+	fi
+
+validate: compile-python validate-json check-generated-files
+
+unit-tests:
+	$(PYTHON) -m unittest discover -s tests -v
+
+tests: unit-tests
+
+ci: lint compile-python validate-json check-generated-files tests plugin

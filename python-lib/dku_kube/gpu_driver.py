@@ -66,9 +66,7 @@ def add_gpu_driver_if_needed(cluster_id, kube_config_path, connection_info, tain
     nvidia_config["spec"]["template"]["spec"]["tolerations"] = Toleration.to_list(tolerations)
 
     # Restrict the DaemonSet to nodes that request a GPU, so it doesn't try to run on every CPU node in the cluster
-    nvidia_config["spec"]["template"]["spec"]["nodeSelector"] = {
-        GPU_ENABLED_NODEPOOL_LABEL: GPU_ENABLED_NODEPOOL_LABEL_VALUE
-    }
+    nvidia_config["spec"]["template"]["spec"]["nodeSelector"] = {GPU_ENABLED_NODEPOOL_LABEL: GPU_ENABLED_NODEPOOL_LABEL_VALUE}
 
     # Write the configuration locally
     local_nvidia_plugin_config = os.path.join(os.environ["DIP_HOME"], "clusters", cluster_id, "nvidia-device-plugin.yml")

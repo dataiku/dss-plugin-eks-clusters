@@ -12,9 +12,9 @@
     "params": [
        {
             "name": "subnets",
-            "label": "VPC subnets",
+            "label": "VPC subnets IDs",
             "type": "STRINGS",
-            "description": "Put at least 2 subnets. Check https://eksctl.io/usage/vpc-configuration/#use-existing-vpc-other-custom-configuration for constraints.",
+            "description": "Put at least 2 subnets IDs (not names). Check https://eksctl.io/usage/vpc-configuration/#use-existing-vpc-other-custom-configuration for constraints.",
             "mandatory" : false
         },
         {
@@ -26,30 +26,30 @@
         },
         {
             "name": "privateSubnets",
-            "label": "VPC private subnets",
+            "label": "VPC private subnets IDs",
             "visibilityCondition": "model.privateNetworking == true",
             "type": "STRINGS",
-            "description": "Put at least 2 subnets. Check https://eksctl.io/usage/vpc-configuration/#use-existing-vpc-other-custom-configuration for constraints.",
+            "description": "Put at least 2 subnets IDs (not names). Check https://eksctl.io/usage/vpc-configuration/#use-existing-vpc-other-custom-configuration for constraints.",
             "mandatory" : false
         },
         {
             "name": "securityGroups",
-            "label": "Security groups",
+            "label": "Security groups IDs",
             "type": "STRINGS",
-            "description": "Additional security groups for the nodes. Needed to give access to the node running DSS",
+            "description": "Additional security groups IDs (not names) for the nodes. Needed to give access to the node running DSS",
             "mandatory" : false
         },
         {
             "name": "controlPlaneSG",
-            "label": "Control plane SG",
+            "label": "Control plane SG ID",
             "type": "STRING",
-            "description": "Optional: Control Plane will be put in this SG. Must allow inbound from DSS if you don't use Shared SG"
+            "description": "Optional: Control Plane will be put in this SG. Must allow inbound access from DSS if you don't use the Shared SG"
         },
         {
             "name": "sharedSG",
-            "label": "Shared SG",
+            "label": "Shared SG ID",
             "type": "STRING",
-            "description": "Optional: Control Plane, Nodes and VPC endpoints will be put in this SG. Should be allow inbound from DSS"
+            "description": "Optional: Control Plane, Nodes and VPC endpoints will be put in this SG. Should allow inbound access from DSS"
         }
     ]
 }

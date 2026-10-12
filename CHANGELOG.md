@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 1.6.0 - Enhancement release - 2026-10-12
+
+- Added supported Python versions: 3.13, 3.14
+- Makefile cleanup: release_info.json lines removed
+
 ## Version 1.5.1 - Bugfix and improvements release
 - Improve autoscaler image version selection
 - Fix newer autoscaler images support

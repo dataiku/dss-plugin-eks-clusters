@@ -27,6 +27,13 @@
             "description": "Assumes an IAM role to perform cluster operations instead of the default AWS credential provider chain. If empty, uses AWS credentials defined above",
             "type": "STRING",
             "mandatory": false
+        },
+        {
+            "name": "cacheCredentials",
+            "label": "Enable AWS credential caching",
+            "description": "Cache temporary AWS credentials on disk for aws-iam-authenticator to reduce calls to AWS. Changes apply the next time the kubeconfig is generated.",
+            "type": "BOOLEAN",
+            "defaultValue": true
         }
     ]
 }

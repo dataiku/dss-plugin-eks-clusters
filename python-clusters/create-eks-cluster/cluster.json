@@ -24,6 +24,13 @@
             "mandatory": false
         },
         {
+            "name": "cacheCredentials",
+            "label": "Enable AWS credential caching",
+            "description": "Cache temporary AWS credentials on disk for aws-iam-authenticator to reduce calls to AWS. Changes apply the next time the kubeconfig is generated.",
+            "type": "BOOLEAN",
+            "defaultValue": true
+        },
+        {
             "name": "s-network",
             "type":"SEPARATOR",
             "label": "Networking"

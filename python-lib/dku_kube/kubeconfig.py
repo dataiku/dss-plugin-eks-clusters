@@ -78,7 +78,24 @@ def add_assumed_arn(kube_config_path, arn):
         yaml.safe_dump(existing, f)
 
 
+def enable_authenticator_cache(kube_config_path):
+    """Enable credential caching for the generated kubeconfig's authenticator."""
+    with open(kube_config_path, "r") as f:
+        existing = yaml.safe_load(f)
+    authenticator = existing["users"][0]["user"].get("exec")
+    if not authenticator or os.path.basename(authenticator.get("command", "")) != "aws-iam-authenticator":
+        return
+    args = authenticator.setdefault("args", [])
+    if "--cache" in args:
+        return
+    args.append("--cache")
+    with open(kube_config_path, "w") as f:
+        yaml.safe_dump(existing, f)
+
+
 def setup_creds_env(kube_config_path, connection_info, config):
+    if config.get("cacheCredentials", False):
+        enable_authenticator_cache(kube_config_path)
     # If the arn exists, then add it to the kubeconfig so it is the assumed role for future use
     arn = config.get("assumeRoleARN", "")
     if arn:

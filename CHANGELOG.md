@@ -1,5 +1,8 @@
 # Changelog
 
+## Next version
+- Add an option, enabled by default in the settings form, to cache AWS credentials for aws-iam-authenticator when attaching or creating EKS clusters.
+
 ## Version 1.5.1 - Bugfix and improvements release
 - Improve autoscaler image version selection
 - Fix newer autoscaler images support

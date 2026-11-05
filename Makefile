@@ -1,8 +1,6 @@
 plugin_id=`cat plugin.json | python3 -c "import sys, json; print(str(json.load(sys.stdin)['id']).replace('/',''))"`
 plugin_version=`cat plugin.json | python3 -c "import sys, json; print(str(json.load(sys.stdin)['version']).replace('/',''))"`
 archive_file_name="dss-plugin-${plugin_id}-${plugin_version}.zip"
-remote_url=`git config --get remote.origin.url`
-last_commit_id=`git rev-parse HEAD`
 PYTHON ?= python3
 VENV ?= .venv
 RUFF := $(VENV)/bin/ruff
@@ -16,13 +14,10 @@ plugin:
 	@wget https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.4/docs/examples/alb-ingress-controller.yaml -P resource
 	@wget https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.8/docs/examples/iam-policy.json -P resource
 	@mkdir dist
-	@echo "{\"remote_url\":\"${remote_url}\",\"last_commit_id\":\"${last_commit_id}\"}" > release_info.json
 	@git archive -v -9 --format zip -o dist/${archive_file_name} HEAD
-	@zip -u dist/${archive_file_name} release_info.json
 	@zip -u dist/${archive_file_name} resource/nvidia-device-plugin.yml
 	@zip -u dist/${archive_file_name} resource/alb-ingress-controller.yaml
 	@zip -u dist/${archive_file_name} resource/iam-policy.json
-	@rm release_info.json
 	@rm resource/nvidia-device-plugin.yml
 	@rm resource/alb-ingress-controller.yaml
 	@rm resource/iam-policy.json
